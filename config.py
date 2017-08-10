@@ -33,9 +33,9 @@ class MongoDBConfig(luigi.Config):
     md1_schema=luigi.Parameter()
 
 #some default params
-TARGET_PATH=os.path.join(os.path.dirname(__file__),'target/{feature}{now}'.format(
+TARGET_PATH=os.path.join(os.path.dirname(__file__),'target/{feature}{rundate}'.format(
     feature=ModelConfig().jobname,
-    now=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    rundate=ModelConfig().rundate)
 )
 
 #config classes

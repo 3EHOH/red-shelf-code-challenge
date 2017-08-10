@@ -3,7 +3,7 @@ import luigi
 import datetime
 from datetime import date
 from config import PathConfig
-from jobsetup import JobSetup
+from postmap import PostMap
 
 #pipeline classes
 class PipelineTask(luigi.WrapperTask):
@@ -13,7 +13,7 @@ class PipelineTask(luigi.WrapperTask):
 
     def requires(self):
         setup_task = [
-                JobSetup(date=self.date)
+                PostMap(date=self.date, jobuid=28)
                 ]
         
         tasks = setup_task
