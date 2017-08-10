@@ -1,9 +1,8 @@
 import os
 import luigi
-from luigi.contrib.external_program import ExternalProgramTask
 import datetime
 from datetime import date
-from config import ModelConfig, PathConfig
+from config import PathConfig
 from jobsetup import JobSetup
 
 #pipeline classes
