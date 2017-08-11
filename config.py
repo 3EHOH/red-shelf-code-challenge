@@ -41,4 +41,3 @@ TARGET_PATH=os.path.join(os.path.dirname(__file__),'target/{feature}{rundate}'.f
 #config classes
 class PathConfig(luigi.Config):
     target_path=luigi.Parameter(default=TARGET_PATH)
-

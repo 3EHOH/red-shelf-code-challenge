@@ -1,8 +1,6 @@
 import os
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-import datetime
-from datetime import date
 import mysql.connector
 from config import ModelConfig, PathConfig
 from run_55 import Run55 
@@ -11,7 +9,7 @@ from map import Map
 #tasks
 class PostMap(luigi.contrib.external_program.ExternalProgramTask):
     """Setup"""
-    date = luigi.DateParameter(default=date.today())
+    date = luigi.Parameter(default=ModelConfig().rundate)
     jobuid = luigi.IntParameter(default=-1)
 
 
@@ -33,10 +31,12 @@ class PostMap(luigi.contrib.external_program.ExternalProgramTask):
     def output(self):
         sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
 
-        db = mysql.connector.connect(host="localhost", user="root", passwd="hackers123", db="ecr")    
+        db = mysql.connector.connect(host="localhost", user="root",
+                                     passwd="hackers123", db="ecr")    
         cur = db.cursor()
         cur.execute(sql)
         db.commit()
         db.close()
 
-        return luigi.LocalTarget(os.path.join(PathConfig().target_path,"postmap"))
+        return luigi.LocalTarget(os.path.join(PathConfig().target_path,
+                                              "postmap"))

@@ -1,16 +1,14 @@
 import os
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-import datetime
-from datetime import date
 from config import ModelConfig, PathConfig
 from run_55 import Run55 
 from schemacreate import SchemaCreate 
 
 #tasks
 class Map(luigi.contrib.external_program.ExternalProgramTask):
-    """Setup"""
-    date = luigi.DateParameter(default=date.today())
+    """Map"""
+    date = luigi.Parameter(default=ModelConfig().rundate)
     jobuid = luigi.IntParameter(default=-1)
 
 

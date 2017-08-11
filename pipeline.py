@@ -1,8 +1,7 @@
 import os
 import luigi
-import datetime
-from datetime import date
-from config import PathConfig
+import mysql.connector
+from config import ModelConfig, PathConfig
 from jobsetup import JobSetup
 from analyze import Analyze
 from schemacreate import SchemaCreate
@@ -13,10 +12,20 @@ from postmap import PostMap
 class PipelineTask(luigi.WrapperTask):
     """Wrap up all the tasks for the pipeline into a single task
     So we can run this pipeline by calling this dummy task"""
-    date = luigi.DateParameter(default=date.today())
-    jobuid = 28
+    date = ModelConfig().rundate 
+    jobuid = 1
 
     def requires(self):
+        # HACK: we have to guess the next jobuid
+        sql = "select max(uid)+1 as max_uid from processJob;"
+        db = mysql.connector.connect(host="localhost", user="root", passwd="hackers123", db="ecr")
+        cur = db.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        if len(row) == 1:
+            self.jobuid = row[0]
+        db.close()
+
         setup_tasks = [
             JobSetup(date=self.date),
             Analyze(date=self.date, jobuid=self.jobuid),

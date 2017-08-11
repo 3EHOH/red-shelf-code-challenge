@@ -1,8 +1,6 @@
 import os
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-import datetime
-from datetime import date
 from config import ModelConfig, PathConfig
 from run_55 import Run55 
 from jobsetup import JobSetup
@@ -10,7 +8,7 @@ from jobsetup import JobSetup
 #tasks
 class Analyze(luigi.contrib.external_program.ExternalProgramTask):
     """Setup"""
-    date = luigi.DateParameter(default=date.today())
+    date = luigi.Parameter(default=ModelConfig().rundate)
     jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
@@ -27,4 +25,5 @@ class Analyze(luigi.contrib.external_program.ExternalProgramTask):
         return jargs.split(' ')
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(PathConfig().target_path,"analyze"))
+        return luigi.LocalTarget(os.path.join(PathConfig().target_path,
+                                              "analyze"))
