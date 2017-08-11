@@ -3,7 +3,7 @@ import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 from config import ModelConfig, ConnieConfig, PathConfig
 from run_55 import Run55 
-from jobsetup import JobSetup
+from normalize import PostNormalize
 
 #tasks
 class Construct(luigi.contrib.external_program.ExternalProgramTask):
@@ -12,7 +12,7 @@ class Construct(luigi.contrib.external_program.ExternalProgramTask):
     conn_id = luigi.IntParameter(default=-1)
 
     def requires(self):
-        return [PostNormalize(jobid=self.jobuid)]
+        return [PostNormalize(jobuid=self.jobuid)]
 
     def program_args(self):
         jargs = 'java -d64 -Xms8G -Xmx128G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jConnie.properties control.ConstructionDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(

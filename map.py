@@ -87,4 +87,3 @@ class PostMapReport(luigi.contrib.external_program.ExternalProgramTask):
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,"postmapreport"))
-

@@ -1,6 +1,7 @@
 import os
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
+import mysql.connector
 from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from run_55 import Run55 
 from map import PostMap 
@@ -36,7 +37,7 @@ class PostNormalize(luigi.contrib.external_program.ExternalProgramTask):
     jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        norm_ids = list(range(0, NormConfig().norman_count))
+        norm_ids = list(range(0, NormanConfig().count))
         return [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
 
     def program_args(self):
@@ -66,3 +67,27 @@ class PostNormalize(luigi.contrib.external_program.ExternalProgramTask):
 
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               "postnormalization"))
+
+class PostNormalizationReport(luigi.contrib.external_program.ExternalProgramTask):
+    """PostNormalizationReport"""
+    jobuid = luigi.IntParameter(default=-1)
+
+    def requires(self):
+        norm_ids = list(range(0, NormanConfig().count))
+        return [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
+
+    def program_args(self):
+        jargs = 'java -d64 -Xms4G -Xmx20G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4j.properties control.BigKahuna jobstep=postnormalizationreport configfolder={configfolder} jobuid={jobuid}'.format(
+            cpath=Run55.cpath(),
+            configfolder=ModelConfig().configfolder,
+            jobuid=self.jobuid)
+
+        with self.output().open('w') as out_file:
+            out_file.write(jargs)
+            out_file.write("\nsuccessfully completed postnormalizationreport step")
+
+        return jargs.split(' ')
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(PathConfig().target_path,
+                                 "postnormalizationreport"))

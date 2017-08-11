@@ -6,7 +6,7 @@ from jobsetup import JobSetup
 from analyze import Analyze
 from schemacreate import SchemaCreate
 from map import Map, PostMap, PostMapReport
-from normalize import Normalize, PostNormalize
+from normalize import Normalize, PostNormalize, PostNormalizationReport
 from construct import Construct, PostConstructionReport
 
 #pipeline classes
@@ -46,6 +46,8 @@ class PipelineTask(luigi.WrapperTask):
         norm_ids = list(range(0, NormanConfig().count))
         norm_tasks = [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
         norm_tasks.append(PostNormalize(jobuid=self.jobuid))
+        norm_tasks.append(PostNormalizationReport(jobuid=self.jobuid))
+
         # construction tasks
         conn_ids = list(range(0, ConnieConfig().count))
         conn_tasks = [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
