@@ -7,12 +7,11 @@ from jobsetup import JobSetup
 
 #tasks
 class Analyze(luigi.contrib.external_program.ExternalProgramTask):
-    """Setup"""
-    date = luigi.Parameter(default=ModelConfig().rundate)
+    """Analyze"""
     jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        return [JobSetup(date=self.date)]
+        return [JobSetup(date=ModelConfig().rundate)]
 
     def program_args(self):
         jargs = 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4j.properties control.BigKahuna jobstep=analyze configfolder={configfolder} jobuid={jobuid}'.format(

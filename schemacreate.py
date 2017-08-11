@@ -8,12 +8,10 @@ from analyze import Analyze
 #tasks
 class SchemaCreate(luigi.contrib.external_program.ExternalProgramTask):
     """SchemaCreate"""
-    date = luigi.Parameter(default=ModelConfig().rundate)
     jobuid = luigi.IntParameter(default=-1)
 
-
     def requires(self):
-        return [Analyze(date=self.date, jobuid=self.jobuid)]
+        return [Analyze(jobuid=self.jobuid)]
 
     def program_args(self):
         jargs = 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4j.properties control.BigKahuna jobstep=schemacreate configfolder={configfolder} jobuid={jobuid}'.format(

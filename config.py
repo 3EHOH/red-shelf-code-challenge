@@ -24,6 +24,16 @@ class ModelConfig(luigi.Config):
     member_file1=luigi.Parameter()
     enroll_file1=luigi.Parameter()
 
+class NormanConfig(luigi.Config):
+    norman_count=luigi.IntParameter()
+    norman_chunksize=luigi.IntParameter()
+    norman_stopafter=luigi.IntParameter()
+
+class ConnieConfig(luigi.Config):
+    connie_count=luigi.IntParameter()
+    connie_chunksize=luigi.IntParameter()
+    connie_stopafter=luigi.IntParameter()
+
 class MySQLDBConfig(luigi.Config):
     prd_schema=luigi.Parameter()
     template_schema=luigi.Parameter()

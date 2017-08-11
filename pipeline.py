@@ -1,12 +1,12 @@
 import os
 import luigi
 import mysql.connector
-from config import ModelConfig, PathConfig
+from config import ModelConfig, NormanConfig, PathConfig
 from jobsetup import JobSetup
 from analyze import Analyze
 from schemacreate import SchemaCreate
-from map import Map
-from postmap import PostMap
+from map import Map, PostMap, PostMapReport
+from normalize import Normalize, PostNormalize
 
 #pipeline classes
 class PipelineTask(luigi.WrapperTask):
@@ -27,16 +27,22 @@ class PipelineTask(luigi.WrapperTask):
         db.close()
 
         setup_tasks = [
-            JobSetup(date=self.date),
-            Analyze(date=self.date, jobuid=self.jobuid),
-            SchemaCreate(date=self.date, jobuid=self.jobuid)
+            JobSetup(),
+            Analyze(jobuid=self.jobuid),
+            SchemaCreate(jobuid=self.jobuid)
         ]
-        map_tasks = [
-                Map(date=self.date, jobuid=self.jobuid),
-                PostMap(date=self.date, jobuid=self.jobuid)
-        ]        
 
-        tasks = setup_tasks + map_tasks
+        map_tasks = [
+                Map(jobuid=self.jobuid),
+                PostMap(jobuid=self.jobuid),
+                PostMapReport(jobuid=self.jobuid)
+        ] 
+
+        norm_ids = list(range(0, NormanConfig().norman_count))
+        norm_tasks = [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
+        norm_tasks.append(PostNormalize(jobuid=self.jobuid))
+
+        tasks = setup_tasks + map_tasks + norm_tasks
         return tasks
 
     def run(self):

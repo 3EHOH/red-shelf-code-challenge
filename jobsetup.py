@@ -8,7 +8,6 @@ from run_55 import Run55
 #tasks
 class JobSetup(luigi.contrib.external_program.ExternalProgramTask):
     """Setup"""
-    date = luigi.Parameter(default=ModelConfig().rundate)
 
     jargs = 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4j.properties control.BigKahuna typeinput={typeinput} jobname={jobname} clientID={clientID} jobstep=setup client={client} runname={runname} rundate={rundate} mapname={mapname} configfolder={configfolder} env={env} typeoutput=sql outputPath={outputPath} studybegin={studybegin} studyend={studyend} metadata={metadata} claim_file1={claim_file1} claim_rx_file1={claim_rx_file1} provider_file1={provider_file1} member_file1={member_file1} enroll_file1={enroll_file1}'.format(
     cpath=Run55.cpath(),
