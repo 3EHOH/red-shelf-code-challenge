@@ -1,12 +1,13 @@
 import os
 import luigi
 import mysql.connector
-from config import ModelConfig, NormanConfig, PathConfig
+from config import ConnieConfig, ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from jobsetup import JobSetup
 from analyze import Analyze
 from schemacreate import SchemaCreate
 from map import Map, PostMap, PostMapReport
 from normalize import Normalize, PostNormalize
+from construct import Construct, PostConstructionReport
 
 #pipeline classes
 class PipelineTask(luigi.WrapperTask):
@@ -18,7 +19,10 @@ class PipelineTask(luigi.WrapperTask):
     def requires(self):
         # HACK: we have to guess the next jobuid
         sql = "select max(uid)+1 as max_uid from processJob;"
-        db = mysql.connector.connect(host="localhost", user="root", passwd="hackers123", db="ecr")
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
         cur = db.cursor()
         cur.execute(sql)
         row = cur.fetchone()
@@ -26,23 +30,29 @@ class PipelineTask(luigi.WrapperTask):
             self.jobuid = row[0]
         db.close()
 
+        # basic setup tasks
         setup_tasks = [
             JobSetup(),
             Analyze(jobuid=self.jobuid),
             SchemaCreate(jobuid=self.jobuid)
         ]
-
+        # mapping tasks
         map_tasks = [
                 Map(jobuid=self.jobuid),
                 PostMap(jobuid=self.jobuid),
                 PostMapReport(jobuid=self.jobuid)
         ] 
-
-        norm_ids = list(range(0, NormanConfig().norman_count))
+        # normalization tasks
+        norm_ids = list(range(0, NormanConfig().count))
         norm_tasks = [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
         norm_tasks.append(PostNormalize(jobuid=self.jobuid))
+        # construction tasks
+        conn_ids = list(range(0, ConnieConfig().count))
+        conn_tasks = [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
+        conn_tasks.append(PostConstructionReport(jobuid=self.jobuid))
 
-        tasks = setup_tasks + map_tasks + norm_tasks
+        # Let's go!
+        tasks = setup_tasks + map_tasks + norm_tasks + conn_tasks
         return tasks
 
     def run(self):

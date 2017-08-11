@@ -25,19 +25,34 @@ class ModelConfig(luigi.Config):
     enroll_file1=luigi.Parameter()
 
 class NormanConfig(luigi.Config):
-    norman_count=luigi.IntParameter()
-    norman_chunksize=luigi.IntParameter()
-    norman_stopafter=luigi.IntParameter()
+    count=luigi.IntParameter()
+    chunksize=luigi.IntParameter()
+    stopafter=luigi.IntParameter()
 
 class ConnieConfig(luigi.Config):
-    connie_count=luigi.IntParameter()
-    connie_chunksize=luigi.IntParameter()
-    connie_stopafter=luigi.IntParameter()
+    count=luigi.IntParameter()
+    chunksize=luigi.IntParameter()
+    stopafter=luigi.IntParameter()
 
 class MySQLDBConfig(luigi.Config):
+    # job database
+    prd_host=luigi.Parameter()
+    prd_port=luigi.IntParameter()
     prd_schema=luigi.Parameter()
+    prd_user=luigi.Parameter()
+    prd_pass=luigi.Parameter()
+    # output template
+    template_host=luigi.Parameter()
+    template_port=luigi.IntParameter()
     template_schema=luigi.Parameter()
+    template_user=luigi.Parameter()
+    template_pass=luigi.Parameter()
+    # episode builder
+    epb_host=luigi.Parameter()
+    epb_port=luigi.IntParameter()
     epb_schema=luigi.Parameter()
+    epb_user=luigi.Parameter()
+    epb_pass=luigi.Parameter()
 
 class MongoDBConfig(luigi.Config):
     md1_schema=luigi.Parameter()

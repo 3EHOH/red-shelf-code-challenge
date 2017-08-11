@@ -1,7 +1,7 @@
 import os
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-from config import ModelConfig, NormanConfig, PathConfig
+from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from run_55 import Run55 
 from map import PostMap 
 
@@ -18,8 +18,8 @@ class Normalize(luigi.contrib.external_program.ExternalProgramTask):
         jargs = 'java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
-            chunksize=NormanConfig().norman_chunksize,
-            stopafter=NormanConfig().norman_stopafter)
+            chunksize=NormanConfig().chunksize,
+            stopafter=NormanConfig().stopafter)
         with self.output().open('w') as out_file:
             out_file.write(jargs)
             out_file.write("\nsuccessfully completed normalization step")
@@ -55,8 +55,10 @@ class PostNormalize(luigi.contrib.external_program.ExternalProgramTask):
         # HACK: set the construction status to READY.
         sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'construct';".format(jobuid=self.jobuid)
 
-        db = mysql.connector.connect(host="localhost", user="root",
-                                     passwd="hackers123", db="ecr")    
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
         cur = db.cursor()
         cur.execute(sql)
         db.commit()
@@ -64,4 +66,3 @@ class PostNormalize(luigi.contrib.external_program.ExternalProgramTask):
 
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               "postnormalization"))
-
