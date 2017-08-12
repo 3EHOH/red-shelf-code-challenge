@@ -19,12 +19,11 @@ class Map(luigi.contrib.external_program.ExternalProgramTask):
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             jobuid=self.jobuid)
-
-        with self.output().open('w') as out_file:
-            out_file.write(jargs)
-            out_file.write("\nsuccessfully completed map step")
-
         return jargs.split(' ')
+
+    def run(self):
+        super(Map, self).run()
+        self.output().open('w').close()
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,"map"))
@@ -42,17 +41,13 @@ class PostMap(luigi.contrib.external_program.ExternalProgramTask):
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             jobuid=self.jobuid)
-
-        with self.output().open('w') as out_file:
-            out_file.write(jargs)
-            out_file.write("\nsuccessfully completed postmap step")
-
         return jargs.split(' ')
 
-    def output(self):
+    def run(self):
+        super(PostMap, self).run()
+        self.output().open('w').close()
         # HACK: set the normalization status to READY.
         sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
-
         db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
                                      user=MySQLDBConfig().prd_user,
                                      passwd=MySQLDBConfig().prd_pass,
@@ -62,6 +57,7 @@ class PostMap(luigi.contrib.external_program.ExternalProgramTask):
         db.commit()
         db.close()
 
+    def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               "postmap"))
 
@@ -78,12 +74,11 @@ class PostMapReport(luigi.contrib.external_program.ExternalProgramTask):
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             jobuid=self.jobuid)
-
-        with self.output().open('w') as out_file:
-            out_file.write(jargs)
-            out_file.write("\nsuccessfully completed postmapreport step")
-
         return jargs.split(' ')
+
+    def run(self):
+        super(PostMapReport, self).run()
+        self.output().open('w').close()
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,"postmapreport"))

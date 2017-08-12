@@ -31,10 +31,11 @@ class JobSetup(luigi.contrib.external_program.ExternalProgramTask):
     enroll_file1=ModelConfig().enroll_file1)
 
     def program_args(self):
-        with self.output().open('w') as out_file:
-            out_file.write(JobSetup.jargs)
-            out_file.write("\nsuccessfully created job")
         return JobSetup.jargs.split(' ')
+
+    def run(self):
+        super(JobSetup, self).run()
+        self.output().open('w').close()
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,

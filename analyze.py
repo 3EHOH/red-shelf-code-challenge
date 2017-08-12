@@ -18,10 +18,11 @@ class Analyze(luigi.contrib.external_program.ExternalProgramTask):
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             jobuid=self.jobuid)
-        with self.output().open('w') as out_file:
-            out_file.write(jargs)
-            out_file.write("\nsuccessfully completed analyze step")
         return jargs.split(' ')
+
+    def run(self):
+        super(Analyze, self).run()
+        self.output().open('w').close()
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
