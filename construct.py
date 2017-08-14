@@ -1,4 +1,6 @@
 import os
+from random import randint
+from time import sleep
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 from config import ModelConfig, ConnieConfig, PathConfig
@@ -23,6 +25,7 @@ class Construct(luigi.contrib.external_program.ExternalProgramTask):
         return jargs.split(' ')
 
     def run(self):
+        sleep(randint(5,20))
         super(Construct, self).run()
         self.output().open('w').close()
 

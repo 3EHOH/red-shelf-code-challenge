@@ -3,6 +3,7 @@ import os
 import luigi
 
 class ModelConfig(luigi.Config):
+    jobuid=luigi.IntParameter()
     typeinput=luigi.Parameter()
     jobname=luigi.Parameter()
     clientID=luigi.Parameter()

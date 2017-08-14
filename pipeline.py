@@ -14,21 +14,21 @@ class PipelineTask(luigi.WrapperTask):
     """Wrap up all the tasks for the pipeline into a single task
     So we can run this pipeline by calling this dummy task"""
     date = ModelConfig().rundate 
-    jobuid = 1
+    jobuid = ModelConfig().jobuid 
 
     def requires(self):
         # HACK: we have to guess the next jobuid
-        sql = "select max(uid)+1 as max_uid from processJob;"
-        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-                                     user=MySQLDBConfig().prd_user,
-                                     passwd=MySQLDBConfig().prd_pass,
-                                     db=MySQLDBConfig().prd_schema)    
-        cur = db.cursor()
-        cur.execute(sql)
-        row = cur.fetchone()
-        if len(row) == 1:
-            self.jobuid = row[0]
-        db.close()
+        #sql = "select max(uid)+1 as max_uid from processJob;"
+        #db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+        #                             user=MySQLDBConfig().prd_user,
+        #                             passwd=MySQLDBConfig().prd_pass,
+        #                             db=MySQLDBConfig().prd_schema)    
+        #cur = db.cursor()
+        #cur.execute(sql)
+        #row = cur.fetchone()
+        #if len(row) == 1:
+        #    self.jobuid = row[0]
+        #db.close()
 
         # basic setup tasks
         setup_tasks = [
