@@ -1,15 +1,19 @@
 import os
+import sys
 import luigi
-import mysql.connector
 from config import ConnieConfig, ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
-from jobsetup import JobSetup
+from setup import Setup
 from analyze import Analyze
 from schemacreate import SchemaCreate
-from map import Map, PostMap, PostMapReport
-from normalize import Normalize, PostNormalize, PostNormalizationReport
-from construct import Construct, PostConstructionReport
+from map import Map
+from postmap import PostMap
+from postmapreport import PostMapReport
+from normalization import Normalize
+from postnormalization import PostNormalize
+from postnormalizationreport import PostNormalizationReport
+from construct import Construct
+from postconstructionreport import PostConstructionReport
 
-#pipeline classes
 class PipelineTask(luigi.WrapperTask):
     """Wrap up all the tasks for the pipeline into a single task
     So we can run this pipeline by calling this dummy task"""
@@ -17,19 +21,6 @@ class PipelineTask(luigi.WrapperTask):
     jobuid = ModelConfig().jobuid 
 
     def requires(self):
-        # HACK: we have to guess the next jobuid
-        #sql = "select max(uid)+1 as max_uid from processJob;"
-        #db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-        #                             user=MySQLDBConfig().prd_user,
-        #                             passwd=MySQLDBConfig().prd_pass,
-        #                             db=MySQLDBConfig().prd_schema)    
-        #cur = db.cursor()
-        #cur.execute(sql)
-        #row = cur.fetchone()
-        #if len(row) == 1:
-        #    self.jobuid = row[0]
-        #db.close()
-
         # basic setup tasks
         setup_tasks = [
             JobSetup(),
@@ -63,3 +54,12 @@ class PipelineTask(luigi.WrapperTask):
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,"dummy"))
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print('pipeline.py <workers>')
+        exit(-1)
+    luigi.run([
+        'PipelineTask', 
+        '--workers', sys.argv[1],
+        '--local-scheduler'])
