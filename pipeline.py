@@ -11,7 +11,7 @@ from postmapreport import PostMapReport
 from normalization import Normalize
 from postnormalization import PostNormalize
 from postnormalizationreport import PostNormalizationReport
-from construct import Construct
+from construction import Construct
 from postconstructionreport import PostConstructionReport
 
 class PipelineTask(luigi.WrapperTask):
@@ -23,7 +23,7 @@ class PipelineTask(luigi.WrapperTask):
     def requires(self):
         # basic setup tasks
         setup_tasks = [
-            JobSetup(),
+            Setup(),
             Analyze(jobuid=self.jobuid),
             SchemaCreate(jobuid=self.jobuid)
         ]
