@@ -5,26 +5,26 @@ from time import sleep
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
+from config import ModelConfig, MySQLDBConfig, ConnieConfig, PathConfig
 from run_55 import Run55 
-from postmap import PostMap
+from postnormalization import PostNormalize
 
-STEP = 'normalization'
+STEP = 'construction'
 
-JARGS = 'java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
+JARGS = 'java -d64 -Xms8G -Xmx128G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jConnie.properties control.ConstructionDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
     cpath=Run55.cpath(),
     configfolder=ModelConfig().configfolder,
-    chunksize=NormanConfig().chunksize,
-    stopafter=NormanConfig().stopafter)
+    chunksize=ConnieConfig().chunksize,
+    stopafter=ConnieConfig().stopafter)
 
-class Normalize(ExternalProgramTask):
-    """ run normalization """
+class Construct(ExternalProgramTask):
+    """ run construction """
     datafile = luigi.Parameter(default=STEP)
     jobuid = luigi.IntParameter(default=-1)
-    norm_id = luigi.IntParameter(default=-1)
+    conn_id = luigi.IntParameter(default=-1)
 
     def requires(self):
-        return [PostMap(jobuid=self.jobuid)]
+        return [PostNormalize(jobuid=self.jobuid)]
 
     def program_args(self):
         return JARGS.split(' ')
@@ -32,21 +32,21 @@ class Normalize(ExternalProgramTask):
     def output(self):
         return luigi.LocalTarget(
             os.path.join(PathConfig().target_path,
-                         '{}.{}'.format(self.datafile, self.norm_id)))
+                         '{}.{}'.format(self.datafile, self.conn_id)))
 
     def run(self):
         # let clients sleep for a random period (< 20s)
         sleep(randint(5,20))
-        super(Normalize, self).run()
+        super(Construct, self).run()
         self.output().open('w').close()
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print('normalization.py <JOBUID> <NORMID>')
+        print('construction.py <JOBUID> <CONNID>')
         exit(-1)
     luigi.run([
-        'Normalize', 
+        'Construct', 
         '--workers', '1',
         '--jobuid', sys.argv[1],
-        '--norm-id', sys.argv[2],
+        '--conn-id', sys.argv[2],
         '--local-scheduler'])

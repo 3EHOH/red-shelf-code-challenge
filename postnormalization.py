@@ -53,6 +53,6 @@ if __name__ == "__main__":
         exit(-1)
     luigi.run([
         'PostNormalize', 
-        '--workers', '1',
+        '--workers', '8',
         '--jobuid', sys.argv[1],
         '--local-scheduler'])

@@ -11,7 +11,7 @@ from map import Map
 
 STEP = 'postmap'
 
-JARGS = 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4j.properties control.BigKahuna jobstep={jobstep} configfolder={configfolder} jobuid={jobuid}'.format(
+JARGS = 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4j.properties control.BigKahuna jobstep={jobstep} configfolder={configfolder}'.format(
     cpath=Run55.cpath(),
     jobstep=STEP,
     configfolder=ModelConfig().configfolder)
