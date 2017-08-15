@@ -1,6 +1,5 @@
 import os
 import sys
-from random import randint
 from time import sleep
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
@@ -35,8 +34,7 @@ class Construct(ExternalProgramTask):
                          '{}.{}'.format(self.datafile, self.conn_id)))
 
     def run(self):
-        # let clients sleep for a random period (< 20s)
-        sleep(randint(5,20))
+        sleep(5*(self.conn_id+1))
         super(Construct, self).run()
         self.output().open('w').close()
 
