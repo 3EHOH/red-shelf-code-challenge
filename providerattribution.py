@@ -26,22 +26,12 @@ class ProviderAttribution(luigi.Task):
                                               self.datafile))
 
     def run(self):
-        #with open(SQL_FILE, "r") as fp:
-        #    sql = ''.join(fp.readlines()[0:])
-        #    db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-        #                                 user=MySQLDBConfig().prd_user,
-        #                                 passwd=MySQLDBConfig().prd_pass,
-        #                                 db=DB)    
-        #    cur = db.cursor()
-        #    cur.execute(sql, multi=True)
-        #    db.commit()
-        #    db.close()
         from subprocess import Popen, PIPE
-        process = Popen(['mysql', DB, '-u', MySQLDBConfig().prd_user,
+        process = Popen(['mysql', '-h', MySQLDBConfig().prd_host,
+                         '-D', DB, '-u', MySQLDBConfig().prd_user,
                          '-p', MySQLDBConfig().prd_pass],
                         stdout=PIPE, stdin=PIPE)
-        out = process.communicate(('source ' + SQL_FILE).encode())[0]
-
+        ret = process.communicate(('SOURCE ' + SQL_FILE).encode())[0]
         self.output().open('w').close()
 
 if __name__ == "__main__":
