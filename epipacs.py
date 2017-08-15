@@ -7,21 +7,22 @@ from subprocess import Popen, PIPE
 
 from config import ModelConfig, MySQLDBConfig, PathConfig
 from run_55 import Run55 
-from epidedupe import Dedupe
+from maternity import Maternity
 
-STEP = 'providerattribution'
+STEP = 'epi_pacs_and_epi_providerPACs_tables'
 
 DB = ModelConfig().jobname + ModelConfig().rundate
 
-SQL_FILE = os.path.join(PathConfig().postec_path, 'Provider_Attribution.sql')
+SQL_FILE = os.path.join(PathConfig().postec_path,
+                        'RSPR/epi_pacs and epi_provider_PACs tables.sql')
 
-class ProviderAttribution(luigi.Task):
-    """ perform provider attribution """
+class EpiPACs(luigi.Task):
+    """ create the epi PACs tables """
     datafile = luigi.Parameter(default=STEP)
     jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        return [Dedupe(jobuid=self.jobuid)]
+        return [Maternity(jobuid=self.jobuid)]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
@@ -41,10 +42,10 @@ class ProviderAttribution(luigi.Task):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print('providerattribution.py <JOBUID>')
+        print('epipacs.py <JOBUID>')
         exit(-1)
     luigi.run([
-        'ProviderAttribution', 
+        'EpiPACs', 
         '--workers', '1',
         '--jobuid', sys.argv[1],
         '--local-scheduler'])
