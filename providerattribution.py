@@ -9,7 +9,7 @@ from epidedupe import Dedupe
 
 STEP = 'providerattribution'
 
-DB = ModelConfig().job_name + ModelConfig.run_date
+DB = ModelConfig().jobname + ModelConfig().rundate
 
 SQL_FILE = os.path.join(PathConfig().postec_path, 'Provider_Attribution.sql')
 
@@ -26,16 +26,21 @@ class ProviderAttribution(luigi.Task):
                                               self.datafile))
 
     def run(self):
-        with open(SQL_FILE, "r") as fp:
-            sql = "".join(fp.readlines()[0:])
-            db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-                                         user=MySQLDBConfig().prd_user,
-                                         passwd=MySQLDBConfig().prd_pass,
-                                         db=DB)    
-            cur = db.cursor()
-            cur.execute(sql)
-            db.commit()
-            db.close()
+        #with open(SQL_FILE, "r") as fp:
+        #    sql = ''.join(fp.readlines()[0:])
+        #    db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+        #                                 user=MySQLDBConfig().prd_user,
+        #                                 passwd=MySQLDBConfig().prd_pass,
+        #                                 db=DB)    
+        #    cur = db.cursor()
+        #    cur.execute(sql, multi=True)
+        #    db.commit()
+        #    db.close()
+        from subprocess import Popen, PIPE
+        process = Popen(['mysql', DB, '-u', MySQLDBConfig().prd_user,
+                         '-p', MySQLDBConfig().prd_pass],
+                        stdout=PIPE, stdin=PIPE)
+        out = process.communicate(('source ' + SQL_FILE).encode())[0]
 
         self.output().open('w').close()
 

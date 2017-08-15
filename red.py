@@ -3,11 +3,11 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from config import ConnieConfig, ModelConfig, PathConfig
+from config import ModelConfig, PathConfig
 from run_55 import Run55 
-from construction import Construct
+from rasamodel import RASAModel
 
-STEP = 'epidedupe'
+STEP = 'red'
 
 JARGS = 'java -d64 -Xms4G -Xmx200G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jOtto.properties control.BigKahuna jobstep={jobstep} configfolder={configfolder}'.format(
     cpath=Run55.cpath(),
@@ -15,14 +15,13 @@ JARGS = 'java -d64 -Xms4G -Xmx200G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
     configfolder=ModelConfig().configfolder)
 
 
-class Dedupe(ExternalProgramTask):
-    """ de-duplicate episodes """
+class RED(ExternalProgramTask):
+    """ run the episode detail report """
     datafile = luigi.Parameter(default=STEP)
     jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        conn_ids = list(range(0, ConnieConfig().count))
-        return [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
+        return [RASAModel(jobuid=self.jobuid)]
 
     def program_args(self):
         return '{} jobuid={}'.format(JARGS, self.jobuid).split(' ')
@@ -32,15 +31,15 @@ class Dedupe(ExternalProgramTask):
                                               self.datafile))
     
     def run(self):
-        super(Dedupe, self).run()
+        super(RED, self).run()
         self.output().open('w').close()
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print('dedupe.py <JOBUID>')
+        print('red.py <JOBUID>')
         exit(-1)
     luigi.run([
-        'Dedupe', 
+        'RED', 
         '--workers', '1',
         '--jobuid', sys.argv[1],
         '--local-scheduler'])

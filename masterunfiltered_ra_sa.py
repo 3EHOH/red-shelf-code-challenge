@@ -3,11 +3,11 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from config import ConnieConfig, ModelConfig, PathConfig
+from config import ModelConfig, PathConfig
 from run_55 import Run55 
-from construction import Construct
+from filteredcostrollups import FilteredCostRollUps
 
-STEP = 'epidedupe'
+STEP = 'masterunfiltered_ra_sa'
 
 JARGS = 'java -d64 -Xms4G -Xmx200G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jOtto.properties control.BigKahuna jobstep={jobstep} configfolder={configfolder}'.format(
     cpath=Run55.cpath(),
@@ -15,14 +15,13 @@ JARGS = 'java -d64 -Xms4G -Xmx200G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
     configfolder=ModelConfig().configfolder)
 
 
-class Dedupe(ExternalProgramTask):
-    """ de-duplicate episodes """
+class MasterUnfilteredRASA(ExternalProgramTask):
+    """ prepare the risk and severity adjustment """
     datafile = luigi.Parameter(default=STEP)
     jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        conn_ids = list(range(0, ConnieConfig().count))
-        return [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
+        return [FilteredCostRollUps(jobuid=self.jobuid)]
 
     def program_args(self):
         return '{} jobuid={}'.format(JARGS, self.jobuid).split(' ')
@@ -32,15 +31,15 @@ class Dedupe(ExternalProgramTask):
                                               self.datafile))
     
     def run(self):
-        super(Dedupe, self).run()
+        super(MasterUnfilteredRASA, self).run()
         self.output().open('w').close()
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print('dedupe.py <JOBUID>')
+        print('masterunfiltered_ra_sa.py <JOBUID>')
         exit(-1)
     luigi.run([
-        'Dedupe', 
+        'MasterUnfilteredRASA', 
         '--workers', '1',
         '--jobuid', sys.argv[1],
         '--local-scheduler'])
