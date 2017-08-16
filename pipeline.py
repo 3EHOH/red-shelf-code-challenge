@@ -2,37 +2,37 @@ import os
 import sys
 import luigi
 from config import ConnieConfig, ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
-from setup import Setup
-from analyze import Analyze
-from schemacreate import SchemaCreate
-from map import Map
-from postmap import PostMap
-from postmapreport import PostMapReport
-from normalization import Normalize
-from postnormalization import PostNormalize
-from postnormalizationreport import PostNormalizationReport
-from construction import Construct
-from postconstructionreport import PostConstructionReport
-from epidedupe import Dedupe
-from providerattribution import ProviderAttribution
-from costrollups import CostRollUps
-from filteredcostrollups import FilteredCostRollUps
-from masterunfiltered_ra_sa import MasterUnfilteredRASA
-from rasamodel import RASAModel
-from red import RED
-from res import RES
-from savingsummary import SavingSummary
-from coreservices import CoreServices
-from pacanalysis import PACAnalysis
-from pasanalysis import PASAnalysis
-from maternity import Maternity
-from epipacs import EpiPACs
-from rainputfiles import RAInputFiles
-from pac_rate_ra_program import PACRateRAProgram
-from provider_pac_rates import ProviderPACRates
-from hci3_reliability_analysis import HCI3ReliabilityAnalysis
-from ieva import IEVA
-from pac_super_groups import PACSuperGroups
+from ec.setup import Setup
+from ec.analyze import Analyze
+from ec.schemacreate import SchemaCreate
+from ec.map import Map
+from ec.postmap import PostMap
+from ec.postmapreport import PostMapReport
+from ec.normalization import Normalize
+from ec.postnormalization import PostNormalize
+from ec.postnormalizationreport import PostNormalizationReport
+from ec.construction import Construct
+from ec.postconstructionreport import PostConstructionReport
+from ec.post.epidedupe import Dedupe
+from ec.post.providerattribution import ProviderAttribution
+from ec.post.costrollups import CostRollUps
+from ec.post.filteredcostrollups import FilteredCostRollUps
+from ec.post.masterunfiltered_ra_sa import MasterUnfilteredRASA
+from ec.post.rasamodel import RASAModel
+from ec.post.red import RED
+from ec.post.res import RES
+from ec.post.savingsummary import SavingSummary
+from ec.post.coreservices import CoreServices
+from ec.post.pacanalysis import PACAnalysis
+from ec.post.pasanalysis import PASAnalysis
+from ec.post.maternity import Maternity
+from ec.post.optional.epipacs import EpiPACs
+from ec.post.optional.rainputfiles import RAInputFiles
+from ec.post.optional.pac_rate_ra_program import PACRateRAProgram
+from ec.post.optional.provider_pac_rates import ProviderPACRates
+from ec.post.optional.hci3_reliability_analysis import HCI3ReliabilityAnalysis
+from ec.post.optional.ieva import IEVA
+from ec.post.optional.pac_super_groups import PACSuperGroups
 
 class PipelineTask(luigi.WrapperTask):
     """Wrap up all the tasks for the pipeline into a single task
