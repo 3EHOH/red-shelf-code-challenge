@@ -17,10 +17,9 @@ R_FILE = os.path.join(PathConfig().postec_path,
 class HCI3ReliabilityAnalysis(luigi.Task):
     """ perform an HCI3 reliability analysis """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        return [ProviderPACRates(jobuid=self.jobuid)]
+        return [ProviderPACRates()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
@@ -36,11 +35,7 @@ class HCI3ReliabilityAnalysis(luigi.Task):
                 out.write(str(error))
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('hci3_reliability_analysis.py <JOBUID>')
-        exit(-1)
     luigi.run([
         'HCI3ReliabilityAnalysis', 
         '--workers', '1',
-        '--jobuid', sys.argv[1],
         '--local-scheduler'])

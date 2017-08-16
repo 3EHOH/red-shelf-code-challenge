@@ -19,10 +19,9 @@ SQL_FILE = os.path.join(PathConfig().postec_path,
 class IEVA(luigi.Task):
     """ perform intra-episode variability analysis """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        return [HCI3ReliabilityAnalysis(jobuid=self.jobuid)]
+        return [HCI3ReliabilityAnalysis()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
@@ -41,11 +40,7 @@ class IEVA(luigi.Task):
                 out.write(str(error))
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('ieva.py <JOBUID>')
-        exit(-1)
     luigi.run([
         'IEVA', 
         '--workers', '1',
-        '--jobuid', sys.argv[1],
         '--local-scheduler'])

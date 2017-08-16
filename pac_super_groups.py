@@ -19,10 +19,9 @@ SQL_FILE = os.path.join(PathConfig().postec_path,
 class PACSuperGroups(luigi.Task):
     """ consolidate PAC code groups into PAC Super Groups """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
-        return [IEVA(jobuid=self.jobuid)]
+        return [IEVA()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
@@ -41,11 +40,7 @@ class PACSuperGroups(luigi.Task):
                 out.write(str(error))
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('pac_super_groups.py <JOBUID>')
-        exit(-1)
     luigi.run([
         'PACSuperGroups', 
         '--workers', '1',
-        '--jobuid', sys.argv[1],
         '--local-scheduler'])

@@ -19,6 +19,8 @@ SQL_FILE = os.path.join(PathConfig().postec_path,
 class EpiPACs(luigi.Task):
     """ create the epi PACs tables """
     datafile = luigi.Parameter(default=STEP)
+    # the JOBUID parameter is here solely for the maternity dependence
+    # Is it really dependent on that?
     jobuid = luigi.IntParameter(default=-1)
 
     def requires(self):
