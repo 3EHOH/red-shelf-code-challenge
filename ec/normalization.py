@@ -4,9 +4,9 @@ from time import sleep
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from ..config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
-from ..run_55 import Run55 
-from postmap import PostMap
+from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
+from run_55 import Run55 
+from ec.postmap import PostMap
 
 STEP = 'normalization'
 

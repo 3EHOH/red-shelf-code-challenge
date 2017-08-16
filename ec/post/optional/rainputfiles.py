@@ -5,9 +5,9 @@ import mysql.connector
 import subprocess
 from subprocess import Popen, PIPE
 
-from ....config import ModelConfig, MySQLDBConfig, PathConfig
-from ....run_55 import Run55 
-from epipacs import EpiPACs
+from config import ModelConfig, MySQLDBConfig, PathConfig
+from run_55 import Run55 
+from ec.post.optional.epipacs import EpiPACs
 
 STEP = 'ra_input_files'
 

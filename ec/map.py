@@ -5,9 +5,9 @@ from luigi.contrib.external_program import ExternalProgramTask
 
 import mysql.connector
 
-from ..config import ModelConfig, MySQLDBConfig, PathConfig
-from ..run_55 import Run55 
-from schemacreate import SchemaCreate 
+from config import ModelConfig, MySQLDBConfig, PathConfig
+from run_55 import Run55 
+from ec.schemacreate import SchemaCreate 
 
 STEP = 'map'
 

@@ -5,9 +5,9 @@ import mysql.connector
 import subprocess
 from subprocess import Popen, PIPE
 
-from ....config import ModelConfig, MySQLDBConfig, PathConfig
-from ....run_55 import Run55 
-from ..maternity import Maternity
+from config import ModelConfig, MySQLDBConfig, PathConfig
+from run_55 import Run55 
+from ec.post.maternity import Maternity
 
 STEP = 'epi_pacs_and_epi_providerPACs_tables'
 

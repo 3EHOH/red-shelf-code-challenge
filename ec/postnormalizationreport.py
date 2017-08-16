@@ -3,9 +3,9 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from ..config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
-from ..run_55 import Run55 
-from postnormalization import PostNormalize
+from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
+from run_55 import Run55 
+from ec.postnormalization import PostNormalize
 
 STEP = 'postnormalizationreport'
 

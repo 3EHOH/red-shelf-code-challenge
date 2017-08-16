@@ -3,9 +3,9 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from ...config import ModelConfig, PathConfig
-from ...run_55 import Run55 
-from masterunfiltered_ra_sa import MasterUnfilteredRASA
+from config import ModelConfig, PathConfig
+from run_55 import Run55 
+from ec.post.masterunfiltered_ra_sa import MasterUnfilteredRASA
 
 STEP = 'rasamodel'
 

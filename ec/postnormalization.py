@@ -5,9 +5,9 @@ from luigi.contrib.external_program import ExternalProgramTask
 
 import mysql.connector
 
-from ..config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
-from ..run_55 import Run55 
-from normalization import Normalize
+from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
+from run_55 import Run55 
+from ec.normalization import Normalize
 
 STEP = 'postnormalization'
 

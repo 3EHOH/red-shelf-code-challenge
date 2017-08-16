@@ -5,9 +5,9 @@ import mysql.connector
 import subprocess
 from subprocess import Popen, PIPE
 
-from ....config import ModelConfig, MySQLDBConfig, PathConfig
-from ....run_55 import Run55 
-from provider_pac_rates import ProviderPACRates
+from config import ModelConfig, MySQLDBConfig, PathConfig
+from run_55 import Run55 
+from ec.post.optional.provider_pac_rates import ProviderPACRates
 
 STEP = 'hci3_reliability_analysis'
 

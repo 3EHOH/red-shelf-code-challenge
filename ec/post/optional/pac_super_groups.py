@@ -5,9 +5,9 @@ import mysql.connector
 import subprocess
 from subprocess import Popen, PIPE
 
-from ....config import ModelConfig, MySQLDBConfig, PathConfig
-from ....run_55 import Run55 
-from ieva import IEVA
+from config import ModelConfig, MySQLDBConfig, PathConfig
+from run_55 import Run55 
+from ec.post.optional.ieva import IEVA
 
 STEP = 'pac_super_groups'
 

@@ -5,9 +5,9 @@ import mysql.connector
 import subprocess
 from subprocess import Popen, PIPE
 
-from ....config import ModelConfig, MySQLDBConfig, PathConfig
-from ....run_55 import Run55 
-from pac_rate_ra_program import PACRateRAProgram 
+from config import ModelConfig, MySQLDBConfig, PathConfig
+from run_55 import Run55 
+from ec.post.optional.pac_rate_ra_program import PACRateRAProgram 
 
 STEP = 'provider_pac_rates'
 
