@@ -3,7 +3,7 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from config import ModelConfig, PathConfig
+from config import ConnieConfig, ModelConfig, PathConfig
 from run_55 import Run55 
 from ec.construction import Construct
 
