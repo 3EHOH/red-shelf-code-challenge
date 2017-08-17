@@ -17,9 +17,10 @@ class PACRateRAProgram(luigi.Task):
     """ calculate predicted probabilities to be used in risk-adjusted
         provider-level PAC rate calculations """
     datafile = luigi.Parameter(default=STEP)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
-        return [RAInputFiles()]
+        return [RAInputFiles(jobuid=self.jobuid)]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
@@ -38,4 +39,5 @@ if __name__ == "__main__":
     luigi.run([
         'PACRateRAProgram', 
         '--workers', '1',
+        '--jobuid', sys.argv[1],
         '--local-scheduler'])

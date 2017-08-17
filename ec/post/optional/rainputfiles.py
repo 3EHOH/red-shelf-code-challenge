@@ -18,9 +18,10 @@ SQL_FILE = os.path.join(PathConfig().postec_path, 'RSPR/RA Input files.sql')
 class RAInputFiles(luigi.Task):
     """ create files that are used a sinput to the risk adjustment """
     datafile = luigi.Parameter(default=STEP)
+    jobuid = luigi.Parameter()
 
     def requires(self):
-        return [EpiPACs()]
+        return [EpiPACs(jobuid=self.jobuid)]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
@@ -45,4 +46,5 @@ if __name__ == "__main__":
     luigi.run([
         'RAInputFiles', 
         '--workers', '1',
+        '--jobuid', sys.argv[1],
         '--local-scheduler'])

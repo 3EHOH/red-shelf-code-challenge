@@ -88,16 +88,16 @@ class PipelineTask(luigi.WrapperTask):
         # RSPR tasks
         rspr_tasks = [
             EpiPACs(jobuid=self.jobuid),
-            RAInputFiles(),
-            PACRateRAProgram(),
-            ProviderPACRates(),
-            HCI3ReliabilityAnalysis()
+            RAInputFiles(jobuid=self.jobuid),
+            PACRateRAProgram(jobuid=self.jobuid),
+            ProviderPACRates(jobuid=self.jobuid),
+            HCI3ReliabilityAnalysis(jobuid=self.jobuid)
         ]
 
         # IEVA and PAC Super Groups
         ieva_pacsg_tasks = [
-            IEVA(),
-            PACSuperGroups()
+            IEVA(jobuid=self.jobuid),
+            PACSuperGroups(jobuid=self.jobuid)
         ]
 
         # Let's go!

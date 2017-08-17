@@ -19,9 +19,10 @@ SQL_FILE = os.path.join(PathConfig().postec_path,
 class ProviderPACRates(luigi.Task):
     """ create provider-level aggregates """
     datafile = luigi.Parameter(default=STEP)
+    jobuid = luigi.Parameter()
 
     def requires(self):
-        return [PACRateRAProgram()]
+        return [PACRateRAProgram(jobuid=self.jobuid)]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
@@ -43,4 +44,5 @@ if __name__ == "__main__":
     luigi.run([
         'ProviderPACRates', 
         '--workers', '1',
+        '--jobuid', sys.argv[1], 
         '--local-scheduler'])
