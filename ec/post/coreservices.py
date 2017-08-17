@@ -18,7 +18,7 @@ JARGS = 'java -d64 -Xms4G -Xmx200G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
 class CoreServices(ExternalProgramTask):
     """ identify gaps in core services at the patient level """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [SavingSummary(jobuid=self.jobuid)]

@@ -18,7 +18,7 @@ JARGS = 'java -d64 -Xms4G -Xmx200G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
 class MasterUnfilteredRASA(ExternalProgramTask):
     """ prepare the risk and severity adjustment """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [FilteredCostRollUps(jobuid=self.jobuid)]

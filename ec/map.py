@@ -20,7 +20,7 @@ JARGS = 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
 class Map(ExternalProgramTask):
     """ map the inputs into MongoDB """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [SchemaCreate(jobuid=self.jobuid)]

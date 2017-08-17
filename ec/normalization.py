@@ -19,8 +19,8 @@ JARGS = 'java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfil
 class Normalize(ExternalProgramTask):
     """ run normalization """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
-    norm_id = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
+    norm_id = luigi.IntParameter()
 
     def requires(self):
         return [PostMap(jobuid=self.jobuid)]

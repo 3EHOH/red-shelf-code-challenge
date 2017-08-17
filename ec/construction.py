@@ -19,8 +19,8 @@ JARGS = 'java -d64 -Xms8G -Xmx128G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
 class Construct(ExternalProgramTask):
     """ run construction """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
-    conn_id = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
+    conn_id = luigi.IntParameter()
 
     def requires(self):
         return [PostNormalize(jobuid=self.jobuid)]

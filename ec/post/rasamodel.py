@@ -18,7 +18,7 @@ JARGS = 'java -d64 -Xms4G -Xmx200G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
 class RASAModel(ExternalProgramTask):
     """ run the risk and severity adjustment model """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [MasterUnfilteredRASA(jobuid=self.jobuid)]

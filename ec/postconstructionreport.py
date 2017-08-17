@@ -17,7 +17,7 @@ JARGS = 'java -d64 -Xms4G -Xmx20G -cp {cpath} -Dlog4j.configuration=file:/ecrfil
 class PostConstructionReport(ExternalProgramTask):
     """ generate the post construction report """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         conn_ids = list(range(0, ConnieConfig().count))

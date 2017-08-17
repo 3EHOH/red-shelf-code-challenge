@@ -17,7 +17,7 @@ JARGS= 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfil
 class SchemaCreate(ExternalProgramTask):
     """ create the output schema for the run """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [Analyze(jobuid=self.jobuid)]

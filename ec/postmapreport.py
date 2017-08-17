@@ -17,7 +17,7 @@ JARGS = 'java -d64 -Xms16G -Xmx80G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
 class PostMapReport(ExternalProgramTask):
     """ generate the post map report """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [PostMap(jobuid=self.jobuid)]

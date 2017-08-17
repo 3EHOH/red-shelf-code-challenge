@@ -18,7 +18,7 @@ SQL_FILE = os.path.join(PathConfig().postec_path, 'Provider_Attribution.sql')
 class ProviderAttribution(luigi.Task):
     """ perform provider attribution """
     datafile = luigi.Parameter(default=STEP)
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [Dedupe(jobuid=self.jobuid)]

@@ -21,7 +21,7 @@ class EpiPACs(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
     # the JOBUID parameter is here solely for the maternity dependence
     # Is it really dependent on that?
-    jobuid = luigi.IntParameter(default=-1)
+    jobuid = luigi.IntParameter()
 
     def requires(self):
         return [Maternity(jobuid=self.jobuid)]
