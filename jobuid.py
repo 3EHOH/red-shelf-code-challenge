@@ -20,7 +20,7 @@ def get_next_jobuid():
     cur.execute(sql)
     row = cur.fetchone()
     db.close()
-    if len(row) == 1:
+    if row[0] is not None:
         return row[0]
     else:
         return 1
