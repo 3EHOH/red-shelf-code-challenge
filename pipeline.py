@@ -50,14 +50,14 @@ class PipelineTask(luigi.WrapperTask):
         # mapping tasks
         map_tasks = [
                 Map(jobuid=self.jobuid),
-                PostMap(jobuid=self.jobuid)
-                #PostMapReport(jobuid=self.jobuid)
+                PostMap(jobuid=self.jobuid),
+                PostMapReport(jobuid=self.jobuid)
         ] 
         # normalization tasks
         norm_ids = list(range(0, NormanConfig().count))
         norm_tasks = [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
         norm_tasks.append(PostNormalize(jobuid=self.jobuid))
-        #norm_tasks.append(PostNormalizationReport(jobuid=self.jobuid))
+        norm_tasks.append(PostNormalizationReport(jobuid=self.jobuid))
 
         # construction tasks
         conn_ids = list(range(0, ConnieConfig().count))

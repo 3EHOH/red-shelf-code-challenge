@@ -6,7 +6,7 @@ from luigi.contrib.external_program import ExternalProgramTask
 
 from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from run_55 import Run55 
-from ec.postmap import PostMap
+from ec.postmapreport import PostMapReport
 
 STEP = 'normalization'
 
@@ -23,7 +23,7 @@ class Normalize(ExternalProgramTask):
     norm_id = luigi.IntParameter()
 
     def requires(self):
-        return [PostMap(jobuid=self.jobuid)]
+        return [PostMapReport(jobuid=self.jobuid)]
 
     def program_args(self):
         return JARGS.split(' ')
@@ -34,7 +34,18 @@ class Normalize(ExternalProgramTask):
                          '{}.{}'.format(self.datafile, self.norm_id)))
 
     def run(self):
-        sleep(5*(self.norm_id+1))
+        # HACK: it appears that the status is sometimes not properly updated
+        if self.norm_id == 0:
+            sql = "update processJobStep set status = 'Active' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
+            db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                         user=MySQLDBConfig().prd_user,
+                                         passwd=MySQLDBConfig().prd_pass,
+                                         db=MySQLDBConfig().prd_schema)    
+            cur = db.cursor()
+            cur.execute(sql)
+            db.commit()
+            db.close()
+
         super(Normalize, self).run()
         self.output().open('w').close()
 

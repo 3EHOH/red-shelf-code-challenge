@@ -32,13 +32,24 @@ class PostNormalize(ExternalProgramTask):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
     def run(self):
-        super(PostNormalize, self).run()
-        # HACK: set the construction status to READY.
-        sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'construct';".format(jobuid=self.jobuid)
+        # HACK: it appears that sometimes the normalization status is not
+        # updated correctly
+        sql = "update processJobStep set status = 'Complete' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
         db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
                                      user=MySQLDBConfig().prd_user,
                                      passwd=MySQLDBConfig().prd_pass,
                                      db=MySQLDBConfig().prd_schema)    
+        cur = db.cursor()
+        cur.execute(sql)
+        db.commit()
+        db.close()
+        super(PostNormalize, self).run()
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
+        # HACK: set the construction status to READY.
+        sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'construct';".format(jobuid=self.jobuid)
         cur = db.cursor()
         cur.execute(sql)
         db.commit()

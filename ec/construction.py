@@ -6,7 +6,7 @@ from luigi.contrib.external_program import ExternalProgramTask
 
 from config import ModelConfig, MySQLDBConfig, ConnieConfig, PathConfig
 from run_55 import Run55 
-from ec.postnormalization import PostNormalize
+from ec.postnormalizationreport import PostNormalizationReport
 
 STEP = 'construction'
 
@@ -23,7 +23,7 @@ class Construct(ExternalProgramTask):
     conn_id = luigi.IntParameter()
 
     def requires(self):
-        return [PostNormalize(jobuid=self.jobuid)]
+        return [PostNormalizationReport(jobuid=self.jobuid)]
 
     def program_args(self):
         return JARGS.split(' ')
@@ -34,7 +34,6 @@ class Construct(ExternalProgramTask):
                          '{}.{}'.format(self.datafile, self.conn_id)))
 
     def run(self):
-        sleep(5*(self.conn_id+1))
         super(Construct, self).run()
         self.output().open('w').close()
 
