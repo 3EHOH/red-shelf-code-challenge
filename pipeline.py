@@ -62,7 +62,7 @@ class PipelineTask(luigi.WrapperTask):
         # construction tasks
         conn_ids = list(range(0, ConnieConfig().count))
         conn_tasks = [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
-        #conn_tasks.append(PostConstructionReport(jobuid=self.jobuid))
+        conn_tasks.append(PostConstructionReport(jobuid=self.jobuid))
 
         # post EC tasks
         postec_tasks = [

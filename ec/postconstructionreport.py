@@ -3,7 +3,9 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from config import ModelConfig, ConnieConfig, PathConfig
+import mysql.connector
+
+from config import ModelConfig, ConnieConfig, PathConfig, MySQLDBConfig
 from run_55 import Run55 
 from ec.construction import Construct
 
@@ -30,6 +32,17 @@ class PostConstructionReport(ExternalProgramTask):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
     def run(self):
+        # HACK: it appears that sometimes the construction status is not
+        # updated correctly
+        sql = "update processJobStep set status = 'Complete' where jobUid = {jobuid} and stepName = 'construct';".format(jobuid=self.jobuid)
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
+        cur = db.cursor()
+        cur.execute(sql)
+        db.commit()
+        db.close()
         super(PostConstructionReport, self).run()
         self.output().open('w').close()
 

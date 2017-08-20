@@ -34,6 +34,7 @@ class Construct(ExternalProgramTask):
                          '{}.{}'.format(self.datafile, self.conn_id)))
 
     def run(self):
+        sleep(600*self.conn_id)
         super(Construct, self).run()
         self.output().open('w').close()
 

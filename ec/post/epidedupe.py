@@ -3,9 +3,9 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-from config import ConnieConfig, ModelConfig, PathConfig
+from config import ModelConfig, PathConfig
 from run_55 import Run55 
-from ec.construction import Construct
+from ec.postconstructionreport import PostConstructionReport
 
 STEP = 'epidedupe'
 
@@ -21,8 +21,7 @@ class Dedupe(ExternalProgramTask):
     jobuid = luigi.IntParameter()
 
     def requires(self):
-        conn_ids = list(range(0, ConnieConfig().count))
-        return [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
+        return [PostConstructionReport(jobuid=self.jobuid)]
 
     def program_args(self):
         return '{} jobuid={}'.format(JARGS, self.jobuid).split(' ')
