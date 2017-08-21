@@ -2,8 +2,9 @@ import os
 import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
+import mysql.connector
 
-from config import ModelConfig, PathConfig
+from config import ModelConfig, MySQLDBConfig, PathConfig
 from run_55 import Run55 
 from ec.post.costrollups import CostRollUps
 
@@ -31,8 +32,30 @@ class FilteredCostRollUps(ExternalProgramTask):
                                               self.datafile))
     
     def run(self):
+        # update the status
+        sql = "update processJobStep set status = 'Active', stepStart = now() where jobUid = {jobuid} and stepName = 'filteredrollups';".format(jobuid=self.jobuid)
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
+        cur = db.cursor()
+        cur.execute(sql)
+        db.commit()
+        db.close()
+        # run the SQL script
         super(FilteredCostRollUps, self).run()
         self.output().open('w').close()
+        # update the status
+        sql = "update processJobStep set status = 'Complete', stepEnd = now() where jobUid = {jobuid} and stepName = 'filteredrollups';".format(jobuid=self.jobuid)
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
+        cur = db.cursor()
+        cur.execute(sql)
+        db.commit()
+        db.close()
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
