@@ -38,7 +38,7 @@ class Normalize(ExternalProgramTask):
     def run(self):
         # HACK: it appears that the status is sometimes not properly updated
         if self.norm_id == 0:
-            sql = "update processJobStep set status = 'Active' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
+            sql = "update processJobStep set status = 'Active', stepStart = now() where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
             db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
                                          user=MySQLDBConfig().prd_user,
                                          passwd=MySQLDBConfig().prd_pass,

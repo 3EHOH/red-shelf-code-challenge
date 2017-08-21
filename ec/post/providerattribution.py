@@ -28,6 +28,17 @@ class ProviderAttribution(luigi.Task):
                                               self.datafile))
 
     def run(self):
+        # update the status
+        sql = "update processJobStep set status = 'Active', stepStart = now() where jobUid = {jobuid} and stepName = 'providerattribution';".format(jobuid=self.jobuid)
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
+        cur = db.cursor()
+        cur.execute(sql)
+        db.commit()
+        db.close()
+        # run the SQL script
         command = ['mysql', '-f', '-h{}'.format(MySQLDBConfig().prd_host),
                    '--database={}'.format(DB),
                    '-u{}'.format(MySQLDBConfig().prd_user),
@@ -38,6 +49,17 @@ class ProviderAttribution(luigi.Task):
             output,error = proc.communicate()
             with self.output().open('w') as out:
                 out.write(str(error))
+        # update the status
+        sql = "update processJobStep set status = 'Complete', stepEnd = now() where jobUid = {jobuid} and stepName = 'providerattribution';".format(jobuid=self.jobuid)
+        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
+                                     user=MySQLDBConfig().prd_user,
+                                     passwd=MySQLDBConfig().prd_pass,
+                                     db=MySQLDBConfig().prd_schema)    
+        cur = db.cursor()
+        cur.execute(sql)
+        db.commit()
+        db.close()
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
