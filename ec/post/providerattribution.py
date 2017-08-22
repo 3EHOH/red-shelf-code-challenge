@@ -1,7 +1,7 @@
 import os
 import sys
 import luigi
-import mysql.connector
+from utils import update_status
 import subprocess
 from subprocess import Popen, PIPE
 
@@ -30,14 +30,7 @@ class ProviderAttribution(luigi.Task):
     def run(self):
         # update the status
         sql = "update processJobStep set status = 'Active', stepStart = now() where jobUid = {jobuid} and stepName = 'providerattribution';".format(jobuid=self.jobuid)
-        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-                                     user=MySQLDBConfig().prd_user,
-                                     passwd=MySQLDBConfig().prd_pass,
-                                     db=MySQLDBConfig().prd_schema)    
-        cur = db.cursor()
-        cur.execute(sql)
-        db.commit()
-        db.close()
+        update_status(sql)
         # run the SQL script
         command = ['mysql', '-f', '-h{}'.format(MySQLDBConfig().prd_host),
                    '--database={}'.format(DB),
@@ -51,14 +44,7 @@ class ProviderAttribution(luigi.Task):
                 out.write(str(error))
         # update the status
         sql = "update processJobStep set status = 'Complete', stepEnd = now() where jobUid = {jobuid} and stepName = 'providerattribution';".format(jobuid=self.jobuid)
-        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-                                     user=MySQLDBConfig().prd_user,
-                                     passwd=MySQLDBConfig().prd_pass,
-                                     db=MySQLDBConfig().prd_schema)    
-        cur = db.cursor()
-        cur.execute(sql)
-        db.commit()
-        db.close()
+        update_status(sql)
 
 
 if __name__ == "__main__":
