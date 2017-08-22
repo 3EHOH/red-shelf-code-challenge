@@ -4,7 +4,7 @@ from time import sleep
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-import mysql.connector
+from utils import update_status
 
 from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from run_55 import Run55 
@@ -39,15 +39,7 @@ class Normalize(ExternalProgramTask):
         # HACK: it appears that the status is sometimes not properly updated
         if self.norm_id == 0:
             sql = "update processJobStep set status = 'Active', stepStart = now() where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
-            db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-                                         user=MySQLDBConfig().prd_user,
-                                         passwd=MySQLDBConfig().prd_pass,
-                                         db=MySQLDBConfig().prd_schema)    
-            cur = db.cursor()
-            cur.execute(sql)
-            db.commit()
-            db.close()
-
+            update_status(sql)
         super(Normalize, self).run()
         self.output().open('w').close()
 

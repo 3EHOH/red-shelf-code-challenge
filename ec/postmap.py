@@ -3,7 +3,7 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-import mysql.connector
+from utils import update_status
 
 from config import ModelConfig, MySQLDBConfig, PathConfig
 from run_55 import Run55 
@@ -35,15 +35,7 @@ class PostMap(ExternalProgramTask):
         super(PostMap, self).run()
         # HACK: set the normalization status to READY.
         sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
-        db = mysql.connector.connect(host=MySQLDBConfig().prd_host,
-                                     user=MySQLDBConfig().prd_user,
-                                     passwd=MySQLDBConfig().prd_pass,
-                                     db=MySQLDBConfig().prd_schema)    
-        cur = db.cursor()
-        cur.execute(sql)
-        db.commit()
-        db.close()
-
+        update_status(sql)
         self.output().open('w').close()
 
 if __name__ == "__main__":

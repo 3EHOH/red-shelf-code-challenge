@@ -3,9 +3,7 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
-import mysql.connector
-
-from config import ModelConfig, MySQLDBConfig, PathConfig
+from config import ModelConfig, PathConfig
 from run_55 import Run55 
 from ec.schemacreate import SchemaCreate 
 
