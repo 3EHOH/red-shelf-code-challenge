@@ -10,7 +10,7 @@ from ec.postnormalizationreport import PostNormalizationReport
 
 STEP = 'construction'
 
-JARGS = 'java -d64 -Xms8G -Xmx128G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jConnie.properties control.ConstructionDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
+JARGS = 'java -d64 -Xms8G -Xmx100G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jConnie.properties control.ConstructionDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
     cpath=Run55.cpath(),
     configfolder=ModelConfig().configfolder,
     chunksize=ConnieConfig().chunksize,
