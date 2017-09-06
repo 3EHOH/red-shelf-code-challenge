@@ -14,23 +14,22 @@ if [ $# -lt 2 ]; then
     exit
 fi
 
-# FILE_NAME should omit the ex
+# FILE_NAME should omit the .zip extension
 JOB_ID="$1"
 FILE_NAME="$2"
-SFTP_FILE_PATH="/home/$EC2_USER/$FILE_NAME.zip"
+SCP_FILE_PATH="/home/$EC2_USER/$FILE_NAME.zip"
 
 
-# SFTP configuration
-EC2_USER="ec2-user"
+# SCP configuration
 KEY__NAME=PFS
-SFTP_KEYFILE=/home/$EC2_USER/.ssh/$KEY_NAME.pem
-SFTP_USER="$EC2_USER"
-SFTP_SERVER=172.31.1.203
+EC2_USER="ec2-user"
+SCP_KEYFILE=/home/$EC2_USER/.ssh/$KEY_NAME.pem
+SCP_USER="$EC2_USER"
+SCP_SERVER=172.31.1.203
 
 # EC2 instance parameters
 AMI_ID="ami-41f40339"
 INSTANCE_TYPE="r3.8xlarge"
-#KEY_NAME="HDF"
 SECURITY_GROUP="sg-26f7c85c"
 SUBNET_ID="subnet-1347774b"
 INSTANCE_NAME="PROM-$JOB_ID-$FILE_NAME"
@@ -38,13 +37,14 @@ INSTANCE_NAME="PROM-$JOB_ID-$FILE_NAME"
 LUIGI_DIR="/home/$EC2_USER/payformance/luigi"
 
 # output file and startup script file locations
-OUTPUT_FILE="$JOB_ID.log"
-SCRIPT_FILE="/tmp/$JOB_ID.sh"
+OUTPUT_DIR="/home/$EC2_USER/prom_output"
+OUTPUT_FILE="$OUTPUT_DIR/$JOB_ID.log"
+SCRIPT_FILE="$OUTPUT_DIR/$JOB_ID.sh"
 
 # location and command for copying the input .zip file to the runner instance
 DOWNLOAD_DIR="/ecrfiles/input"
 DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME.zip"
-DOWNLOAD_COMMAND="sudo -u $EC2_USER scp -i $SFTP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SFTP_USER}@${SFTP_SERVER}:$SFTP_FILE_PATH $DOWNLOAD_FILE"
+DOWNLOAD_COMMAND="sudo -u $EC2_USER scp -i $SCP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SCP_USER}@${SCP_SERVER}:$SCP_FILE_PATH $DOWNLOAD_FILE"
 
 
 # this script will be run as root after the EC2 instance is launched
