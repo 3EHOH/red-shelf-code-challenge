@@ -21,7 +21,7 @@ SCP_FILE_PATH="/home/$EC2_USER/$FILE_NAME.zip"
 
 
 # SCP configuration
-KEY__NAME=PFS
+KEY_NAME=PFS
 EC2_USER="ec2-user"
 SCP_KEYFILE=/home/$EC2_USER/.ssh/$KEY_NAME.pem
 SCP_USER="$EC2_USER"
