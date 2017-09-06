@@ -17,12 +17,12 @@ fi
 # FILE_NAME should omit the .zip extension
 JOB_ID="$1"
 FILE_NAME="$2"
+EC2_USER="ec2-user"
 SCP_FILE_PATH="/home/$EC2_USER/$FILE_NAME.zip"
 
 
 # SCP configuration
 KEY_NAME=PFS
-EC2_USER="ec2-user"
 SCP_KEYFILE=/home/$EC2_USER/.ssh/$KEY_NAME.pem
 SCP_USER="$EC2_USER"
 SCP_SERVER=172.31.1.203
