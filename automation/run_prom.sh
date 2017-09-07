@@ -28,7 +28,7 @@ SCP_USER="$EC2_USER"
 SCP_SERVER=172.31.1.203
 
 # EC2 instance parameters
-AMI_ID="ami-41f40339"
+AMI_ID="ami-c97681b1"
 INSTANCE_TYPE="r3.8xlarge"
 SECURITY_GROUP="sg-26f7c85c"
 SUBNET_ID="subnet-1347774b"
