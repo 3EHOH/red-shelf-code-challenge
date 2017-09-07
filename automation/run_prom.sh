@@ -47,6 +47,14 @@ DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME.zip"
 DOWNLOAD_COMMAND="sudo -u $EC2_USER scp -i $SCP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SCP_USER}@${SCP_SERVER}:$SCP_FILE_PATH $DOWNLOAD_FILE"
 
 
+# create an SNS topic and channel for function notifications
+# this is pretty sloppy and needs to be improved
+SNS_OUTPUT_FILE="sns-$INSTANCE_NAME"
+aws sns create-topic --name $INSTANCE_NAME > $SNS_OUTPUT_FILE
+SNS_TOPIC=$(grep -Po 'arn:[^".]+' $SNS_OUTPUT_FILE)
+SNS_EMAIL="andrew.weinrich@hdfgroup.org"
+aws sns subscribe --topic-arn $SNS_TOPIC --protocol email --notification-endpoint $SNS_EMAIL
+
 # this script will be run as root after the EC2 instance is launched
 cat <<EOF > "$SCRIPT_FILE"
 #!/bin/bash
