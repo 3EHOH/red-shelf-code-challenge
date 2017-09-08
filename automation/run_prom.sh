@@ -30,7 +30,7 @@ SCP_SERVER=172.31.1.203
 # EC2 instance parameters
 AMI_ID="ami-c97681b1"
 INSTANCE_TYPE="r3.8xlarge"
-SECURITY_GROUP="sg-26f7c85c"
+SECURITY_GROUPS="sg-26f7c85c sg-59abd323"
 SUBNET_ID="subnet-1347774b"
 INSTANCE_NAME="PROM-$JOB_ID-$FILE_NAME"
 
@@ -49,11 +49,14 @@ DOWNLOAD_COMMAND="sudo -u $EC2_USER scp -i $SCP_KEYFILE -o StrictHostKeyChecking
 
 # create an SNS topic and channel for function notifications
 # this is pretty sloppy and needs to be improved
-SNS_OUTPUT_FILE="sns-$INSTANCE_NAME"
-aws sns create-topic --name $INSTANCE_NAME > $SNS_OUTPUT_FILE
-SNS_TOPIC=$(grep -Po 'arn:[^".]+' $SNS_OUTPUT_FILE)
-SNS_EMAIL="andrew.weinrich@hdfgroup.org"
-aws sns subscribe --topic-arn $SNS_TOPIC --protocol email --notification-endpoint $SNS_EMAIL
+#SNS_OUTPUT_FILE="sns-$INSTANCE_NAME"
+#aws sns create-topic --name $INSTANCE_NAME > $SNS_OUTPUT_FILE
+#SNS_TOPIC="arn:aws:sns:us-west-2:574943243130:PromLog"
+#SNS_TOPIC=$(grep -Po 'arn:[^".]+' $SNS_OUTPUT_FILE)
+#SNS_EMAIL="andrew.weinrich@hdfgroup.org"
+#aws sns subscribe --topic-arn $SNS_TOPIC --protocol email --notification-endpoint $SNS_EMAIL
+
+
 
 # this script will be run as root after the EC2 instance is launched
 cat <<EOF > "$SCRIPT_FILE"
@@ -79,13 +82,14 @@ aws ec2 run-instances \
     --count 1 \
     --instance-type "$INSTANCE_TYPE" \
     --key-name "$KEY_NAME" \
-    --security-group-ids "$SECURITY_GROUP" \
+    --security-group-ids $SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
     --user-data "file://$SCRIPT_FILE" \
-    --no-associate-public-ip-address \
+    --associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$INSTANCE_NAME}]'
 AWS_COMMAND
 )
+#    --no-associate-public-ip-address \
 
 echo "$AWS_COMMAND"
 
