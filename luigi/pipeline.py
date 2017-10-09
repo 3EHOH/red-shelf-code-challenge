@@ -4,6 +4,7 @@ import luigi
 from config import ConnieConfig, ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from ec.setup import Setup
 from ec.analyze import Analyze
+from ec.preflightcheck import PreflightCheck
 from ec.schemacreate import SchemaCreate
 from ec.map import Map
 from ec.postmap import PostMap
@@ -43,6 +44,7 @@ class PipelineTask(luigi.WrapperTask):
     def requires(self):
         # basic setup tasks
         setup_tasks = [
+            PreflightCheck(),
             Setup(),
             Analyze(jobuid=self.jobuid),
             SchemaCreate(jobuid=self.jobuid)

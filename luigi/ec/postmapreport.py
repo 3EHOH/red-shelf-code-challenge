@@ -4,7 +4,7 @@ import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
 from config import ModelConfig, PathConfig
-from run_55 import Run55 
+from run_55 import Run55
 from ec.postmap import PostMap
 
 STEP = 'postmapreport'

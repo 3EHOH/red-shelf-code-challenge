@@ -1,9 +1,8 @@
-import os
-import luigi
-
-from luigi.contrib.external_program import ExternalProgramTask
-
 from config import ModelConfig, PathConfig
+from ec.preflightcheck import PreflightCheck
+import luigi
+from luigi.contrib.external_program import ExternalProgramTask
+import os
 from run_55 import Run55
 
 STEP = 'setup'
@@ -35,6 +34,9 @@ class Setup(ExternalProgramTask):
     """ task to set up a new run """
 
     datafile = luigi.Parameter(default=STEP)
+
+    def requires(self):
+        return [PreflightCheck()]
 
     def program_args(self):
         return JARGS.split(' ')
