@@ -9,6 +9,9 @@
 # IP addresses and security group IDs. These must be
 # be specified manually.
 
+# Key-pair name used by all servers
+KEY_NAME=KEY_PAIR
+
 # SFTP/SCP instance parameters
 SCP_SERVER=172.1.1.1
 
@@ -31,7 +34,6 @@ SECURITY_GROUPS="sg-abcdef12 sg-abcdef12"
 
 # internal subnet that servers will be placed in (must have a connection to external internet)
 SUBNET_ID="subnet-abcdef12"
-
 
 ##########################################
 #
