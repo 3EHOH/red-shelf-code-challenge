@@ -70,7 +70,8 @@ UPLOAD_SCP_FILE_PATH="${SCP_FILE}-output.zip"
 UPLOAD_COMMAND="$SCP_COMMAND $UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:$UPLOAD_SCP_FILE_PATH"
 
 # local directory that contains output from AWS instance launching commands
-LAUNCH_COMMAND_DIR="/tmp/$JOB_ID-launch-commands"
+LAUNCH_COMMAND_FILE="$JOB_ID-launch-commands"
+LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
 LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/$JOB_ID.sh"
 
 # create output directory
@@ -93,13 +94,6 @@ echo "export HOSTNAME=PROM-$JOB_ID" >> $USER_HOME/.bashrc
 sed -i 's/<JOB_ID>/$JOB_ID/; s/<FILE_NAME>/$FILE_NAME/' $LUIGI_DIR/luigi.cfg
 
 sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1 
-
-# copy output 
-#cp -r $ECR_HOME/output $OUTPUT_DIR/output
-
-# zip up output folder and upload back to SFTP server
-#zip $UPLOAD_FILE $OUTPUT_DIR
-#$UPLOAD_COMMAND
 
 EOF
 
@@ -125,8 +119,8 @@ echo "$ROOT_LAUNCH_COMMAND"
 eval "$ROOT_LAUNCH_COMMAND"
 
 # copy launch information to the SFTP server
-#LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
-#zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
-#$SCP_COMMAND $LAUNCH_UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:${SCP_FILE}-launch.zip
+LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
+zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
+$SCP_COMMAND $LAUNCH_UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:${SCP_FILE}-${LAUNCH_COMMAND_FILE}.zip
 
 
