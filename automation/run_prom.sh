@@ -6,92 +6,121 @@
 # instructions on running a script on startup: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
 
 # check for arguments
-# <custom_job_id> is a user-defined identifier for this run. It will be used in the name of the EC2 instance, and for reporting. It is not used by the actual Prometheus code, only the automation script.
-# <file_name> should be the name of the input .zip file, but without the extension
-# e.g. "./run_prom.sh 1234 50K_Test_2016_03_16"
-if [ $# -lt 2 ]; then
-    echo "Usage: run_prom.sh <custom_job_id> <file_name>"
+if [ $# -lt 3 ]; then
+    echo "Usage: run_prom.sh <aws_config_file> <custom_job_id> <sftp_file_name>"
+    echo "  <aws_config_file> is a file that contains AMI IDs, instance types, and security"
+    echo "    groups that will be used for launching servers. See example_aws_config.sh."
+    echo "  <custom_job_id> is a user-defined identifier for this run. It will be used in the"
+    echo "    name of the EC2 instance, and for reporting. It is not used by the actual"
+    echo "    Prometheus code, only the automation script."
+    echo "  <sftp_file_name> should be the name of the input .zip file on the SFTP server"
+    echo "  e.g. './run_prom.sh aws_config.sh 1234 50K_Test_2016_03_16.zip'"
     exit
 fi
 
-# FILE_NAME should omit the .zip extension
-JOB_ID="$1"
-FILE_NAME="$2"
-EC2_USER="ec2-user"
-SCP_FILE_PATH="/home/$EC2_USER/$FILE_NAME.zip"
 
+# load AWS-specific configuration
+# this is not safe, but will suffice for the moment
+source $1
+
+# TO-DO: check that AWS variables are defined
+
+
+##########################################
+#
+# VARIABLE DEFINITIONS
+#
+# It should not be necessary to edit these variables
+#
+##########################################
+
+JOB_ID="$2"
+FILE_NAME="$3"
+EC2_USER="ec2-user"
+USER_HOME="/home/$EC2_USER"
+ECR_HOME="/ecrfiles"
+SCP_FILE="/$USER_HOME/$FILE_NAME"
 
 # SCP configuration
-KEY_NAME=PFS
-SCP_KEYFILE=/home/$EC2_USER/.ssh/$KEY_NAME.pem
+SCP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
 SCP_USER="$EC2_USER"
-SCP_SERVER=172.31.1.203
 
 # EC2 instance parameters
-AMI_ID="ami-c97681b1"
-INSTANCE_TYPE="r3.8xlarge"
-SECURITY_GROUPS="sg-26f7c85c sg-59abd323"
-SUBNET_ID="subnet-1347774b"
 INSTANCE_NAME="PROM-$JOB_ID-$FILE_NAME"
 
-LUIGI_DIR="/home/$EC2_USER/payformance/luigi"
+LUIGI_DIR="$USER_HOME/payformance/luigi"
 
-# output file and startup script file locations
-OUTPUT_DIR="/home/$EC2_USER/prom_output"
+# output file and startup script file locations on worker servers
+OUTPUT_DIR="$USER_HOME/prom_output_${JOB_ID}"
 OUTPUT_FILE="$OUTPUT_DIR/$JOB_ID.log"
-SCRIPT_FILE="$OUTPUT_DIR/$JOB_ID.sh"
+
+# base arguments for scp
+# sudo is necessary because the script will run as root on startup
+SCP_COMMAND="sudo -u $EC2_USER scp -i $SCP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 # location and command for copying the input .zip file to the runner instance
-DOWNLOAD_DIR="/ecrfiles/input"
-DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME.zip"
-DOWNLOAD_COMMAND="sudo -u $EC2_USER scp -i $SCP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SCP_USER}@${SCP_SERVER}:$SCP_FILE_PATH $DOWNLOAD_FILE"
+DOWNLOAD_DIR="$ECR_HOME/input"
+DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME"
+DOWNLOAD_SCP_FILE_PATH="$SCP_FILE"
+DOWNLOAD_COMMAND="$SCP_COMMAND ${SCP_USER}@${SCP_SERVER}:$DOWNLOAD_SCP_FILE_PATH $DOWNLOAD_FILE"
 
+# location and command for copying output files back to to the file server
+UPLOAD_FILE="$USER_HOME/$JOB_ID-$FILE_NAME-output.zip"
+UPLOAD_SCP_FILE_PATH="${SCP_FILE}-output.zip"
+UPLOAD_COMMAND="$SCP_COMMAND $UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:$UPLOAD_SCP_FILE_PATH"
 
-# create an SNS topic and channel for function notifications
-# this is pretty sloppy and needs to be improved
-#SNS_OUTPUT_FILE="sns-$INSTANCE_NAME"
-#aws sns create-topic --name $INSTANCE_NAME > $SNS_OUTPUT_FILE
-#SNS_TOPIC="arn:aws:sns:us-west-2:574943243130:PromLog"
-#SNS_TOPIC=$(grep -Po 'arn:[^".]+' $SNS_OUTPUT_FILE)
-#SNS_EMAIL="andrew.weinrich@hdfgroup.org"
-#aws sns subscribe --topic-arn $SNS_TOPIC --protocol email --notification-endpoint $SNS_EMAIL
+# local directory that contains output from AWS instance launching commands
+LAUNCH_COMMAND_FILE="$JOB_ID-launch-commands"
+LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
+LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/$JOB_ID.sh"
 
-
+# create output directory
+mkdir $LAUNCH_COMMAND_DIR
 
 # this script will be run as root after the EC2 instance is launched
-cat <<EOF > "$SCRIPT_FILE"
+cat <<EOF > "$LAUNCH_SCRIPT_FILE"
 #!/bin/bash
 
 $DOWNLOAD_COMMAND
 
+# create output directory
+sudo -u $EC2_USER mkdir $OUTPUT_DIR
+
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
-echo "export HOSTNAME=PROM-$JOB_ID" >> /home/$EC2_USER/.bashrc
+echo "export HOSTNAME=PROM-$JOB_ID" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i 's/<JOB_ID>/$JOB_ID/; s/<FILE_NAME>/$FILE_NAME/' $LUIGI_DIR/luigi.cfg
 
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $LUIGI_DIR/$JOB_ID.log 2>&1 
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1 
 
 EOF
 
-# launch the instance
-AWS_COMMAND=$(cat <<AWS_COMMAND
+
+# launch the root instance
+ROOT_LAUNCH_COMMAND=$(cat <<ROOT_LAUNCH_COMMAND
 aws ec2 run-instances \
-    --image-id $AMI_ID \
+    --image-id $ROOT_AMI_ID \
     --count 1 \
-    --instance-type "$INSTANCE_TYPE" \
+    --instance-type "$ROOT_INSTANCE_TYPE" \
     --key-name "$KEY_NAME" \
     --security-group-ids $SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
-    --user-data "file://$SCRIPT_FILE" \
-    --associate-public-ip-address \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$INSTANCE_NAME}]'
-AWS_COMMAND
+    --user-data "file://$LAUNCH_SCRIPT_FILE" \
+    --no-associate-public-ip-address \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$INSTANCE_NAME}]' \
+> $LAUNCH_COMMAND_DIR/root_instance.launch
+ROOT_LAUNCH_COMMAND
 )
-#    --no-associate-public-ip-address \
 
-echo "$AWS_COMMAND"
+echo "$ROOT_LAUNCH_COMMAND"
 
-eval "$AWS_COMMAND"
+eval "$ROOT_LAUNCH_COMMAND"
+
+# copy launch information to the SFTP server
+LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
+zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
+$SCP_COMMAND $LAUNCH_UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:${SCP_FILE}-${LAUNCH_COMMAND_FILE}.zip
+
 
