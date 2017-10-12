@@ -39,11 +39,11 @@ FILE_NAME="$3"
 EC2_USER="ec2-user"
 USER_HOME="/home/$EC2_USER"
 ECR_HOME="/ecrfiles"
-SCP_FILE="/$USER_HOME/$FILE_NAME"
+SFTP_FILE="/$USER_HOME/$FILE_NAME"
 
-# SCP configuration
-SCP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
-SCP_USER="$EC2_USER"
+# SFTP configuration
+SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
+SFTP_USER="$EC2_USER"
 
 # EC2 instance parameters
 INSTANCE_NAME="PROM-$JOB_ID-$FILE_NAME"
@@ -56,18 +56,18 @@ OUTPUT_FILE="$OUTPUT_DIR/$JOB_ID.log"
 
 # base arguments for scp
 # sudo is necessary because the script will run as root on startup
-SCP_COMMAND="sudo -u $EC2_USER scp -i $SCP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SFTP_COMMAND="sudo -u $EC2_USER scp -i $SFTP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 # location and command for copying the input .zip file to the runner instance
 DOWNLOAD_DIR="$ECR_HOME/input"
 DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME"
-DOWNLOAD_SCP_FILE_PATH="$SCP_FILE"
-DOWNLOAD_COMMAND="$SCP_COMMAND ${SCP_USER}@${SCP_SERVER}:$DOWNLOAD_SCP_FILE_PATH $DOWNLOAD_FILE"
+DOWNLOAD_SFTP_FILE_PATH="$SFTP_FILE"
+DOWNLOAD_COMMAND="$SFTP_COMMAND ${SFTP_USER}@${SFTP_SERVER}:$DOWNLOAD_SFTP_FILE_PATH $DOWNLOAD_FILE"
 
 # location and command for copying output files back to to the file server
 UPLOAD_FILE="$USER_HOME/$JOB_ID-$FILE_NAME-output.zip"
-UPLOAD_SCP_FILE_PATH="${SCP_FILE}-output.zip"
-UPLOAD_COMMAND="$SCP_COMMAND $UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:$UPLOAD_SCP_FILE_PATH"
+UPLOAD_SFTP_FILE_PATH="${SFTP_FILE}-output.zip"
+UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:$UPLOAD_SFTP_FILE_PATH"
 
 # local directory that contains output from AWS instance launching commands
 LAUNCH_COMMAND_FILE="$JOB_ID-launch-commands"
@@ -91,7 +91,11 @@ unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 echo "export HOSTNAME=PROM-$JOB_ID" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
-sed -i 's/<JOB_ID>/$JOB_ID/; s/<FILE_NAME>/$FILE_NAME/' $LUIGI_DIR/luigi.cfg
+sed -i 's/<JOB_ID>/$JOB_ID/;\
+        s/<FILE_NAME>/$FILE_NAME/;\
+        s/<SFTP_SERVER>/$SFTP_SERVER/;\
+        s/<KEY_NAME>/$KEY_NAME/'\
+    $LUIGI_DIR/luigi.cfg
 
 sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1 
 
@@ -121,6 +125,6 @@ eval "$ROOT_LAUNCH_COMMAND"
 # copy launch information to the SFTP server
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
 zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
-$SCP_COMMAND $LAUNCH_UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:${SCP_FILE}-${LAUNCH_COMMAND_FILE}.zip
+$SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${SFTP_FILE}-${LAUNCH_COMMAND_FILE}.zip
 
 

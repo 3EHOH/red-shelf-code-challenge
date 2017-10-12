@@ -13,7 +13,7 @@
 KEY_NAME=KEY_PAIR
 
 # SFTP/SCP instance parameters
-SCP_SERVER=172.1.1.1
+SFTP_SERVER=172.1.1.1
 
 # AMIs for servers
 ROOT_AMI_ID="ami-abcdef12"
