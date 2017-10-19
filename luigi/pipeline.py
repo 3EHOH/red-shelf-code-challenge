@@ -34,6 +34,7 @@ from ec.post.optional.provider_pac_rates import ProviderPACRates
 from ec.post.optional.hci3_reliability_analysis import HCI3ReliabilityAnalysis
 from ec.post.optional.ieva import IEVA
 from ec.post.optional.pac_super_groups import PACSuperGroups
+from ec.post.optional.terminate import Terminate
 
 class PipelineTask(luigi.WrapperTask):
     """Wrap up all the tasks for the pipeline into a single task
@@ -101,10 +102,14 @@ class PipelineTask(luigi.WrapperTask):
             IEVA(jobuid=self.jobuid),
             PACSuperGroups(jobuid=self.jobuid)
         ]
+        #shutdown tasks
+        shutdown_task = [
+            Terminate(jobuid=self.jobuid)
+        ]
 
         # Let's go!
         tasks = setup_tasks + map_tasks + norm_tasks + conn_tasks + \
-                postec_tasks + opt_postec_tasks + rspr_tasks + ieva_pacsg_tasks
+                postec_tasks + opt_postec_tasks + rspr_tasks + ieva_pacsg_tasks + shutdown_task
         return tasks
 
     def run(self):
