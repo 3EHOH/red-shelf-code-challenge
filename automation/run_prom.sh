@@ -82,7 +82,7 @@ LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/$RUN_ID.sh"
 mkdir $LAUNCH_COMMAND_DIR
 
 # launch the MySQL instance
-MYSQL_INSTANCE_NAME="mysql-$RUN_ID"
+MYSQL_INSTANCE_NAME="mysql-$INSTANCE_NAME"
 MYSQL_LAUNCH_COMMAND=$(cat <<MYSQL_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $MYSQL_AMI_ID \
@@ -101,8 +101,38 @@ echo "$MYSQL_LAUNCH_COMMAND"
 
 eval "$MYSQL_LAUNCH_COMMAND"
 
-exit
+#sleep while we wait for mysql to reach running state
+sleep 60
 
+#capture the mongo ip address so we can rewrite database.properties with its value
+MYSQL_IP=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
+
+
+# launch the mongo instance
+MONGO_INSTANCE_NAME="mongo-$INSTANCE_NAME"
+MONGO_LAUNCH_COMMAND=$(cat <<MONGO_LAUNCH_COMMAND
+aws ec2 run-instances \
+    --image-id $MONGO_AMI_ID \
+    --count 1 \
+    --instance-type "$MONGO_INSTANCE_TYPE" \
+    --key-name "$KEY_NAME" \
+    --security-group-ids $SECURITY_GROUPS \
+    --subnet-id "$SUBNET_ID" \
+    --no-associate-public-ip-address \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$MONGO_INSTANCE_NAME}]' \
+> $LAUNCH_COMMAND_DIR/mongo_instance.launch
+MONGO_LAUNCH_COMMAND
+)
+
+echo "$MONGO_LAUNCH_COMMAND"
+
+eval "$MONGO_LAUNCH_COMMAND"
+
+#sleep while we wait for mongo to reach running state
+sleep 60
+
+#capture the mongo ip address so we can rewrite database.properties with its value
+MONGO_IP=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
 
 # this script will be run as root after the EC2 instance is launched
 cat <<EOF > "$LAUNCH_SCRIPT_FILE"
@@ -116,16 +146,25 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME=PROM-$RUN_ID" >> $USER_HOME/.bashrc
+echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i 's/<RUN_ID>/$RUN_ID/;\
         s/<FILE_NAME>/$FILE_NAME/;\
         s/<SFTP_SERVER>/$SFTP_SERVER/;\
-        s/<MYSQL_INSTANCE_TYPE>/$MYSQL_SERVER/;
-        s/<KEY_NAME>/$KEY_NAME/;\
+        s/<MYSQL_SERVER>/$MYSQL_IP/;\
+        s/<KEY_NAME>/$KEY_NAME/;'\
     $LUIGI_DIR/luigi.cfg
 
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$RUN_ID-luigi.log 2>&1 
+# edit database.properties to contain mysql ip
+sed -i 's/md1.host=.*/md1.host=$MONGO_IP/;\
+        s/prd.host=.*/prd.host=$MYSQL_IP/;\
+        s/ecr.host=.*/ecr.host=$MYSQL_IP/;\
+        s/template.host=.*/template.host=$MYSQL_IP/;'\
+    $LUIGI_DIR/database.properties
+
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1
+
 EOF
 
 
@@ -149,6 +188,7 @@ ROOT_LAUNCH_COMMAND
 echo "$ROOT_LAUNCH_COMMAND"
 
 eval "$ROOT_LAUNCH_COMMAND"
+
 
 # copy launch information to the SFTP server
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip

@@ -4,6 +4,7 @@ import luigi
 from config import ConnieConfig, ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from ec.setup import Setup
 from ec.analyze import Analyze
+from ec.preflightcheck import PreflightCheck
 from ec.schemacreate import SchemaCreate
 from ec.map import Map
 from ec.postmap import PostMap
@@ -33,7 +34,7 @@ from ec.post.optional.provider_pac_rates import ProviderPACRates
 from ec.post.optional.hci3_reliability_analysis import HCI3ReliabilityAnalysis
 from ec.post.optional.ieva import IEVA
 from ec.post.optional.pac_super_groups import PACSuperGroups
-from ec.cleanup import Cleanup
+from ec.post.optional.terminate import Terminate
 
 class PipelineTask(luigi.WrapperTask):
     """Wrap up all the tasks for the pipeline into a single task
@@ -44,6 +45,7 @@ class PipelineTask(luigi.WrapperTask):
     def requires(self):
         # basic setup tasks
         setup_tasks = [
+            PreflightCheck(),
             Setup(),
             Analyze(jobuid=self.jobuid),
             SchemaCreate(jobuid=self.jobuid)
@@ -100,6 +102,10 @@ class PipelineTask(luigi.WrapperTask):
             IEVA(jobuid=self.jobuid),
             PACSuperGroups(jobuid=self.jobuid)
         ]
+        #shutdown tasks
+        shutdown_task = [
+            Terminate(jobuid=self.jobuid)
+        ]
 
         # Cleanup tasks
         cleanup_tasks = [
@@ -111,8 +117,7 @@ class PipelineTask(luigi.WrapperTask):
 
         # Let's go!
         tasks = setup_tasks + map_tasks + norm_tasks + conn_tasks + \
-                postec_tasks + opt_postec_tasks + rspr_tasks + ieva_pacsg_tasks + \
-                cleanup_tasks
+                postec_tasks + opt_postec_tasks + rspr_tasks + ieva_pacsg_tasks + shutdown_task
         return tasks
 
     def run(self):
