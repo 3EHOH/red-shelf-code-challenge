@@ -71,8 +71,11 @@ class PreflightCheck(luigi.Task):
     @staticmethod
     def check_mongo_connectivity():
 
+        #TODO ultimately remove localhost default option once we are totally migrated to shared mode
+        mongo_ip = os.getenv('MONGO_IP', 'localhost')
+
         try:
-            client = pymongo.MongoClient("mongodb://" + os.environ['MONGO_IP'] + ":27017", serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
+            client = pymongo.MongoClient("mongodb://" + mongo_ip + ":27017", serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
 
         except pymongo.errors.ServerSelectionTimeoutError as err:
             print(err)
