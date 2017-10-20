@@ -38,9 +38,7 @@ class PreflightCheck(luigi.Task):
     @staticmethod
     def check_sftp_status():
         ec2 = boto3.resource('ec2')
-
-        #TODO once we have the separate mysql and mongo instances we can check them with boto
-
+        
         instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']},
                                                   {'Name': 'tag:Name', 'Values': ['SFTP Server']}])
 
@@ -50,25 +48,6 @@ class PreflightCheck(luigi.Task):
             print("ERROR: Unable to reach a running SFTP Server")
 
         return is_sftp_running
-
-    @staticmethod
-    def check_mongo_process_status(process_names):
-
-        is_mongo_process_running = True if "mongod" in process_names else False
-
-        if not is_mongo_process_running:
-            print("ERROR: Mongo process is not running")
-
-        return is_mongo_process_running
-
-    @staticmethod
-    def check_mysql_process_status(process_names):
-        is_mysql_process_running = True if "mysqld" in process_names else False
-
-        if not is_mysql_process_running:
-            print("ERROR: MySQL process is not running")
-
-        return is_mysql_process_running
 
     @staticmethod
     def check_mysql_connectivity():
@@ -91,8 +70,12 @@ class PreflightCheck(luigi.Task):
 
     @staticmethod
     def check_mongo_connectivity():
+
+        #TODO ultimately remove localhost default option once we are totally migrated to shared mode
+        mongo_ip = os.getenv('MONGO_IP', 'localhost')
+
         try:
-            client = pymongo.MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
+            client = pymongo.MongoClient("mongodb://" + mongo_ip + ":27017", serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
 
         except pymongo.errors.ServerSelectionTimeoutError as err:
             print(err)

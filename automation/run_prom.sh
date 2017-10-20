@@ -77,6 +77,31 @@ LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/$JOB_ID.sh"
 # create output directory
 mkdir $LAUNCH_COMMAND_DIR
 
+# launch the mongo instance
+MONGO_LAUNCH_COMMAND=$(cat <<MONGO_LAUNCH_COMMAND
+aws ec2 run-instances \
+    --image-id $MONGO_AMI_ID \
+    --count 1 \
+    --instance-type "$MONGO_INSTANCE_TYPE" \
+    --key-name "$KEY_NAME" \
+    --security-group-ids $SECURITY_GROUPS \
+    --subnet-id "$SUBNET_ID" \
+    --no-associate-public-ip-address \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Mongo_$INSTANCE_NAME}]' \
+> $LAUNCH_COMMAND_DIR/mongo_instance.launch
+MONGO_LAUNCH_COMMAND
+)
+
+echo "$MONGO_LAUNCH_COMMAND"
+
+eval "$MONGO_LAUNCH_COMMAND"
+
+#sleep while we wait for mongo to reach running state
+sleep 60
+
+#capture the mongo ip address so we can rewrite database.properties with its value
+MONGO_IP=$(python find_mongo_ip.py Mongo_$INSTANCE_NAME)
+
 # this script will be run as root after the EC2 instance is launched
 cat <<EOF > "$LAUNCH_SCRIPT_FILE"
 #!/bin/bash
@@ -89,11 +114,16 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME=PROM-$JOB_ID" >> $USER_HOME/.bashrc
+echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i 's/<JOB_ID>/$JOB_ID/; s/<FILE_NAME>/$FILE_NAME/' $LUIGI_DIR/luigi.cfg
 
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1 
+#edit database.properties to contain mongo ip
+sed -i "s/md1.host=.*/md1.host=$MONGO_IP/" $LUIGI_DIR/database.properties
+
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1
+
 
 EOF
 
@@ -118,9 +148,8 @@ echo "$ROOT_LAUNCH_COMMAND"
 
 eval "$ROOT_LAUNCH_COMMAND"
 
+
 # copy launch information to the SFTP server
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
 zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
 $SCP_COMMAND $LAUNCH_UPLOAD_FILE ${SCP_USER}@${SCP_SERVER}:${SCP_FILE}-${LAUNCH_COMMAND_FILE}.zip
-
-
