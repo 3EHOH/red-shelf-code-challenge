@@ -102,7 +102,7 @@ echo "$MYSQL_LAUNCH_COMMAND"
 eval "$MYSQL_LAUNCH_COMMAND"
 
 #sleep while we wait for mysql to reach running state
-sleep 60
+sleep 120
 
 #capture the mongo ip address so we can rewrite database.properties with its value
 MYSQL_IP=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
@@ -129,7 +129,7 @@ echo "$MONGO_LAUNCH_COMMAND"
 eval "$MONGO_LAUNCH_COMMAND"
 
 #sleep while we wait for mongo to reach running state
-sleep 60
+sleep 120
 
 #capture the mongo ip address so we can rewrite database.properties with its value
 MONGO_IP=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
@@ -149,18 +149,18 @@ echo "export HOSTNAME=PROM-$RUN_ID" >> $USER_HOME/.bashrc
 echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
-sed -i 's/<RUN_ID>/$RUN_ID/;\
-        s/<FILE_NAME>/$FILE_NAME/;\
-        s/<SFTP_SERVER>/$SFTP_SERVER/;\
-        s/<MYSQL_SERVER>/$MYSQL_IP/;\
-        s/<KEY_NAME>/$KEY_NAME/;'\
+sed -i -e 's/<RUN_ID>/$RUN_ID/'\
+       -e 's/<FILE_NAME>/$FILE_NAME/'\
+       -e 's/<SFTP_SERVER>/$SFTP_SERVER/'\
+       -e 's/<MYSQL_SERVER>/$MYSQL_IP/'\
+       -e 's/<KEY_NAME>/$KEY_NAME/'\
     $LUIGI_DIR/luigi.cfg
 
 # edit database.properties to contain mysql ip
-sed -i 's/md1.host=.*/md1.host=$MONGO_IP/;\
-        s/prd.host=.*/prd.host=$MYSQL_IP/;\
-        s/ecr.host=.*/ecr.host=$MYSQL_IP/;\
-        s/template.host=.*/template.host=$MYSQL_IP/;'\
+sed -i -e 's/md1.host=.*/md1.host=$MONGO_IP/'\
+       -e 's/prd.host=.*/prd.host=$MYSQL_IP/'\
+       -e 's/ecr.host=.*/ecr.host=$MYSQL_IP/'\
+       -e 's/template.host=.*/template.host=$MYSQL_IP/'\
     $LUIGI_DIR/database.properties
 
 sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1
@@ -170,6 +170,7 @@ EOF
 
 
 # launch the root instance
+ROOT_INSTANCE_NAME="root-$INSTANCE_NAME"
 ROOT_LAUNCH_COMMAND=$(cat <<ROOT_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $ROOT_AMI_ID \
