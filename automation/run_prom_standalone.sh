@@ -7,16 +7,23 @@
 
 # check for arguments
 if [ $# -lt 3 ]; then
-    echo "Usage: run_prom.sh <aws_config_file> <custom_run_id> <sftp_file_name>"
-    echo "  <aws_config_file> is a file that contains AMI IDs, instance types, and security"
-    echo "    groups that will be used for launching servers. See example_aws_config.sh."
-    echo "  <custom_run_id> is a user-defined identifier for this run. It will be used in the"
-    echo "    name of the EC2 instance, and for reporting. It is not used by the actual"
-    echo "    Prometheus code, only the automation script. It must only contain letters, numbers,"
-    echo "    and hyphens."
-    echo "  <sftp_file_name> should be the name of the input .zip file on the SFTP server"
-    echo ""
-    echo "  e.g. './run_prom.sh aws_config.sh my-run-1234 50K_Test_2016_03_16.zip'"
+    cat <<EOF
+Usage: run_prom_standalone.sh <aws_config_file> <custom_run_id> <sftp_file_name>
+
+Runs Prometheus on a single standalone server, with MongoDB, MySQL, and all Connie
+and Norman workers running on the same machine.
+
+Arguments:
+  <aws_standalone_config_file> is a file that contains AMI IDs, instance types, and security
+    groups that will be used for the standalone server. See example_aws_standalone_config.cfg
+  <custom_run_id> is a user-defined identifier for this run. It will be used in the
+    name of the EC2 instance, and for reporting. It is not used by the actual
+    Prometheus code, only the automation script. It must only contain letters, numbers,
+    and hyphens.
+  <sftp_file_name> should be the name of the input .zip file on the SFTP server
+
+e.g. './run_prom_standalone.sh aws_standalone_config.cfg my-run-1234 50K_Test_2016_03_16.zip'
+EOF
     exit
 fi
 
@@ -50,7 +57,7 @@ SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
 SFTP_USER="$EC2_USER"
 
 # EC2 instance parameters
-INSTANCE_NAME="PROM-$RUN_ID-$FILE_NAME"
+INSTANCE_NAME="STND-$RUN_ID"
 
 LUIGI_DIR="$USER_HOME/payformance/luigi"
 
@@ -81,59 +88,6 @@ LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/$RUN_ID.sh"
 # create output directory
 mkdir $LAUNCH_COMMAND_DIR
 
-# launch the MySQL instance
-MYSQL_INSTANCE_NAME="mysql-$INSTANCE_NAME"
-MYSQL_LAUNCH_COMMAND=$(cat <<MYSQL_LAUNCH_COMMAND
-aws ec2 run-instances \
-    --image-id $MYSQL_AMI_ID \
-    --count 1 \
-    --instance-type "$MYSQL_INSTANCE_TYPE" \
-    --key-name "$KEY_NAME" \
-    --security-group-ids $SECURITY_GROUPS \
-    --subnet-id "$SUBNET_ID" \
-    --no-associate-public-ip-address \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$MYSQL_INSTANCE_NAME}]' \
-> $LAUNCH_COMMAND_DIR/mysql_instance.launch
-MYSQL_LAUNCH_COMMAND
-)
-
-echo "$MYSQL_LAUNCH_COMMAND"
-
-eval "$MYSQL_LAUNCH_COMMAND"
-
-#sleep while we wait for mysql to reach running state
-sleep 120
-
-#capture the mongo ip address so we can rewrite database.properties with its value
-MYSQL_IP=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
-
-
-# launch the mongo instance
-MONGO_INSTANCE_NAME="mongo-$INSTANCE_NAME"
-MONGO_LAUNCH_COMMAND=$(cat <<MONGO_LAUNCH_COMMAND
-aws ec2 run-instances \
-    --image-id $MONGO_AMI_ID \
-    --count 1 \
-    --instance-type "$MONGO_INSTANCE_TYPE" \
-    --key-name "$KEY_NAME" \
-    --security-group-ids $SECURITY_GROUPS \
-    --subnet-id "$SUBNET_ID" \
-    --no-associate-public-ip-address \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$MONGO_INSTANCE_NAME}]' \
-> $LAUNCH_COMMAND_DIR/mongo_instance.launch
-MONGO_LAUNCH_COMMAND
-)
-
-echo "$MONGO_LAUNCH_COMMAND"
-
-eval "$MONGO_LAUNCH_COMMAND"
-
-#sleep while we wait for mongo to reach running state
-sleep 120
-
-#capture the mongo ip address so we can rewrite database.properties with its value
-MONGO_IP=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
-
 # this script will be run as root after the EC2 instance is launched
 cat <<EOF > "$LAUNCH_SCRIPT_FILE"
 #!/bin/bash
@@ -152,25 +106,16 @@ echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
        -e 's/<SFTP_SERVER>/$SFTP_SERVER/'\
-       -e 's/<MYSQL_SERVER>/$MYSQL_IP/'\
        -e 's/<KEY_NAME>/$KEY_NAME/'\
     $LUIGI_DIR/luigi.cfg
-
-# edit database.properties to contain mysql ip
-sed -i -e 's/md1.host=.*/md1.host=$MONGO_IP/'\
-       -e 's/prd.host=.*/prd.host=$MYSQL_IP/'\
-       -e 's/ecr.host=.*/ecr.host=$MYSQL_IP/'\
-       -e 's/template.host=.*/template.host=$MYSQL_IP/'\
-    $LUIGI_DIR/database.properties
 
 sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1
 
 EOF
 
 
-
 # launch the root instance
-ROOT_INSTANCE_NAME="root-$INSTANCE_NAME"
+ROOT_INSTANCE_NAME="$INSTANCE_NAME-root"
 ROOT_LAUNCH_COMMAND=$(cat <<ROOT_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $ROOT_AMI_ID \
