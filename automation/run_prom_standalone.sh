@@ -125,7 +125,7 @@ aws ec2 run-instances \
     --count 1 \
     --instance-type "$ROOT_INSTANCE_TYPE" \
     --key-name "$KEY_NAME" \
-    --security-group-ids $SECURITY_GROUPS \
+    --security-group-ids $ROOT_SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
     --user-data "file://$ROOT_LAUNCH_SCRIPT_FILE" \
     --no-associate-public-ip-address \
