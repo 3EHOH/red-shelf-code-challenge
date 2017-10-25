@@ -59,12 +59,12 @@ SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
 SFTP_USER="$EC2_USER"
 
 # EC2 instance parameters
-INSTANCE_NAME="SHRD-$RUN_ID"
+INSTANCE_NAME="SHRD__${RUN_ID}"
 
 LUIGI_DIR="$USER_HOME/payformance/luigi"
 
 # output file and startup script file locations on worker servers
-OUTPUT_DIR="$USER_HOME/prom_output_${RUN_ID}"
+OUTPUT_DIR="$USER_HOME/prom_output__${RUN_ID}"
 OUTPUT_FILE="$OUTPUT_DIR/$RUN_ID.log"
 
 # base arguments for scp
@@ -85,13 +85,12 @@ UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:$UPLOAD_S
 # local directory that contains output from AWS instance launching commands
 LAUNCH_COMMAND_FILE="$RUN_ID-launch-commands"
 LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
-LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/$RUN_ID.sh"
 
 # create output directory
 mkdir $LAUNCH_COMMAND_DIR
 
 # launch the MySQL instance
-MYSQL_INSTANCE_NAME="$INSTANCE_NAME-mysql"
+MYSQL_INSTANCE_NAME="${INSTANCE_NAME}__mysql"
 MYSQL_LAUNCH_COMMAND=$(cat <<MYSQL_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $MYSQL_AMI_ID \
@@ -118,7 +117,7 @@ MYSQL_IP=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
 
 
 # launch the mongo instance
-MONGO_INSTANCE_NAME="$INSTANCE_NAME-mongo"
+MONGO_INSTANCE_NAME="${INSTANCE_NAME}__mongo"
 MONGO_LAUNCH_COMMAND=$(cat <<MONGO_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $MONGO_AMI_ID \
@@ -144,7 +143,9 @@ sleep $SLEEP_SECONDS
 MONGO_IP=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
 
 # this script will be run as root after the EC2 instance is launched
-cat <<EOF > "$LAUNCH_SCRIPT_FILE"
+ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
+ROOT_INSTANCE_NAME="${INSTANCE_NAME}__root"
+cat <<EOF > "$ROOT_LAUNCH_SCRIPT_FILE"
 #!/bin/bash
 
 $DOWNLOAD_COMMAND
@@ -154,7 +155,7 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
-echo "export HOSTNAME=PROM-$RUN_ID" >> $USER_HOME/.bashrc
+echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
 echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
@@ -172,14 +173,16 @@ sed -i -e 's/md1.host=.*/md1.host=$MONGO_IP/'\
        -e 's/template.host=.*/template.host=$MYSQL_IP/'\
     $LUIGI_DIR/database.properties
 
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1
+# set logging level
+echo "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
+
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
 
 EOF
 
 
 
 # launch the root instance
-ROOT_INSTANCE_NAME="$INSTANCE_NAME-root"
 ROOT_LAUNCH_COMMAND=$(cat <<ROOT_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $ROOT_AMI_ID \
@@ -188,7 +191,7 @@ aws ec2 run-instances \
     --key-name "$KEY_NAME" \
     --security-group-ids $SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
-    --user-data "file://$LAUNCH_SCRIPT_FILE" \
+    --user-data "file://$ROOT_LAUNCH_SCRIPT_FILE" \
     --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$ROOT_INSTANCE_NAME}]' \
 > $LAUNCH_COMMAND_DIR/root_instance.launch

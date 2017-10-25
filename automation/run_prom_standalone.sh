@@ -57,7 +57,7 @@ SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
 SFTP_USER="$EC2_USER"
 
 # EC2 instance parameters
-INSTANCE_NAME="STND-$RUN_ID"
+INSTANCE_NAME="STND__${RUN_ID}"
 
 LUIGI_DIR="$USER_HOME/payformance/luigi"
 
@@ -83,13 +83,14 @@ UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:$UPLOAD_S
 # local directory that contains output from AWS instance launching commands
 LAUNCH_COMMAND_FILE="$RUN_ID-launch-commands"
 LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
-LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/$RUN_ID.sh"
 
 # create output directory
 mkdir $LAUNCH_COMMAND_DIR
 
 # this script will be run as root after the EC2 instance is launched
-cat <<EOF > "$LAUNCH_SCRIPT_FILE"
+ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
+ROOT_INSTANCE_NAME="${INSTANCE_NAME}__root"
+cat <<EOF > "$ROOT_LAUNCH_SCRIPT_FILE"
 #!/bin/bash
 
 $DOWNLOAD_COMMAND
@@ -99,7 +100,7 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
-echo "export HOSTNAME=PROM-$RUN_ID" >> $USER_HOME/.bashrc
+echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
 echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
@@ -109,13 +110,15 @@ sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<KEY_NAME>/$KEY_NAME/'\
     $LUIGI_DIR/luigi.cfg
 
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/$JOB_ID-luigi.log 2>&1
+# set logging level
+echo "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
+
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
 
 EOF
 
 
 # launch the root instance
-ROOT_INSTANCE_NAME="$INSTANCE_NAME-root"
 ROOT_LAUNCH_COMMAND=$(cat <<ROOT_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $ROOT_AMI_ID \
@@ -124,7 +127,7 @@ aws ec2 run-instances \
     --key-name "$KEY_NAME" \
     --security-group-ids $SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
-    --user-data "file://$LAUNCH_SCRIPT_FILE" \
+    --user-data "file://$ROOT_LAUNCH_SCRIPT_FILE" \
     --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$ROOT_INSTANCE_NAME}]' \
 > $LAUNCH_COMMAND_DIR/root_instance.launch
