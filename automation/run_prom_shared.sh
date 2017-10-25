@@ -58,13 +58,10 @@ SFTP_FILE="/$USER_HOME/$FILE_NAME"
 SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
 SFTP_USER="$EC2_USER"
 
-# EC2 instance parameters
-INSTANCE_NAME="SHRD__${RUN_ID}"
-
 LUIGI_DIR="$USER_HOME/payformance/luigi"
 
 # output file and startup script file locations on worker servers
-OUTPUT_DIR="$USER_HOME/prom_output__${RUN_ID}"
+OUTPUT_DIR="$USER_HOME/${RUN_ID}__output"
 OUTPUT_FILE="$OUTPUT_DIR/$RUN_ID.log"
 
 # base arguments for scp
@@ -78,8 +75,8 @@ DOWNLOAD_SFTP_FILE_PATH="$SFTP_FILE"
 DOWNLOAD_COMMAND="$SFTP_COMMAND ${SFTP_USER}@${SFTP_SERVER}:$DOWNLOAD_SFTP_FILE_PATH $DOWNLOAD_FILE"
 
 # location and command for copying output files back to to the file server
-UPLOAD_FILE="$USER_HOME/$RUN_ID-$FILE_NAME-output.zip"
-UPLOAD_SFTP_FILE_PATH="${SFTP_FILE}-output.zip"
+UPLOAD_FILE="$USER_HOME/${RUN_ID}__output.zip"
+UPLOAD_SFTP_FILE_PATH="${SFTP_FILE}__output.zip"
 UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:$UPLOAD_SFTP_FILE_PATH"
 
 # local directory that contains output from AWS instance launching commands
@@ -90,7 +87,7 @@ LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
 mkdir $LAUNCH_COMMAND_DIR
 
 # launch the MySQL instance
-MYSQL_INSTANCE_NAME="${INSTANCE_NAME}__mysql"
+MYSQL_INSTANCE_NAME="${RUN_ID}__mysql"
 MYSQL_LAUNCH_COMMAND=$(cat <<MYSQL_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $MYSQL_AMI_ID \
@@ -117,7 +114,7 @@ MYSQL_IP=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
 
 
 # launch the mongo instance
-MONGO_INSTANCE_NAME="${INSTANCE_NAME}__mongo"
+MONGO_INSTANCE_NAME="${RUN_ID}__mongo"
 MONGO_LAUNCH_COMMAND=$(cat <<MONGO_LAUNCH_COMMAND
 aws ec2 run-instances \
     --image-id $MONGO_AMI_ID \
@@ -144,7 +141,7 @@ MONGO_IP=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
 
 # this script will be run as root after the EC2 instance is launched
 ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
-ROOT_INSTANCE_NAME="${INSTANCE_NAME}__root"
+ROOT_INSTANCE_NAME="${RUN_ID}__root"
 cat <<EOF > "$ROOT_LAUNCH_SCRIPT_FILE"
 #!/bin/bash
 
@@ -174,7 +171,7 @@ sed -i -e 's/md1.host=.*/md1.host=$MONGO_IP/'\
     $LUIGI_DIR/database.properties
 
 # set logging level
-echo "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
+echo -e "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
 
 sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
 
@@ -207,5 +204,6 @@ eval "$ROOT_LAUNCH_COMMAND"
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
 zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
 $SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${SFTP_FILE}-${LAUNCH_COMMAND_FILE}.zip
+rm -rf $LAUNCH_COMMAND_DIR $LAUNCH_UPLOAD_FILE
 
 
