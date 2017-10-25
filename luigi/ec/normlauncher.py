@@ -28,6 +28,7 @@ class NormLauncher(luigi.Task):
 
         norm_n_instances = NormanConfig().n_instances
         norm_n_processes = NormanConfig().n_processes_per_instance
+
         # norm_chunk_size = NormanConfig().chunksize
         # norm_stopafter = NormanConfig().stopafter
 

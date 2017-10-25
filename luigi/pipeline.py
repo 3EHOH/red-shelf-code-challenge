@@ -62,7 +62,7 @@ class PipelineTask(luigi.WrapperTask):
         norm_tasks = [
             Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_count
         ]
-        norm_tasks.insert(0, NormLauncher(jobuid=self.jobuid))
+        norm_tasks.insert(0, NormLauncher())
         norm_tasks.append(PostNormalize(jobuid=self.jobuid))
         norm_tasks.append(PostNormalizationReport(jobuid=self.jobuid))
 
