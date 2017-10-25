@@ -9,6 +9,7 @@ from ec.schemacreate import SchemaCreate
 from ec.map import Map
 from ec.postmap import PostMap
 from ec.postmapreport import PostMapReport
+from ec.normlauncher import NormLauncher
 from ec.normalization import Normalize
 from ec.postnormalization import PostNormalize
 from ec.postnormalizationreport import PostNormalizationReport
@@ -57,8 +58,11 @@ class PipelineTask(luigi.WrapperTask):
                 PostMapReport(jobuid=self.jobuid)
         ] 
         # normalization tasks
-        norm_ids = list(range(0, NormanConfig().count))
-        norm_tasks = [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
+        norm_count = list(range(0, NormanConfig().count))
+        norm_tasks = [
+            Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_count
+        ]
+        norm_tasks.insert(0, NormLauncher(jobuid=self.jobuid))
         norm_tasks.append(PostNormalize(jobuid=self.jobuid))
         norm_tasks.append(PostNormalizationReport(jobuid=self.jobuid))
 
