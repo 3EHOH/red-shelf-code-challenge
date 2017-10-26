@@ -26,7 +26,7 @@ class Normalize(ExternalProgramTask):
     norm_id = luigi.IntParameter()
 
     def requires(self):
-        return [NormLauncher()]
+        return [NormLauncher(jobuid=self.jobuid)]
 
     def program_args(self):
         return JARGS.split(' ')
