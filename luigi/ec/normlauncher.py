@@ -4,8 +4,9 @@ import luigi
 import sys
 import time
 
-from config import PathConfig, NormanConfig
+from config import PathConfig, ModelConfig, NormanConfig
 from ec.postmap import PostMap
+from run_55 import Run55
 
 STEP = 'normlauncher'
 
