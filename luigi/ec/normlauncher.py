@@ -44,6 +44,8 @@ class NormLauncher(luigi.Task):
             chunksize=NormanConfig().chunksize,
             stopafter=NormanConfig().stopafter)
 
+        print("SCRIPT: ", user_data_script)
+
         norm_instances = ec2.create_instances(
             MinCount=1,
             MaxCount=norm_n_instances,
