@@ -46,7 +46,7 @@ class NormLauncher(luigi.Task):
 
         print("SCRIPT: ", user_data_script)
 
-        norm_instances = ec2.create_instances(
+        norm_instances = ec2.run_instances(
             MinCount=1,
             MaxCount=norm_n_instances,
             ImageId='ami-1ac10762',  # replace with config or env var
