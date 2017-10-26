@@ -26,8 +26,8 @@ class NormLauncher(luigi.Task):
         # norm_image_id = os.getenv('NORM_SERVICE_IMAGE_ID')
         # norm_instance_type = os.getenv('NORM_SERVICE_INSTANCE_TYPE')
 
-        norm_n_instances = NormanConfig().n_instances
-        norm_n_processes = NormanConfig().n_processes_per_instance
+        norm_n_instances = NormanConfig().count
+        #norm_n_processes = NormanConfig().n_processes_per_instance
 
         # norm_chunk_size = NormanConfig().chunksize
         # norm_stopafter = NormanConfig().stopafter
@@ -58,13 +58,15 @@ class NormLauncher(luigi.Task):
             norm_names.append(tag_name)
 
         instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
-
+        running_instance_count = len(list(instances))
         n_tries = 0
 
-        while len(list(instances)) < norm_n_instances or n_tries < 3:
-            time.sleep(60)
-            instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
+        while running_instance_count < norm_n_instances or n_tries < 3:
+            time.sleep(5)
+            running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
+            print("INSTANCE COUNT: " + str(len(list(instances))))
             n_tries += 1
+            print("N TRIES: " + str(n_tries))
 
         if n_tries == 3:
             raise ValueError("Error: Norm instances not all running after multiple checks")
