@@ -26,8 +26,8 @@ class NormLauncher(luigi.Task):
         # norm_image_id = os.getenv('NORM_SERVICE_IMAGE_ID')
         # norm_instance_type = os.getenv('NORM_SERVICE_INSTANCE_TYPE')
 
-        norm_n_instances = NormanConfig().n_instances
-        norm_n_processes = NormanConfig().n_processes_per_instance
+        norm_n_instances = NormanConfig().count
+        #norm_n_processes = NormanConfig().n_processes_per_instance
 
         # norm_chunk_size = NormanConfig().chunksize
         # norm_stopafter = NormanConfig().stopafter
@@ -62,7 +62,7 @@ class NormLauncher(luigi.Task):
             norm_names.append(tag_name)
 
         instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
-
+        running_instance_count = len(list(instances))
         n_tries = 0
 
         while (not len(list(instances)) == norm_n_instances) or n_tries < 3:
