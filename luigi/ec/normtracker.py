@@ -34,12 +34,13 @@ class NormTracker(luigi.Task):
         sql3 = "select exists(select * from normview where stepName='normalization' and status='Complete');"
         
         while !sql3:
-            sql3 = "select exists(select * from normview where stepName='normalization' and status='Complete');"
+            #sql3 = "select exists(select * from normview where stepName='normalization' and status='Complete');"
             sql4= "select count(1) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
             sql5="select count(1) from jobStepQueue where jobUid=1 and stepName ='normalization';"
             #the count will return empty set initially hence have to make sure that this step isn't skipped immediately
             if (sql4 > 0 and sql5 > 0 and sql4==sql5):
                 return True
+                break
             else:
                 #till norm completes show the current count
                 print "Current Normalization count->" + sql4
