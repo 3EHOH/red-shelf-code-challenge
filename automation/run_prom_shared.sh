@@ -52,7 +52,7 @@ FILE_NAME="$3"
 EC2_USER="ec2-user"
 USER_HOME="/home/$EC2_USER"
 ECR_HOME="/ecrfiles"
-SFTP_FILE="/$USER_HOME/$FILE_NAME"
+SFTP_FILE="/$USER_HOME/input/$FILE_NAME"
 
 # SFTP configuration
 SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
@@ -161,6 +161,9 @@ sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<SFTP_SERVER>/$SFTP_SERVER/'\
        -e 's/<MYSQL_SERVER>/$MYSQL_IP/'\
        -e 's/<KEY_NAME>/$KEY_NAME/'\
+       -e 's/prd_host=.*/prd_host=$MYSQL_IP/'\
+       -e 's/template_host=.*/template_host=$MYSQL_IP/'\
+       -e 's/epb_host=.*/epb_host=$MYSQL_IP/'\
     $LUIGI_DIR/luigi.cfg
 
 # edit database.properties to contain mysql ip
@@ -169,11 +172,18 @@ sed -i -e 's/md1.host=.*/md1.host=$MONGO_IP/'\
        -e 's/ecr.host=.*/ecr.host=$MYSQL_IP/'\
        -e 's/template.host=.*/template.host=$MYSQL_IP/'\
     $LUIGI_DIR/database.properties
+cp $LUIGI_DIR/database.properties $ECR_HOME/scripts/database.properties
+
 
 # set logging level
 echo -e "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
 
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
+# ensure that local database servers are not running
+service mysqld stop
+service mongod stop
+
+# run the luigi workflow - filter out DEBUG (logging levels aren't respected for stdout somehow)
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh | grep -v DEBUG > $LUIGI_DIR/logs/${RUN_ID}__luigi.log 2>&1
 
 EOF
 
@@ -204,6 +214,6 @@ eval "$ROOT_LAUNCH_COMMAND"
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
 zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
 $SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${SFTP_FILE}-${LAUNCH_COMMAND_FILE}.zip
-rm -rf $LAUNCH_COMMAND_DIR $LAUNCH_UPLOAD_FILE
+#rm -rf $LAUNCH_COMMAND_DIR $LAUNCH_UPLOAD_FILE
 
 
