@@ -65,14 +65,19 @@ class NormLauncher(luigi.Task):
         running_instance_count = len(list(instances))
         n_tries = 0
 
-        while (not len(list(instances)) == norm_n_instances) or n_tries < 3:
-            time.sleep(60)
-            instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
-            n_tries += 1
-            if n_tries == 3:
-                raise ValueError("Error: Norm instances not all running after multiple checks")
+        time.sleep(100)
 
-        self.output().open('w').close()
+        instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
+
+        # while (not len(list(instances)) == norm_n_instances) or n_tries < 3:
+        #     if n_tries == 3:
+        #         raise ValueError("Error: Norm instances not all running after multiple checks")
+        #     time.sleep(60)
+
+        if len(list(instances)) >= norm_n_instances:
+            self.output().open('w').close()
+        else:
+            ValueError("Error: Norm instances not all running after multiple checks")
 
 if __name__ == "__main__":
     luigi.run([
