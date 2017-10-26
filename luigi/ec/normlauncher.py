@@ -36,7 +36,7 @@ class NormLauncher(luigi.Task):
         # norm_server_key_name = os.getenv('NORM_SERVICE_KEY_NAME')
         # norm_server_security_groups = os.getenv('NORM_SERVICE_SECURITY_GROUPS')
 
-        ec2 = boto3.resource('ec2')
+        ec2 = boto3.client('ec2')
 
         user_data_script = 'java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
             cpath=Run55.cpath(),
