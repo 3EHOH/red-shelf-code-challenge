@@ -41,7 +41,7 @@ class NormLauncher(luigi.Task):
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
-            stopafter=NormanConfig().stopafter)'
+            stopafter=NormanConfig().stopafter)
 
         norm_instances = ec2.create_instances(
             MinCount=1,
