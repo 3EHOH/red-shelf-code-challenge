@@ -51,12 +51,7 @@ class NormLauncher(luigi.Task):
             InstanceType='r3.8xlarge',  # replace with config or env var
             KeyName='PFS',  # replace with config or env var
             SecurityGroups=['PFS'], # replace with config or env var
-            UserData=user_data_script,
-            NetworkInterfaces=[
-                {
-                    'AssociatePublicIpAddress': False
-                }
-            ]
+            UserData=user_data_script
         )
 
         norm_names = []
