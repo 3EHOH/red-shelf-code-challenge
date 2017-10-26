@@ -52,7 +52,11 @@ class NormLauncher(luigi.Task):
             KeyName='PFS',  # replace with config or env var
             SecurityGroups=['PFS'], # replace with config or env var
             UserData=user_data_script,
-            NoAssociatePublicIpAddress="False"
+            NetworkInterfaces=[
+                {
+                    'AssociatePublicIpAddress': False
+                }
+            ]
         )
 
         norm_names = []
