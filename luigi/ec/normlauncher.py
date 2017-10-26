@@ -37,13 +37,17 @@ class NormLauncher(luigi.Task):
 
         ec2 = boto3.resource('ec2')
 
+        user_data_script = """#!/bin/bash
+        echo "Hello World" >> /tmp/data.txt"""
+
         norm_instances = ec2.create_instances(
             MinCount=1,
             MaxCount=norm_n_instances,
             ImageId='ami-1ac10762',  # replace with config or env var
             InstanceType='r3.8xlarge',  # replace with config or env var
             KeyName='PFS',  # replace with config or env var
-            SecurityGroups=['PFS']  # replace with config or env var
+            SecurityGroups=['PFS'], # replace with config or env var
+            UserData=user_data_script
         )
 
         norm_names = []
