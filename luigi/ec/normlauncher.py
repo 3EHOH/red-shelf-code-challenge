@@ -10,7 +10,7 @@ from ec.postmap import PostMap
 STEP = 'normlauncher'
 
 class NormLauncher(luigi.Task):
-    """ generate the post map report """
+    """ launch external normalization services """
     datafile = luigi.Parameter(default=STEP)
     jobuid = luigi.IntParameter()
 
@@ -37,8 +37,11 @@ class NormLauncher(luigi.Task):
 
         ec2 = boto3.resource('ec2')
 
-        user_data_script = """#!/bin/bash
-        echo "Hello World" >> /tmp/data.txt"""
+        user_data_script = 'java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
+            cpath=Run55.cpath(),
+            configfolder=ModelConfig().configfolder,
+            chunksize=NormanConfig().chunksize,
+            stopafter=NormanConfig().stopafter)'
 
         norm_instances = ec2.create_instances(
             MinCount=1,
@@ -47,7 +50,8 @@ class NormLauncher(luigi.Task):
             InstanceType='r3.8xlarge',  # replace with config or env var
             KeyName='PFS',  # replace with config or env var
             SecurityGroups=['PFS'], # replace with config or env var
-            UserData=user_data_script
+            UserData=user_data_script,
+            NoAssociatePublicIpAddress="False"
         )
 
         norm_names = []
@@ -61,15 +65,14 @@ class NormLauncher(luigi.Task):
 
         n_tries = 0
 
-        while len(list(instances)) < norm_n_instances or n_tries < 3:
+        while (not len(list(instances)) == norm_n_instances) or n_tries < 3:
             time.sleep(60)
             instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
             n_tries += 1
+            if n_tries == 3:
+                raise ValueError("Error: Norm instances not all running after multiple checks")
 
-        if n_tries == 3:
-            raise ValueError("Error: Norm instances not all running after multiple checks")
-        else:
-            self.output().open('w').close()
+        self.output().open('w').close()
 
 if __name__ == "__main__":
     luigi.run([
