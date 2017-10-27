@@ -182,8 +182,7 @@ echo -e "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
 service mysqld stop
 service mongod stop
 
-# run the luigi workflow - filter out DEBUG (logging levels aren't respected for stdout somehow)
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh | grep -v DEBUG > $LUIGI_DIR/logs/${RUN_ID}__luigi.log 2>&1
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $LUIGI_DIR/logs/${RUN_ID}__luigi.log 2>&1
 
 EOF
 
