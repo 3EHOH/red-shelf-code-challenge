@@ -43,13 +43,18 @@ class NormLauncher(luigi.Task):
 
         ec2 = boto3.resource('ec2')
 
-        user_data_script = """#!/bin/bash echo "Hello World" >> /tmp/data.txt"""
+        user_data_script = """#!/bin/bash
+        sed -i "s/md1.host=.*/md1.host={mongoip}/" {luigidir}/database.properties
+        """.format(
+            mongoip=os.getenv('MONGO_IP'),
+            luigidir=os.getenv('LUIGI_DIR'))
 
-        # user_data_script = 'java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}'.format(
-        #     cpath=Run55.cpath(),
-        #     configfolder=ModelConfig().configfolder,
-        #     chunksize=NormanConfig().chunksize,
-        #     stopafter=NormanConfig().stopafter)
+        user_data_script = """#!/bin/bash
+            java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}""".format(
+            cpath=Run55.cpath(),
+            configfolder=ModelConfig().configfolder,
+            chunksize=NormanConfig().chunksize,
+            stopafter=NormanConfig().stopafter)
 
         print("SCRIPT: ", user_data_script)
 
