@@ -59,14 +59,20 @@ class NormLauncher(luigi.Task):
             .format(
                 mongohost=os.getenv('MONGO_IP'),
                 luigidir=os.getenv('LUIGI_DIR'),
-                prdhost=MySQLDBConfig().prd_host,
-                ecrhost=MySQLDBConfig().prd_host,
-                templatehost=MySQLDBConfig().template_host,
-                epbhost=MySQLDBConfig().epb_host,
+                prdhost=os.getenv('ROOT_IP'),
+                ecrhost=os.getenv('ROOT_IP'),
+                templatehost=os.getenv('ROOT_IP'),
+                epbhost=os.getenv('ROOT_IP'),
                 cpath=Run55.cpath(),
                 configfolder=ModelConfig().configfolder,
                 chunksize=NormanConfig().chunksize,
                 stopafter=NormanConfig().stopafter)
+
+        #use these once the mysql shared is in place
+        # prdhost=MySQLDBConfig().prd_host,
+        # ecrhost=MySQLDBConfig().prd_host,
+        # templatehost=MySQLDBConfig().template_host,
+        # epbhost=MySQLDBConfig().epb_host,
 
 
         # user_data_script = """#!/bin/bash
