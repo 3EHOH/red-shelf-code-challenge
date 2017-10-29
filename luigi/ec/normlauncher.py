@@ -4,7 +4,7 @@ import luigi
 import sys
 import time
 
-from config import PathConfig, ModelConfig, NormanConfig
+from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig
 from ec.postmap import PostMap
 from run_55 import Run55
 
@@ -45,18 +45,29 @@ class NormLauncher(luigi.Task):
 
         #todo pretty sure we don't need the luigi.cfg changes - remove later
 
-        user_data_script = """#!/bin/bash
-        sed -i "s/md1.host=.*/md1.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/prd.host=.*/prd.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/ecr.host=.*/ecr.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/template.host=.*/template.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/prd_host=.*/prd_host=dummyvalue/" /home/ec2-user/payformance/luigi/luigi.cfg
-        sed -i "s/template_host=.*/template_host=dummyvalue/" /home/ec2-user/payformance/luigi/luigi.cfg
-        sed -i "s/epb_host=.*/epb_host=dummyvalue/" /home/ec2-user/payformance/luigi/luigi.cfg
-        """.format()
+        #todo get an env var or something for ecr because it's not in luigi.cfg
 
-        # mongoip=os.getenv('MONGO_IP'),
-        # luigidir=os.getenv('LUIGI_DIR')
+        user_data_script = """#!/bin/bash
+        sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/prd.host=.*/prd.host={prdhost}/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/prd_host=.*/prd_host={prd_host}/" /home/ec2-user/payformance/luigi/luigi.cfg
+        sed -i "s/template_host=.*/template_host={templatehost}/" /home/ec2-user/payformance/luigi/luigi.cfg
+        sed -i "s/epb_host=.*/epb_host={epb_host}/" /home/ec2-user/payformance/luigi/luigi.cfg
+        java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"""\
+            .format(
+                mongohost=os.getenv('MONGO_IP'),
+                luigidir=os.getenv('LUIGI_DIR'),
+                prdhost=MySQLDBConfig().prd_host,
+                ecrhost=MySQLDBConfig().prd_host,
+                templatehost=MySQLDBConfig().template_host,
+                epbhost=os.MySQLDBConfig().epb_host,
+                cpath=Run55.cpath(),
+                configfolder=ModelConfig().configfolder,
+                chunksize=NormanConfig().chunksize,
+                stopafter=NormanConfig().stopafter)
+
 
         # user_data_script = """#!/bin/bash
         #     java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}""".format(
