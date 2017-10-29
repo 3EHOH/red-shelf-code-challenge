@@ -43,8 +43,16 @@ class NormLauncher(luigi.Task):
 
         ec2 = boto3.resource('ec2')
 
+        #todo pretty sure we don't need the luigi.cfg changes - remove later
+
         user_data_script = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/prd.host=.*/prd.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/ecr.host=.*/ecr.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/template.host=.*/template.host=dummyvalue/" /home/ec2-user/payformance/luigi/database.properties
+        sed -i "s/prd_host=.*/prd_host=dummyvalue/" /home/ec2-user/payformance/luigi/luigi.cfg
+        sed -i "s/template_host=.*/template_host=dummyvalue/" /home/ec2-user/payformance/luigi/luigi.cfg
+        sed -i "s/epb_host=.*/epb_host=dummyvalue/" /home/ec2-user/payformance/luigi/luigi.cfg
         """.format()
 
         # mongoip=os.getenv('MONGO_IP'),
