@@ -148,6 +148,14 @@ echo "$ROOT_LAUNCH_COMMAND"
 
 eval "$ROOT_LAUNCH_COMMAND"
 
+sleep 60
+
+#get root instance ip so we can pass it to normlauncher later
+#will get rid of this once shared branch is merged and we can use mysql ip
+
+ROOT_IP=$(python find_mongo_ip.py $INSTANCE_NAME)
+echo "export ROOT_IP=$ROOT_IP" >> $USER_HOME/.bashrc
+
 
 # copy launch information to the SFTP server
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
