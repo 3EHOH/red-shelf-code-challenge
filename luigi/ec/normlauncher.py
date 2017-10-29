@@ -62,7 +62,7 @@ class NormLauncher(luigi.Task):
                 prdhost=MySQLDBConfig().prd_host,
                 ecrhost=MySQLDBConfig().prd_host,
                 templatehost=MySQLDBConfig().template_host,
-                epbhost=os.MySQLDBConfig().epb_host,
+                epbhost=MySQLDBConfig().epb_host,
                 cpath=Run55.cpath(),
                 configfolder=ModelConfig().configfolder,
                 chunksize=NormanConfig().chunksize,
