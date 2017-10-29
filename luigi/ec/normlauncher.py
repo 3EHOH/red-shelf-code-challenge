@@ -49,12 +49,12 @@ class NormLauncher(luigi.Task):
             mongoip=os.getenv('MONGO_IP'),
             luigidir=os.getenv('LUIGI_DIR'))
 
-        user_data_script = """#!/bin/bash
-            java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}""".format(
-            cpath=Run55.cpath(),
-            configfolder=ModelConfig().configfolder,
-            chunksize=NormanConfig().chunksize,
-            stopafter=NormanConfig().stopafter)
+        # user_data_script = """#!/bin/bash
+        #     java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}""".format(
+        #     cpath=Run55.cpath(),
+        #     configfolder=ModelConfig().configfolder,
+        #     chunksize=NormanConfig().chunksize,
+        #     stopafter=NormanConfig().stopafter)
 
         print("SCRIPT: ", user_data_script)
 
