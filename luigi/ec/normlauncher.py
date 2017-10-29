@@ -32,7 +32,8 @@ class NormLauncher(luigi.Task):
         # norm_image_id = os.getenv('NORM_SERVICE_IMAGE_ID')
         # norm_instance_type = os.getenv('NORM_SERVICE_INSTANCE_TYPE')
 
-        norm_n_instances = NormanConfig().count
+        # use #NormanConfig().count for the var below
+        norm_n_instances = 1
         #norm_n_processes = NormanConfig().n_processes_per_instance
 
         # norm_chunk_size = NormanConfig().chunksize
