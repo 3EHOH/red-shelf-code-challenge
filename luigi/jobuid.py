@@ -15,7 +15,9 @@ def get_next_jobuid():
 
     conn = MySQLConn(MySQLDBConfig().prd_schema,
                      MySQLDBConfig().prd_user,
-                     MySQLDBConfig().prd_pass).connect()
+                     MySQLDBConfig().prd_pass
+                     MySQLDBConfig().prd_host,
+                     MySQLDBConfig().prd_port).connect()
     cur = conn.cursor()
     sql = "select max(uid)+1 as max_uid from processJob;"
     cur.execute(sql)
