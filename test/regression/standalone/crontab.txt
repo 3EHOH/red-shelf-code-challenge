@@ -1,0 +1,1 @@
+30 5 * * 1-5 /bin/bash $HOME/test/payformance/test/regression/standalone/run_prom.sh $HOME/test/payformance/test/regression/standalone/aws_config.sh `date +'STANDALONE_\%Y-\%m-\%d'` 50K_Test_2016_03_16.zip
