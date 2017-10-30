@@ -20,6 +20,7 @@ class NormTracker(luigi.Task):
                                               self.datafile))
     def run(self):
         self.track_norman()
+        self.output().open('w').close()
 
     @staticmethod
     def track_norman():

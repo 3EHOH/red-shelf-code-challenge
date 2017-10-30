@@ -22,8 +22,7 @@ class PostNormalize(ExternalProgramTask):
     jobuid = luigi.IntParameter()
 
     def requires(self):
-        norm_ids = list(range(0, NormanConfig().count))
-        return [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
+        return [NormTracker(jobuid=self.jobuid)]
 
     def program_args(self):
         return '{} jobuid={}'.format(JARGS, self.jobuid).split(' ')
