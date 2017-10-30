@@ -44,30 +44,33 @@ class NormLauncher(luigi.Task):
 
         ec2 = boto3.resource('ec2')
 
-        #todo pretty sure we don't need the luigi.cfg changes - remove later
-
         #todo get an env var or something for ecr because it's not in luigi.cfg
 
-        user_data_script = """#!/bin/bash
+        user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
         sed -i "s/prd.host=.*/prd.host={prdhost}/" /home/ec2-user/payformance/luigi/database.properties
         sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/prd_host=.*/prd_host={prdhost}/" /home/ec2-user/payformance/luigi/luigi.cfg
-        sed -i "s/template_host=.*/template_host={templatehost}/" /home/ec2-user/payformance/luigi/luigi.cfg
-        sed -i "s/epb_host=.*/epb_host={epbhost}/" /home/ec2-user/payformance/luigi/luigi.cfg
-        java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"""\
-            .format(
-                mongohost=os.getenv('MONGO_IP'),
-                luigidir=os.getenv('LUIGI_DIR'),
-                prdhost=os.getenv('ROOT_IP'),
-                ecrhost=os.getenv('ROOT_IP'),
-                templatehost=os.getenv('ROOT_IP'),
-                epbhost=os.getenv('ROOT_IP'),
-                cpath=Run55.cpath(),
-                configfolder=ModelConfig().configfolder,
-                chunksize=NormanConfig().chunksize,
-                stopafter=NormanConfig().stopafter)
+        sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties"""
+
+        user_data_norm_command = ""
+
+        for _ in range(NormanConfig().processesperinstance):
+            user_data_norm_command = '\n' + "java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
+
+        user_data_script = user_data_host_info + user_data_norm_command
+
+        user_data_script_formatted = user_data_script.format(
+            mongohost=os.getenv('MONGO_IP'),
+            luigidir=os.getenv('LUIGI_DIR'),
+            prdhost=os.getenv('ROOT_IP'),
+            ecrhost=os.getenv('ROOT_IP'),
+            templatehost=os.getenv('ROOT_IP'),
+            epbhost=os.getenv('ROOT_IP'),
+            cpath=Run55.cpath(),
+            configfolder=ModelConfig().configfolder,
+            chunksize=NormanConfig().chunksize,
+            stopafter=NormanConfig().stopafter)
+
 
         #use these once the mysql shared is in place
         # prdhost=MySQLDBConfig().prd_host,
@@ -87,12 +90,12 @@ class NormLauncher(luigi.Task):
 
         norm_instances = ec2.create_instances(
             MinCount=1,
-            MaxCount=1,
+            MaxCount=NormanConfig().instancecount,
             ImageId='ami-1ac10762',  # replace with config or env var
             InstanceType='r3.8xlarge',  # replace with config or env var
             KeyName='PFS',  # replace with config or env var
             SecurityGroups=['PFS'],  # replace with config or env var
-            UserData=user_data_script
+            UserData=user_data_script_formatted
         )
 
         norm_names = []
@@ -108,17 +111,21 @@ class NormLauncher(luigi.Task):
 
         time.sleep(100)
 
-        instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
+        # instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
+
+        for _ in range(3):
+            time.sleep(10)
+            print("Number of running norms: ", len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}]))))
 
         # while (not len(list(instances)) == norm_n_instances) or n_tries < 3:
         #     if n_tries == 3:
         #         raise ValueError("Error: Norm instances not all running after multiple checks")
         #     time.sleep(60)
 
-        if len(list(instances)) >= norm_n_instances:
+        # if len(list(instances)) >= norm_n_instances:
             self.output().open('w').close()
-        else:
-            ValueError("Error: Norm instances not all running after multiple checks")
+        # else:
+        #     ValueError("Error: Norm instances not all running after multiple checks")
 
 if __name__ == "__main__":
     luigi.run([
