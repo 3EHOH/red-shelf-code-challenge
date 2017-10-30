@@ -29,6 +29,8 @@ class NormanConfig(luigi.Config):
     count=luigi.IntParameter()
     chunksize=luigi.IntParameter()
     stopafter=luigi.IntParameter()
+    processesperinstance=luigi.IntParameter()
+    instancecount=luigi.IntParameter()
 
 class ConnieConfig(luigi.Config):
     count=luigi.IntParameter()
