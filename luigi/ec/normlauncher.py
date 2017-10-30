@@ -55,7 +55,7 @@ class NormLauncher(luigi.Task):
         user_data_norm_command = ""
 
         for _ in range(NormanConfig().processesperinstance):
-            user_data_norm_command = '\n' + "java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
+            user_data_norm_command = user_data_norm_command + '\n' + "java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
 
         user_data_script = user_data_host_info + user_data_norm_command
 
@@ -86,11 +86,11 @@ class NormLauncher(luigi.Task):
         #     chunksize=NormanConfig().chunksize,
         #     stopafter=NormanConfig().stopafter)
 
-        print("SCRIPT: ", user_data_script)
+        print("SCRIPT: ", user_data_script_formatted)
 
         norm_instances = ec2.create_instances(
             MinCount=1,
-            MaxCount=NormanConfig().instancecount,
+            MaxCount=2,
             ImageId='ami-1ac10762',  # replace with config or env var
             InstanceType='r3.8xlarge',  # replace with config or env var
             KeyName='PFS',  # replace with config or env var
@@ -98,16 +98,19 @@ class NormLauncher(luigi.Task):
             UserData=user_data_script_formatted
         )
 
+        print("NORM INSTANCES", norm_instances)
+
         norm_names = []
 
         for instance in norm_instances:
             tag_name = 'Norm_' + instance.id
             ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
             norm_names.append(tag_name)
+            print("LOOPING: ", instance.id)
 
-        instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
-        running_instance_count = len(list(instances))
-        n_tries = 0
+        # instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
+        # running_instance_count = len(list(instances))
+        # n_tries = 0
 
         time.sleep(100)
 
