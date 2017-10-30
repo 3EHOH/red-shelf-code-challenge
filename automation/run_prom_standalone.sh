@@ -32,60 +32,18 @@ fi
 # this is not safe, but will suffice for the moment
 source $1
 
-# TO-DO: check that AWS variables are defined
+check_def() {
+    if [ -z "$1" ]; then
+        echo "Reqi=uired variable $1 is not defined, check you config file"
+        exit -1
+    fi
+}
 
 
-##########################################
-#
-# VARIABLE DEFINITIONS
-#
-# It should not be necessary to edit these variables
-#
-##########################################
+check_def MONGO_HOST
 
-# seconds to sleep after starting a new server
-SLEEP_SECONDS=300
 
-# TO-DO - Check that RUN_ID only contains letters, numbers, and hyphens
-
-RUN_ID="$2"
-FILE_NAME="$3"
-EC2_USER="ec2-user"
-USER_HOME="/home/$EC2_USER"
-ECR_HOME="/ecrfiles"
-SFTP_FILE="/$USER_HOME/input/$FILE_NAME"
-
-# SFTP configuration
-SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
-SFTP_USER="$EC2_USER"
-
-LUIGI_DIR="$USER_HOME/payformance/luigi"
-
-# output file and startup script file locations on worker servers
-OUTPUT_DIR="$USER_HOME/${RUN_ID}__output"
-OUTPUT_FILE="$OUTPUT_DIR/$RUN_ID.log"
-
-# base arguments for scp
-# sudo is necessary because the script will run as root on startup
-SFTP_COMMAND="sudo -u $EC2_USER scp -i $SFTP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
-# location and command for copying the input .zip file to the runner instance
-DOWNLOAD_DIR="$ECR_HOME/input"
-DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME"
-DOWNLOAD_SFTP_FILE_PATH="$SFTP_FILE"
-DOWNLOAD_COMMAND="$SFTP_COMMAND ${SFTP_USER}@${SFTP_SERVER}:$DOWNLOAD_SFTP_FILE_PATH $DOWNLOAD_FILE"
-
-# location and command for copying output files back to to the file server
-UPLOAD_FILE="$USER_HOME/${RUN_ID}__output.zip"
-UPLOAD_SFTP_FILE_PATH="${SFTP_FILE}__output.zip"
-UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:$UPLOAD_SFTP_FILE_PATH"
-
-# local directory that contains output from AWS instance launching commands
-LAUNCH_COMMAND_FILE="$RUN_ID-launch-commands"
-LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
-
-# create output directory
-mkdir $LAUNCH_COMMAND_DIR
+source lib_run_prom.sh
 
 # this script will be run as root after the EC2 instance is launched
 ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
@@ -106,12 +64,21 @@ echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 # edit luigi.cfg to contain the new job ID and file location
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
-       -e 's/<SFTP_SERVER>/$SFTP_SERVER/'\
+       -e 's/<SFTP_HOST>/$SFTP_HOST/'\
        -e 's/<KEY_NAME>/$KEY_NAME/'\
+       -e 's/<MONGO_HOST>/$MONGO_IP/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
+       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
+       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
     $LUIGI_DIR/luigi.cfg
 
-# set logging level
-echo -e "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
+# edit database.properties
+sed -i -e 's/<MONGO_HOST>/$MONGO_IP/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
+       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
+       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
+    $LUIGI_DIR/database.properties
+cp $LUIGI_DIR/database.properties $ECR_HOME/scripts/database.properties
 
 sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
 
@@ -140,8 +107,11 @@ eval "$ROOT_LAUNCH_COMMAND"
 
 
 # copy launch information to the SFTP server
-LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
-zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
-$SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${SFTP_FILE}-${LAUNCH_COMMAND_FILE}.zip
+#LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
+#zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
+#$SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${SFTP_FILE}-${LAUNCH_COMMAND_FILE}.zip
 #rm -rf $LAUNCH_COMMAND_DIR $LAUNCH_UPLOAD_FILE
+
+
+upload_launch_commands
 
