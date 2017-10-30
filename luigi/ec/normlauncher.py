@@ -67,7 +67,7 @@ class NormLauncher(luigi.Task):
         sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties
         java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"""\
             .format(
-            mongohost=os.getenv('MONGO_IP', socket.gethostbyname(socket.gethostname())),
+            mongohost=os.getenv('MONGO_IP'),
             luigidir=os.getenv('LUIGI_DIR'),
             prdhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
             ecrhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
