@@ -24,8 +24,6 @@ class PreflightCheck(luigi.Task):
 
 #        process_names = [proc.name() for proc in psutil.process_iter()]
 
-#       is_mongo_process_running = self.check_mongo_process_status(process_names)
-#        is_mysql_process_running = self.check_mysql_process_status(process_names)
 #        is_mysql_connection_established = self.check_mysql_connectivity()
 #        is_mongo_connection_established = self.check_mongo_connectivity()
 
