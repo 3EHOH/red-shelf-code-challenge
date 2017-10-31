@@ -37,9 +37,6 @@ class NormLauncher(luigi.Task):
         norm_n_instances = 1
         #norm_n_processes = NormanConfig().n_processes_per_instance
 
-        # norm_chunk_size = NormanConfig().chunksize
-        # norm_stopafter = NormanConfig().stopafter
-
         # norm_server_key_name = os.getenv('NORM_SERVICE_KEY_NAME')
         # norm_server_security_groups = os.getenv('NORM_SERVICE_SECURITY_GROUPS')
 
@@ -106,15 +103,25 @@ class NormLauncher(luigi.Task):
         #     chunksize=NormanConfig().chunksize,
         #     stopafter=NormanConfig().stopafter)
 
+        security_groups = os.getenv('SECURITY_GROUPS')
+
+        security_groups_formatted = []
+
+        for security_group in security_groups.split():
+            security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
+
+        norm_ami_id = os.getenv('NORMAN_AMI_ID')
+        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
+
         print("SCRIPT: ", user_data)
 
         norm_instances = ec2.create_instances(
             MinCount=1,
             MaxCount=2,
-            ImageId='ami-1ac10762',  # replace with config or env var
-            InstanceType='r3.8xlarge',  # replace with config or env var
+            ImageId=norm_ami_id,
+            InstanceType=norm_instance_type,
             KeyName='PFS',  # replace with config or env var
-            SecurityGroups=['launch-wizard-1', 'PFS', 'PFS_external_access'],  # replace with config or env var
+            SecurityGroups=security_groups_formatted,
             UserData=user_data
         )
 
