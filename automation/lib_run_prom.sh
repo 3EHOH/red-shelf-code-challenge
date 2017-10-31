@@ -1,7 +1,7 @@
 
 check_def() {
     if [ -z "$1" ]; then
-        echo "Reqiuired variable $1 is not defined, check you config file"
+        echo "Required variable $1 is not defined, check your config file"
         exit -1
     fi
 }
