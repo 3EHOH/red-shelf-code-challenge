@@ -32,6 +32,7 @@ fi
 # this is not safe, but will suffice for the moment
 source $1
 
+# load library
 source lib_run_prom.sh
 
 check_root_defined_vars
