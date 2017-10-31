@@ -25,24 +25,11 @@ class NormLauncher(luigi.Task):
 
     def run(self):
 
-        # MAYBE run the hack here?
-        # if self.norm_id == 0:
-        #     sql = "update processJobStep set status = 'Active', stepStart = now() where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
-        #     update_status(sql)
+        print("ENVIRONMENT", os.environ)
 
-        # norm_image_id = os.getenv('NORM_SERVICE_IMAGE_ID')
-        # norm_instance_type = os.getenv('NORM_SERVICE_INSTANCE_TYPE')
-
-        # use #NormanConfig().count for the var below
-        norm_n_instances = 1
-        #norm_n_processes = NormanConfig().n_processes_per_instance
-
-        # norm_server_key_name = os.getenv('NORM_SERVICE_KEY_NAME')
-        # norm_server_security_groups = os.getenv('NORM_SERVICE_SECURITY_GROUPS')
+        print("DO THE ENV VARS SHOW UP", os.environ['MONGO_IP'], os.environ['NORMAN_AMI_ID'])
 
         ec2 = boto3.resource('ec2')
-
-        #todo get an env var or something for ecr because it's not in luigi.cfg
 
         user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
@@ -100,21 +87,6 @@ class NormLauncher(luigi.Task):
         #     chunksize=NormanConfig().chunksize,
         #     stopafter=NormanConfig().stopafter)
 
-
-        #use these once the mysql shared is in place
-        # prdhost=MySQLDBConfig().prd_host,
-        # ecrhost=MySQLDBConfig().prd_host,
-        # templatehost=MySQLDBConfig().template_host,
-        # epbhost=MySQLDBConfig().epb_host,
-
-
-        # user_data_script = """#!/bin/bash
-        #     java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}""".format(
-        #     cpath=Run55.cpath(),
-        #     configfolder=ModelConfig().configfolder,
-        #     chunksize=NormanConfig().chunksize,
-        #     stopafter=NormanConfig().stopafter)
-
         # security_groups = os.getenv('SECURITY_GROUPS')
         #
         # security_groups_formatted = []
@@ -124,6 +96,7 @@ class NormLauncher(luigi.Task):
 
         norm_ami_id = os.getenv('NORMAN_AMI_ID')
         norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
+        key_name = os.getenv('KEY_NAME')
 
         print("SCRIPT: ", user_data_script_populated)
 
@@ -132,7 +105,7 @@ class NormLauncher(luigi.Task):
             MaxCount=2,
             ImageId=norm_ami_id,
             InstanceType=norm_instance_type,
-            KeyName='PFS',  # replace with config or env var
+            KeyName=key_name,
             SecurityGroups=['launch-wizard-1', 'PFS', 'PFS_external_access'],  # replace with env var
             UserData=user_data_script_populated
         )
