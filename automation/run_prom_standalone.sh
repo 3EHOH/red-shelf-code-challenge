@@ -32,18 +32,11 @@ fi
 # this is not safe, but will suffice for the moment
 source $1
 
-check_def() {
-    if [ -z "$1" ]; then
-        echo "Reqi=uired variable $1 is not defined, check you config file"
-        exit -1
-    fi
-}
-
-
-check_def MONGO_HOST
-
-
 source lib_run_prom.sh
+
+check_root_defined_vars
+
+init_launch_commands
 
 # this script will be run as root after the EC2 instance is launched
 ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
@@ -105,12 +98,6 @@ echo "$ROOT_LAUNCH_COMMAND"
 
 eval "$ROOT_LAUNCH_COMMAND"
 
-
-# copy launch information to the SFTP server
-#LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
-#zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
-#$SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${SFTP_FILE}-${LAUNCH_COMMAND_FILE}.zip
-#rm -rf $LAUNCH_COMMAND_DIR $LAUNCH_UPLOAD_FILE
 
 
 upload_launch_commands
