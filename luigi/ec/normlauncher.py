@@ -103,12 +103,12 @@ class NormLauncher(luigi.Task):
         #     chunksize=NormanConfig().chunksize,
         #     stopafter=NormanConfig().stopafter)
 
-        security_groups = os.getenv('SECURITY_GROUPS')
-
-        security_groups_formatted = []
-
-        for security_group in security_groups.split():
-            security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
+        # security_groups = os.getenv('SECURITY_GROUPS')
+        #
+        # security_groups_formatted = []
+        #
+        # for security_group in security_groups.split():
+        #     security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
 
         norm_ami_id = os.getenv('NORMAN_AMI_ID')
         norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
@@ -121,7 +121,7 @@ class NormLauncher(luigi.Task):
             ImageId=norm_ami_id,
             InstanceType=norm_instance_type,
             KeyName='PFS',  # replace with config or env var
-            SecurityGroups=security_groups_formatted,
+            SecurityGroups=['launch-wizard-1', 'PFS', 'PFS_external_access'],  # replace with env var
             UserData=user_data
         )
 
