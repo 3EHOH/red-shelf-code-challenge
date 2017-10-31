@@ -44,7 +44,7 @@ ECR_HOME="/ecrfiles"
 SFTP_FILE="/$USER_HOME/input/$FILE_NAME"
 
 # SFTP configuration
-SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
+SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_PAIR.pem
 SFTP_USER="$EC2_USER"
 
 LUIGI_DIR="$PAYFORMANCE_HOME/luigi"
@@ -70,6 +70,10 @@ LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
 
 init_launch_commands() {
     # create output directory
+    if [ -d "$LAUNCH_COMMAND_DIR" ]; then
+        echo "Run with ID '${RUN_ID}' is already in use"
+        exit -1
+    fi
     mkdir $LAUNCH_COMMAND_DIR
 }
 
@@ -81,7 +85,7 @@ upload_launch_commands() {
     
     local LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
     zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
-    $SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${LAUNCH_COMMAND_FILE}.zip
+    $SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_HOST}:${LAUNCH_COMMAND_FILE}.zip
 }
 
 
