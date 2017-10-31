@@ -59,7 +59,7 @@ echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
        -e 's/<SFTP_HOST>/$SFTP_HOST/'\
-       -e 's/<KEY_NAME>/$KEY_NAME/'\
+       -e 's/<KEY_PAIR>/$KEY_PAIR/'\
        -e 's/<MONGO_HOST>/$MONGO_IP/'\
        -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
        -e 's/<MYSQL_USER>/$MYSQL_USER/'\
@@ -85,7 +85,7 @@ aws ec2 run-instances \
     --image-id $ROOT_AMI_ID \
     --count 1 \
     --instance-type "$ROOT_INSTANCE_TYPE" \
-    --key-name "$KEY_NAME" \
+    --key-name "$KEY_PAIR" \
     --security-group-ids $ROOT_SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
     --user-data "file://$ROOT_LAUNCH_SCRIPT_FILE" \

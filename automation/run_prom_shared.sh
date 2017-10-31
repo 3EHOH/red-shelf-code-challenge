@@ -55,7 +55,7 @@ ECR_HOME="/ecrfiles"
 SFTP_FILE="/$USER_HOME/input/$FILE_NAME"
 
 # SFTP configuration
-SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
+SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_PAIR.pem
 SFTP_USER="$EC2_USER"
 
 LUIGI_DIR="$USER_HOME/payformance/luigi"
@@ -93,7 +93,7 @@ aws ec2 run-instances \
     --image-id $MYSQL_AMI_ID \
     --count 1 \
     --instance-type "$MYSQL_INSTANCE_TYPE" \
-    --key-name "$KEY_NAME" \
+    --key-name "$KEY_PAIR" \
     --security-group-ids $MYSQL_SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
     --no-associate-public-ip-address \
@@ -120,7 +120,7 @@ aws ec2 run-instances \
     --image-id $MONGO_AMI_ID \
     --count 1 \
     --instance-type "$MONGO_INSTANCE_TYPE" \
-    --key-name "$KEY_NAME" \
+    --key-name "$KEY_PAIR" \
     --security-group-ids $MONGO_SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
     --no-associate-public-ip-address \
@@ -160,7 +160,7 @@ sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
        -e 's/<SFTP_SERVER>/$SFTP_SERVER/'\
        -e 's/<MYSQL_SERVER>/$MYSQL_IP/'\
-       -e 's/<KEY_NAME>/$KEY_NAME/'\
+       -e 's/<KEY_PAIR>/$KEY_PAIR/'\
        -e 's/prd_host=.*/prd_host=$MYSQL_IP/'\
        -e 's/template_host=.*/template_host=$MYSQL_IP/'\
        -e 's/epb_host=.*/epb_host=$MYSQL_IP/'\
@@ -194,7 +194,7 @@ aws ec2 run-instances \
     --image-id $ROOT_AMI_ID \
     --count 1 \
     --instance-type "$ROOT_INSTANCE_TYPE" \
-    --key-name "$KEY_NAME" \
+    --key-name "$KEY_PAIR" \
     --security-group-ids $ROOT_SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
     --user-data "file://$ROOT_LAUNCH_SCRIPT_FILE" \
