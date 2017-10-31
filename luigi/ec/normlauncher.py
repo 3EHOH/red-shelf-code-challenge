@@ -44,26 +44,20 @@ class NormLauncher(luigi.Task):
 
         #todo get an env var or something for ecr because it's not in luigi.cfg
 
-        # user_data_host_info = """#!/bin/bash
-        # sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
-        # sed -i "s/prd.host=.*/prd.host={prdhost}/" /home/ec2-user/payformance/luigi/database.properties
-        # sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" /home/ec2-user/payformance/luigi/database.properties
-        # sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties"""
-        #
-        # user_data_norm_command = ""
-        #
-        # for _ in range(NormanConfig().processesperinstance):
-        #     user_data_norm_command = user_data_norm_command + '\n' + "java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
-        #
-        # user_data_script = user_data_host_info + user_data_norm_command
-
-        user_data = """#!/bin/bash
+        user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
         sed -i "s/prd.host=.*/prd.host={prdhost}/" /home/ec2-user/payformance/luigi/database.properties
         sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties
-        cd /home/ec2-user/payformance/luigi/; java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"""\
-            .format(
+        sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties"""
+
+        user_data_norm_command = ""
+
+        for _ in range(NormanConfig().processesperinstance):
+            user_data_norm_command = user_data_norm_command + '\n' + "java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
+
+        user_data_script = user_data_host_info + user_data_norm_command
+
+        user_data_script_populated = user_data_script.format(
             mongohost=os.getenv('MONGO_IP'),
             luigidir=os.getenv('LUIGI_DIR'),
             prdhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
@@ -74,6 +68,24 @@ class NormLauncher(luigi.Task):
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
             stopafter=NormanConfig().stopafter)
+
+        # user_data = """#!/bin/bash
+        # sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
+        # sed -i "s/prd.host=.*/prd.host={prdhost}/" /home/ec2-user/payformance/luigi/database.properties
+        # sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" /home/ec2-user/payformance/luigi/database.properties
+        # sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties
+        # cd /home/ec2-user/payformance/luigi/; java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"""\
+        #     .format(
+        #     mongohost=os.getenv('MONGO_IP'),
+        #     luigidir=os.getenv('LUIGI_DIR'),
+        #     prdhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+        #     ecrhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+        #     templatehost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+        #     epbhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+        #     cpath=Run55.cpath(),
+        #     configfolder=ModelConfig().configfolder,
+        #     chunksize=NormanConfig().chunksize,
+        #     stopafter=NormanConfig().stopafter)
 
 
         # user_data_script_formatted = user_data_script.format(
@@ -113,7 +125,7 @@ class NormLauncher(luigi.Task):
         norm_ami_id = os.getenv('NORMAN_AMI_ID')
         norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
 
-        print("SCRIPT: ", user_data)
+        print("SCRIPT: ", user_data_script_populated)
 
         norm_instances = ec2.create_instances(
             MinCount=1,
@@ -122,7 +134,7 @@ class NormLauncher(luigi.Task):
             InstanceType=norm_instance_type,
             KeyName='PFS',  # replace with config or env var
             SecurityGroups=['launch-wizard-1', 'PFS', 'PFS_external_access'],  # replace with env var
-            UserData=user_data
+            UserData=user_data_script_populated
         )
 
         print("NORM INSTANCES", norm_instances)
