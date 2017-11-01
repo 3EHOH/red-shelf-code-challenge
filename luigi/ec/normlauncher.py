@@ -113,7 +113,7 @@ class NormLauncher(luigi.Task):
 
         print("NORM INSTANCES", norm_instances)
 
-        sleep(60)
+        time.sleep(60)
 
         norm_names = []
 
