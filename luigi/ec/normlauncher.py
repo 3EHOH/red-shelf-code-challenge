@@ -45,7 +45,7 @@ class NormLauncher(luigi.Task):
         user_data_script = user_data_host_info + user_data_norm_command
 
         user_data_script_populated = user_data_script.format(
-            mongohost=MongoDBConfig().mongo_ip, #os.getenv('MONGO_IP'),
+            mongohost=os.getenv('MONGO_IP'),#MongoDBConfig().mongo_ip,
             luigidir=os.getenv('LUIGI_DIR'), #this var isn't being used - it's hardcoded as /home/ec2-user/payformance/luigi/
             prdhost=MySQLDBConfig().prd_host,   #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())), #until we have a separate mysql instance
             ecrhost=MySQLDBConfig().prd_host,  #there is no ecr host var in MySQLDBConfig
@@ -87,12 +87,12 @@ class NormLauncher(luigi.Task):
         #     chunksize=NormanConfig().chunksize,
         #     stopafter=NormanConfig().stopafter)
 
-        # security_groups = os.getenv('SECURITY_GROUPS')
-        #
-        # security_groups_formatted = []
-        #
-        # for security_group in security_groups.split():
-        #     security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
+        security_groups = os.getenv('SECURITY_GROUPS')
+
+        security_groups_formatted = []
+
+        for security_group in security_groups.split():
+            security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
 
         norm_ami_id = os.getenv('NORMAN_AMI_ID') #NormanConfig().ami_id
         norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE') #NormanConfig().instance_type
@@ -106,7 +106,7 @@ class NormLauncher(luigi.Task):
             ImageId=norm_ami_id,
             InstanceType=norm_instance_type,
             KeyName=key_name,
-            SecurityGroups=['launch-wizard-1', 'PFS', 'PFS_external_access'],  # replace with env var
+            SecurityGroups=security_groups_formatted, #['launch-wizard-1', 'PFS', 'PFS_external_access'],  # replace with env var
             UserData=user_data_script_populated
         )
 
@@ -121,32 +121,14 @@ class NormLauncher(luigi.Task):
             ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
             norm_names.append(tag_name)
 
-        n_tries = 0
-
-        time.sleep(60) #buffer to let instances get up and running before ending this step
+        time.sleep(60) #buffer to let instances reach running state before ending this step
 
         running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
 
-        while(running_instance_count < NormanConfig().instance_count) || n_tries < 3:
-            time.sleep(60)
-            if n_tries == 3:
-                raise ValueError("Error: Norm instances not all running after multiple checks")
-            running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
-            n_tries += 1
-
-        # for _ in range(3):
-        #     time.sleep(10)
-        #     print("Number of running norms: ", len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}]))))
-
-        # while (not len(list(instances)) == norm_n_instances) or n_tries < 3:
-        #     if n_tries == 3:
-        #         raise ValueError("Error: Norm instances not all running after multiple checks")
-        #     time.sleep(60)
-
-        # if len(list(instances)) >= norm_n_instances:
-        self.output().open('w').close()
-        # else:
-        #     ValueError("Error: Norm instances not all running after multiple checks")
+        if not len(list(running_instance_count)) == NormanConfig().instance_count:
+            ValueError("Error: Norm instances not all running after multiple checks")
+        else:
+            self.output().open('w').close()
 
 if __name__ == "__main__":
     luigi.run([

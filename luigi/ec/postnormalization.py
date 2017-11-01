@@ -23,7 +23,7 @@ class PostNormalize(ExternalProgramTask):
 
     def requires(self):
         norm_ids = list(range(0, NormanConfig().count))
-        return [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
+        return [NormLauncher(jobuid=self.jobuid] #replace this with NormTracker
 
     def program_args(self):
         return '{} jobuid={}'.format(JARGS, self.jobuid).split(' ')
