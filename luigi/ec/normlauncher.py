@@ -1,9 +1,8 @@
 import boto3
-import os
 import luigi
-import sys
-import time
+import os
 import socket
+import time
 
 from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig
 from ec.postmap import PostMap
@@ -41,47 +40,16 @@ class NormLauncher(luigi.Task):
         user_data_script = user_data_host_info + user_data_norm_command
 
         user_data_script_populated = user_data_script.format(
-            mongohost=os.getenv('MONGO_IP'),#MongoDBConfig().mongo_ip,
+            mongohost=os.getenv('MONGO_IP'),
             luigidir=os.getenv('LUIGI_DIR'),
-            prdhost=MySQLDBConfig().prd_host,   #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())), #until we have a separate mysql instance
+            prdhost=MySQLDBConfig().prd_host,
             ecrhost=MySQLDBConfig().prd_host,  #there is no ecr host var in MySQLDBConfig
-            templatehost=MySQLDBConfig().template_host,     #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
-            epbhost=MySQLDBConfig().epb_host, #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+            templatehost=MySQLDBConfig().template_host,
+            epbhost=MySQLDBConfig().epb_host,
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
             stopafter=NormanConfig().stopafter)
-
-        # user_data = """#!/bin/bash
-        # sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
-        # sed -i "s/prd.host=.*/prd.host={prdhost}/" /home/ec2-user/payformance/luigi/database.properties
-        # sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" /home/ec2-user/payformance/luigi/database.properties
-        # sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties
-        # cd /home/ec2-user/payformance/luigi/; java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"""\
-        #     .format(
-        #     mongohost=os.getenv('MONGO_IP'),
-        #     luigidir=os.getenv('LUIGI_DIR'),
-        #     prdhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
-        #     ecrhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
-        #     templatehost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
-        #     epbhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
-        #     cpath=Run55.cpath(),
-        #     configfolder=ModelConfig().configfolder,
-        #     chunksize=NormanConfig().chunksize,
-        #     stopafter=NormanConfig().stopafter)
-
-
-        # user_data_script_formatted = user_data_script.format(
-        #     mongohost=os.getenv('MONGO_IP'),
-        #     luigidir=os.getenv('LUIGI_DIR'),
-        #     prdhost=os.getenv('ROOT_IP'),
-        #     ecrhost=os.getenv('ROOT_IP'),
-        #     templatehost=os.getenv('ROOT_IP'),
-        #     epbhost=os.getenv('ROOT_IP'),
-        #     cpath=Run55.cpath(),
-        #     configfolder=ModelConfig().configfolder,
-        #     chunksize=NormanConfig().chunksize,
-        #     stopafter=NormanConfig().stopafter)
 
         security_groups = os.getenv('SECURITY_GROUPS')
 
@@ -90,9 +58,9 @@ class NormLauncher(luigi.Task):
         for security_group in security_groups.split():
             security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
 
-        norm_ami_id = os.getenv('NORMAN_AMI_ID') #NormanConfig().ami_id
-        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE') #NormanConfig().instance_type
-        key_name = os.getenv('KEY_NAME') #ModelConfig().key_name
+        norm_ami_id = os.getenv('NORMAN_AMI_ID')
+        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
+        key_name = os.getenv('KEY_NAME')
 
         print("SCRIPT: ", user_data_script_populated)
 
@@ -102,7 +70,7 @@ class NormLauncher(luigi.Task):
             ImageId=norm_ami_id,
             InstanceType=norm_instance_type,
             KeyName=key_name,
-            SecurityGroups=security_groups_formatted, #['launch-wizard-1', 'PFS', 'PFS_external_access'],  # replace with env var
+            SecurityGroups=security_groups_formatted,
             UserData=user_data_script_populated
         )
 

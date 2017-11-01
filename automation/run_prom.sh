@@ -114,11 +114,11 @@ unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME=PROM-$JOB_ID" >> $USER_HOME/.bashrc
 echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
-
-echo "export SECURITY_GROUPS=$SECURITY_GROUPS" >> $USER_HOME/.bashrc
-
-echo "export NORMAN_AMI_ID=NORMAN_AMI_ID" >> $USER_HOME/.bashrc
-echo "export NORMAN_INSTANCE_TYPE=NORMAN_INSTANCE_TYPE" >> $USER_HOME/.bashrc
+echo "export KEY_NAME=$KEY_NAME" >> $USER_HOME/.bashrc
+echo "export NORMAN_AMI_ID=$NORMAN_AMI_ID" >> $USER_HOME/.bashrc
+echo "export NORMAN_INSTANCE_TYPE=$NORMAN_INSTANCE_TYPE" >> $USER_HOME/.bashrc
+echo "export SECURITY_GROUPS='${SECURITY_GROUPS[*]}'" >> $USER_HOME/.bashrc
+echo "export LUIGI_DIR=$LUIGI_DIR" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i 's/<JOB_ID>/$JOB_ID/; s/<FILE_NAME>/$FILE_NAME/' $LUIGI_DIR/luigi.cfg
@@ -150,14 +150,6 @@ ROOT_LAUNCH_COMMAND
 echo "$ROOT_LAUNCH_COMMAND"
 
 eval "$ROOT_LAUNCH_COMMAND"
-
-sleep 60
-
-#get root instance ip so we can pass it to normlauncher later
-#will get rid of this once shared branch is merged and we can use mysql ip
-
-ROOT_IP=$(python find_server_ip.py $INSTANCE_NAME)
-echo 'echo "export ROOT_IP='$ROOT_IP'" >> '$USER_HOME'/.bashrc' >> $LAUNCH_SCRIPT_FILE
 
 # copy launch information to the SFTP server
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
