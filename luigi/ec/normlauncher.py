@@ -47,10 +47,10 @@ class NormLauncher(luigi.Task):
         user_data_script_populated = user_data_script.format(
             mongohost=MongoDBConfig().mongo_ip, #os.getenv('MONGO_IP'),
             luigidir=os.getenv('LUIGI_DIR'), #this var isn't being used - it's hardcoded as /home/ec2-user/payformance/luigi/
-            prdhost=MySQLDBConfig().prd_host   #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())), #until we have a separate mysql instance
-            ecrhost=MySQLDBConfig().prd_host  #there is no ecr host var in MySQLDBConfig
-            templatehost=MySQLDBConfig().template_host     #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
-            epbhost=MySQLDBConfig().epb_host #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+            prdhost=MySQLDBConfig().prd_host,   #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())), #until we have a separate mysql instance
+            ecrhost=MySQLDBConfig().prd_host,  #there is no ecr host var in MySQLDBConfig
+            templatehost=MySQLDBConfig().template_host,     #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+            epbhost=MySQLDBConfig().epb_host, #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
