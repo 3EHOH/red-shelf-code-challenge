@@ -24,13 +24,16 @@ class ModelConfig(luigi.Config):
     provider_file1=luigi.Parameter()
     member_file1=luigi.Parameter()
     enroll_file1=luigi.Parameter()
+    key_name=luigi.Parameter()
 
 class NormanConfig(luigi.Config):
     count=luigi.IntParameter()
     chunksize=luigi.IntParameter()
     stopafter=luigi.IntParameter()
-    processesperinstance=luigi.IntParameter()
-    instancecount=luigi.IntParameter()
+    processes_per_instance=luigi.IntParameter()
+    instance_count=luigi.IntParameter()
+    instance_type=luigi.Parameter()
+    ami_id=luigi.Parameter()
 
 class ConnieConfig(luigi.Config):
     count=luigi.IntParameter()
@@ -59,6 +62,7 @@ class MySQLDBConfig(luigi.Config):
 
 class MongoDBConfig(luigi.Config):
     md1_schema=luigi.Parameter()
+    mongo_ip=luigi.Parameter()
 
 #some default params
 TARGET_PATH=os.path.join(os.path.dirname(__file__),'target/{feature}{rundate}'.format(

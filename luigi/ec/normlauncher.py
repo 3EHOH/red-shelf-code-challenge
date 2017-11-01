@@ -5,7 +5,7 @@ import sys
 import time
 import socket
 
-from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig
+from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig
 from ec.postmap import PostMap
 from run_55 import Run55
 
@@ -25,9 +25,9 @@ class NormLauncher(luigi.Task):
 
     def run(self):
 
-        print("ENVIRONMENT", os.environ)
+        #print("ENVIRONMENT", os.environ)
 
-        print("DO THE ENV VARS SHOW UP", os.environ['MONGO_IP'], os.environ['NORMAN_AMI_ID'])
+        #print("DO THE ENV VARS SHOW UP", os.environ['MONGO_IP'], os.environ['NORMAN_AMI_ID'])
 
         ec2 = boto3.resource('ec2')
 
@@ -39,15 +39,15 @@ class NormLauncher(luigi.Task):
 
         user_data_norm_command = ""
 
-        for _ in range(NormanConfig().processesperinstance):
+        for _ in range(NormanConfig().processes_per_instance):
             user_data_norm_command = user_data_norm_command + '\n' + "java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
 
         user_data_script = user_data_host_info + user_data_norm_command
 
         user_data_script_populated = user_data_script.format(
-            mongohost=os.getenv('MONGO_IP'),
-            luigidir=os.getenv('LUIGI_DIR'),
-            prdhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
+            mongohost=MongoDBConfig().mongo_ip, #os.getenv('MONGO_IP'),
+            luigidir=os.getenv('LUIGI_DIR'), #this var isn't being used - it's hardcoded as /home/ec2-user/payformance/luigi/
+            prdhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())), #until we have a separate mysql instance
             ecrhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
             templatehost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
             epbhost=os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
@@ -94,15 +94,16 @@ class NormLauncher(luigi.Task):
         # for security_group in security_groups.split():
         #     security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
 
-        norm_ami_id = os.getenv('NORMAN_AMI_ID')
-        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
-        key_name = os.getenv('KEY_NAME')
+        norm_ami_id = NormanConfig().ami_id #os.getenv('NORMAN_AMI_ID')
+        norm_instance_type = NormanConfig().instance_type  #os.getenv('NORMAN_INSTANCE_TYPE')
+        key_name = ModelConfig().key_name
+        # os.getenv('KEY_NAME')
 
         print("SCRIPT: ", user_data_script_populated)
 
         norm_instances = ec2.create_instances(
             MinCount=1,
-            MaxCount=2,
+            MaxCount=NormanConfig().instance_count,
             ImageId=norm_ami_id,
             InstanceType=norm_instance_type,
             KeyName=key_name,
