@@ -42,10 +42,10 @@ class NormLauncher(luigi.Task):
         user_data_script_populated = user_data_script.format(
             mongohost=os.getenv('MONGO_IP'),
             luigidir=os.getenv('LUIGI_DIR'),
-            prdhost=MySQLDBConfig().prd_host,
-            ecrhost=MySQLDBConfig().prd_host,  #there is no ecr host var in MySQLDBConfig
-            templatehost=MySQLDBConfig().template_host,
-            epbhost=MySQLDBConfig().epb_host,
+            prdhost=socket.gethostbyname(socket.gethostname()), #until we have a separate mysql instance
+            ecrhost=socket.gethostbyname(socket.gethostname()),
+            templatehost=socket.gethostbyname(socket.gethostname()),
+            epbhost=socket.gethostbyname(socket.gethostname()),
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
