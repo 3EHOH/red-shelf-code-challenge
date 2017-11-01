@@ -40,7 +40,7 @@ class NormLauncher(luigi.Task):
         user_data_norm_command = ""
 
         for _ in range(NormanConfig().processes_per_instance):
-            user_data_norm_command = user_data_norm_command + '\n' + "java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
+            user_data_norm_command = user_data_norm_command + '\n' + "cd /home/ec2-user/payformance/luigi/; java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
 
         user_data_script = user_data_host_info + user_data_norm_command
 
