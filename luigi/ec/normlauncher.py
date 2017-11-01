@@ -25,28 +25,24 @@ class NormLauncher(luigi.Task):
 
     def run(self):
 
-        print("ENVIRONMENT", os.environ)
-
-        print("DO THE ENV VARS SHOW UP", os.environ['MONGO_IP'], os.environ['NORMAN_AMI_ID'])
-
         ec2 = boto3.resource('ec2')
 
         user_data_host_info = """#!/bin/bash
-        sed -i "s/md1.host=.*/md1.host={mongohost}/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/prd.host=.*/prd.host={prdhost}/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" /home/ec2-user/payformance/luigi/database.properties
-        sed -i "s/template.host=.*/template.host={templatehost}/" /home/ec2-user/payformance/luigi/database.properties"""
+        sed -i "s/md1.host=.*/md1.host={mongohost}/" {luigidir}/database.properties
+        sed -i "s/prd.host=.*/prd.host={prdhost}/" {luigidir}/database.properties
+        sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" {luigidir}/database.properties
+        sed -i "s/template.host=.*/template.host={templatehost}/" {luigidir}/database.properties"""
 
         user_data_norm_command = ""
 
         for _ in range(NormanConfig().processes_per_instance):
-            user_data_norm_command = user_data_norm_command + '\n' + "cd /home/ec2-user/payformance/luigi/; java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
+            user_data_norm_command = user_data_norm_command + '\n' + "cd {luigidir}/; java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
 
         user_data_script = user_data_host_info + user_data_norm_command
 
         user_data_script_populated = user_data_script.format(
             mongohost=os.getenv('MONGO_IP'),#MongoDBConfig().mongo_ip,
-            luigidir=os.getenv('LUIGI_DIR'), #this var isn't being used - it's hardcoded as /home/ec2-user/payformance/luigi/
+            luigidir=os.getenv('LUIGI_DIR'),
             prdhost=MySQLDBConfig().prd_host,   #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())), #until we have a separate mysql instance
             ecrhost=MySQLDBConfig().prd_host,  #there is no ecr host var in MySQLDBConfig
             templatehost=MySQLDBConfig().template_host,     #os.getenv('ROOT_IP', socket.gethostbyname(socket.gethostname())),
@@ -125,7 +121,7 @@ class NormLauncher(luigi.Task):
 
         running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
 
-        if not len(list(running_instance_count)) == NormanConfig().instance_count:
+        if not running_instance_count == NormanConfig().instance_count:
             ValueError("Error: Norm instances not all running after multiple checks")
         else:
             self.output().open('w').close()
