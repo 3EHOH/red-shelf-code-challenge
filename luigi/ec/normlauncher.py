@@ -94,10 +94,9 @@ class NormLauncher(luigi.Task):
         # for security_group in security_groups.split():
         #     security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
 
-        norm_ami_id = NormanConfig().ami_id #os.getenv('NORMAN_AMI_ID')
-        norm_instance_type = NormanConfig().instance_type  #os.getenv('NORMAN_INSTANCE_TYPE')
-        key_name = ModelConfig().key_name
-        # os.getenv('KEY_NAME')
+        norm_ami_id = os.getenv('NORMAN_AMI_ID') #NormanConfig().ami_id
+        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE') #NormanConfig().instance_type
+        key_name = os.getenv('KEY_NAME') #ModelConfig().key_name
 
         print("SCRIPT: ", user_data_script_populated)
 
@@ -113,28 +112,31 @@ class NormLauncher(luigi.Task):
 
         print("NORM INSTANCES", norm_instances)
 
-        time.sleep(60)
+        time.sleep(30) #time buffer before iterating over and adding name tags
 
         norm_names = []
-
 
         for instance in norm_instances:
             tag_name = 'Norm_' + instance.id
             ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
             norm_names.append(tag_name)
-            print("LOOPING: ", instance.id)
 
-        # instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
-        # running_instance_count = len(list(instances))
-        # n_tries = 0
+        n_tries = 0
 
-        time.sleep(100)
+        time.sleep(60) #buffer to let instances get up and running before ending this step
 
-        # instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])
+        running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
 
-        for _ in range(3):
-            time.sleep(10)
-            print("Number of running norms: ", len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}]))))
+        while(running_instance_count < NormanConfig().instance_count) || n_tries < 3:
+            time.sleep(60)
+            if n_tries == 3:
+                raise ValueError("Error: Norm instances not all running after multiple checks")
+            running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
+            n_tries += 1
+
+        # for _ in range(3):
+        #     time.sleep(10)
+        #     print("Number of running norms: ", len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}]))))
 
         # while (not len(list(instances)) == norm_n_instances) or n_tries < 3:
         #     if n_tries == 3:
@@ -142,7 +144,7 @@ class NormLauncher(luigi.Task):
         #     time.sleep(60)
 
         # if len(list(instances)) >= norm_n_instances:
-            self.output().open('w').close()
+        self.output().open('w').close()
         # else:
         #     ValueError("Error: Norm instances not all running after multiple checks")
 
