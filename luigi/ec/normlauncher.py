@@ -25,6 +25,10 @@ class NormLauncher(luigi.Task):
     def run(self):
 
         ec2 = boto3.resource('ec2')
+        norm_ami_id = os.getenv('NORMAN_AMI_ID')
+        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
+        key_name = os.getenv('KEY_NAME')
+        security_groups = os.getenv('SECURITY_GROUPS')
 
         user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" {luigidir}/database.properties
@@ -51,18 +55,10 @@ class NormLauncher(luigi.Task):
             chunksize=NormanConfig().chunksize,
             stopafter=NormanConfig().stopafter)
 
-        security_groups = os.getenv('SECURITY_GROUPS')
-
         security_groups_formatted = []
 
         for security_group in security_groups.split():
             security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
-
-        norm_ami_id = os.getenv('NORMAN_AMI_ID')
-        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
-        key_name = os.getenv('KEY_NAME')
-
-        print("SCRIPT: ", user_data_script_populated)
 
         norm_instances = ec2.create_instances(
             MinCount=1,
@@ -73,8 +69,6 @@ class NormLauncher(luigi.Task):
             SecurityGroups=security_groups_formatted,
             UserData=user_data_script_populated
         )
-
-        print("NORM INSTANCES", norm_instances)
 
         time.sleep(30) #time buffer before iterating over and adding name tags
 
@@ -90,7 +84,7 @@ class NormLauncher(luigi.Task):
         running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
 
         if not running_instance_count == NormanConfig().instance_count:
-            ValueError("Error: Norm instances not all running after multiple checks")
+            ValueError("Error: Norm instances not all running. Shutting down.")
         else:
             self.output().open('w').close()
 
