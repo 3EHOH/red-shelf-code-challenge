@@ -39,58 +39,36 @@ check_shared_defined_vars
 
 init_launch_commands
 
+
+
 # launch the MySQL instance
 MYSQL_INSTANCE_NAME="${RUN_ID}__mysql"
-MYSQL_LAUNCH_COMMAND=$(cat <<MYSQL_LAUNCH_COMMAND
-aws ec2 run-instances \
-    --image-id $MYSQL_AMI_ID \
-    --count 1 \
-    --instance-type "$MYSQL_INSTANCE_TYPE" \
-    --key-name "$KEY_PAIR" \
-    --security-group-ids $MYSQL_SECURITY_GROUPS \
-    --subnet-id "$SUBNET_ID" \
-    --no-associate-public-ip-address \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$MYSQL_INSTANCE_NAME}]' \
-> $LAUNCH_COMMAND_DIR/mysql_instance.launch
-MYSQL_LAUNCH_COMMAND
-)
+launch_instance \
+    "$MYSQL_AMI_ID" \
+    "$MYSQL_INSTANCE_TYPE" \
+    "$KEY_PAIR" \
+    "$MYSQL_SECURITY_GROUPS" \
+    "$SUBNET_ID" \
+    "$MYSQL_INSTANCE_NAME"
 
-echo "$MYSQL_LAUNCH_COMMAND"
-
-eval "$MYSQL_LAUNCH_COMMAND"
-
-#sleep while we wait for mysql to reach running state
-sleep $SLEEP_SECONDS
-
-#capture the mysql ip address so we can rewrite database.properties with its value
-MYSQL_IP=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
-
-
-# launch the mongo instance
+# launch the MySQL instance
 MONGO_INSTANCE_NAME="${RUN_ID}__mongo"
-MONGO_LAUNCH_COMMAND=$(cat <<MONGO_LAUNCH_COMMAND
-aws ec2 run-instances \
-    --image-id $MONGO_AMI_ID \
-    --count 1 \
-    --instance-type "$MONGO_INSTANCE_TYPE" \
-    --key-name "$KEY_PAIR" \
-    --security-group-ids $MONGO_SECURITY_GROUPS \
-    --subnet-id "$SUBNET_ID" \
-    --no-associate-public-ip-address \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$MONGO_INSTANCE_NAME}]' \
-> $LAUNCH_COMMAND_DIR/mongo_instance.launch
-MONGO_LAUNCH_COMMAND
-)
+launch_instance \
+    "$MONGO_AMI_ID" \
+    "$MONGO_INSTANCE_TYPE" \
+    "$KEY_PAIR" \
+    "$MONGO_SECURITY_GROUPS" \
+    "$SUBNET_ID" \
+    "$MONGO_INSTANCE_NAME" 
 
-echo "$MONGO_LAUNCH_COMMAND"
-
-eval "$MONGO_LAUNCH_COMMAND"
-
-#sleep while we wait for mongo to reach running state
+  
+# sleep while we wait for database servers to reach running state
 sleep $SLEEP_SECONDS
 
-#capture the mongo ip address so we can rewrite database.properties with its value
-MONGO_IP=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
+
+# capture the server IP addresses so we can rewrite database.properties
+MYSQL_HOST=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
+MONGO_HOST=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
 
 # this script will be run as root after the EC2 instance is launched
 ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
@@ -106,22 +84,22 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
-echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
+echo "export MONGO_IP=$MONGO_HOST" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
        -e 's/<SFTP_HOST>/$SFTP_HOST/'\
        -e 's/<KEY_PAIR>/$KEY_PAIR/'\
-       -e 's/<MONGO_HOST>/$MONGO_IP/'\
-       -e 's/<MYSQL_HOST>/$MYSQL_IP/'\
+       -e 's/<MONGO_HOST>/$MONGO_HOST/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
        -e 's/<MYSQL_USER>/$MYSQL_USER/'\
        -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
     $LUIGI_DIR/luigi.cfg
 
 # edit database.properties
-sed -i -e 's/<MONGO_HOST>/$MONGO_IP/'\
-       -e 's/<MYSQL_HOST>/$MYSQL_IP/'\
+sed -i -e 's/<MONGO_HOST>/$MONGO_HOST/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
        -e 's/<MYSQL_USER>/$MYSQL_USER/'\
        -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
     $LUIGI_DIR/database.properties
@@ -133,7 +111,7 @@ EOF
 
 
 launch_instance \
-    $ROOT_AMI_ID \
+    "$ROOT_AMI_ID" \
     "$ROOT_INSTANCE_TYPE" \
     "$KEY_PAIR" \
     "$ROOT_SECURITY_GROUPS" \

@@ -1,8 +1,8 @@
 #!/bin/sh
 
-
+# verifies that a variable has been defined in aws_config.cfg
 check_def() {
-    if [ -z "$1" ]; then
+    if [[ ! -v $1 ]]; then
         echo "Required variable $1 is not defined, check your config file"
         exit -1
     fi
@@ -12,10 +12,8 @@ check_root_defined_vars() {
     check_def PAYFORMANCE_HOME
     check_def KEY_PAIR
     check_def SFTP_HOST
-    check_def MYSQL_HOST
     check_def MYSQL_USER
     check_def MYSQL_PASS
-    check_def MONGO_HOST
     check_def ROOT_AMI_ID
     check_def ROOT_INSTANCE_TYPE
     check_def ROOT_SECURITY_GROUPS

@@ -37,6 +37,9 @@ source lib_run_prom.sh
 
 check_root_defined_vars
 
+MYSQL_HOST=localhost
+MONGO_HOST=localhost
+
 init_launch_commands
 
 # this script will be run as root after the EC2 instance is launched
@@ -60,14 +63,14 @@ sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
        -e 's/<SFTP_HOST>/$SFTP_HOST/'\
        -e 's/<KEY_PAIR>/$KEY_PAIR/'\
-       -e 's/<MONGO_HOST>/$MONGO_IP/'\
+       -e 's/<MONGO_HOST>/$MONGO_HOST/'\
        -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
        -e 's/<MYSQL_USER>/$MYSQL_USER/'\
        -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
     $LUIGI_DIR/luigi.cfg
 
 # edit database.properties
-sed -i -e 's/<MONGO_HOST>/$MONGO_IP/'\
+sed -i -e 's/<MONGO_HOST>/$MONGO_HOST/'\
        -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
        -e 's/<MYSQL_USER>/$MYSQL_USER/'\
        -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
