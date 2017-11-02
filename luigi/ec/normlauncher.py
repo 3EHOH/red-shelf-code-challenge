@@ -1,7 +1,6 @@
 import boto3
 import luigi
 import os
-import socket
 import time
 
 from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig
@@ -9,6 +8,8 @@ from ec.postmap import PostMap
 from run_55 import Run55
 
 STEP = 'normlauncher'
+ec2 = boto3.resource('ec2')
+
 
 class NormLauncher(luigi.Task):
     """ launch external normalization services """
@@ -22,13 +23,27 @@ class NormLauncher(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
 
-    def run(self):
+    @staticmethod
+    def format_security_groups():
 
-        ec2 = boto3.resource('ec2')
-        norm_ami_id = os.getenv('NORMAN_AMI_ID')
-        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
-        key_name = os.getenv('KEY_NAME')
-        security_groups = os.getenv('SECURITY_GROUPS')
+        root_security_groups = os.getenv('ROOT_SECURITY_GROUPS')
+        mysql_security_groups = os.getenv('MYSQL_SECURITY_GROUPS')
+        mongo_security_groups = os.getenv('MONGO_SECURITY_GROUPS')
+
+        all_security_groups = root_security_groups + " " + mysql_security_groups + " " + mongo_security_groups
+
+        security_groups_formatted = []
+
+        for security_group in all_security_groups.split():
+            security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
+
+        return security_groups_formatted
+
+    @staticmethod
+    def create_user_data_script():
+        mongo_host = os.getenv('MONGO_HOST')
+        mysql_host = os.getenv('MYSQL_HOST')
+        luigi_dir = os.getenv('LUIGI_DIR')
 
         user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" {luigidir}/database.properties
@@ -43,22 +58,38 @@ class NormLauncher(luigi.Task):
 
         user_data_script = user_data_host_info + user_data_norm_command
 
-        user_data_script_populated = user_data_script.format(
-            mongohost=os.getenv('MONGO_IP'),
-            luigidir=os.getenv('LUIGI_DIR'),
-            prdhost=socket.gethostbyname(socket.gethostname()), #until we have a separate mysql instance
-            ecrhost=socket.gethostbyname(socket.gethostname()),
-            templatehost=socket.gethostbyname(socket.gethostname()),
-            epbhost=socket.gethostbyname(socket.gethostname()),
+        return user_data_script.format(
+            mongohost=mongo_host,
+            luigidir=luigi_dir,
+            prdhost=mysql_host,
+            ecrhost=mysql_host,
+            templatehost=mysql_host,
+            epbhost=mysql_host,
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
             stopafter=NormanConfig().stopafter)
 
-        security_groups_formatted = []
+    @staticmethod
+    def name_norms(norm_instances):
 
-        for security_group in security_groups.split():
-            security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
+        norm_names = []
+
+        for instance in norm_instances:
+            tag_name = 'Norm_' + instance.id
+            ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
+            norm_names.append(tag_name)
+
+        return norm_names
+
+    def run(self):
+
+        norm_ami_id = os.getenv('NORMAN_AMI_ID')
+        norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
+        key_name = os.getenv('KEY_NAME')
+
+        security_groups_formatted = self.format_security_groups()
+        user_data_script = self.create_user_data_script()
 
         norm_instances = ec2.create_instances(
             MinCount=1,
@@ -67,17 +98,12 @@ class NormLauncher(luigi.Task):
             InstanceType=norm_instance_type,
             KeyName=key_name,
             SecurityGroups=security_groups_formatted,
-            UserData=user_data_script_populated
+            UserData=user_data_script
         )
 
         time.sleep(30) #time buffer before iterating over and adding name tags
 
-        norm_names = []
-
-        for instance in norm_instances:
-            tag_name = 'Norm_' + instance.id
-            ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
-            norm_names.append(tag_name)
+        norm_names = self.name_norms(norm_instances)
 
         time.sleep(60) #buffer to let instances reach running state before ending this step
 
@@ -87,6 +113,7 @@ class NormLauncher(luigi.Task):
             ValueError("Error: Norm instances not all running. Shutting down.")
         else:
             self.output().open('w').close()
+
 
 if __name__ == "__main__":
     luigi.run([

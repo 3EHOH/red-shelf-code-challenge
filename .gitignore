@@ -1,4 +1,9 @@
+# installation-specific config files
 aws_config.sh
+aws_standalone_config.cfg
+aws_shared_config.cfg
+
+
 *.swp
 *~
 

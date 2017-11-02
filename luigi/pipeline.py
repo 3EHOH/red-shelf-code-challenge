@@ -109,6 +109,14 @@ class PipelineTask(luigi.WrapperTask):
             Terminate(jobuid=self.jobuid)
         ]
 
+        # Cleanup tasks
+        cleanup_tasks = [
+            CollectOutput(jobuid=self.jobuid),
+            UploadOutput(jobuid=self.jobuid),
+            CollectLogs(jobuid=self.jobuid),
+            UploadLogs(jobuid=self.jobuid)
+        ]
+
         # Let's go!
         tasks = setup_tasks + map_tasks + norm_tasks + conn_tasks + \
                 postec_tasks + opt_postec_tasks + rspr_tasks + ieva_pacsg_tasks + shutdown_task

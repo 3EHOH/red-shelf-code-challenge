@@ -60,6 +60,13 @@ class MySQLDBConfig(luigi.Config):
 class MongoDBConfig(luigi.Config):
     md1_schema=luigi.Parameter()
 
+class AwsConfig(luigi.Config):
+    job_id=luigi.Parameter()
+    sftp_server=luigi.Parameter()
+    key_pair_name=luigi.Parameter()
+    file_name=luigi.Parameter()
+
+
 #some default params
 TARGET_PATH=os.path.join(os.path.dirname(__file__),'target/{feature}{rundate}'.format(
     feature=ModelConfig().jobname,

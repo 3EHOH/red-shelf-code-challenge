@@ -40,6 +40,7 @@ EC2_USER="ec2-user"
 USER_HOME="/home/$EC2_USER"
 ECR_HOME="/ecrfiles"
 SCP_FILE="/$USER_HOME/$FILE_NAME"
+PFS_HOME="/home/$EC2_USER/test/payformance"
 
 # SCP configuration
 SCP_KEYFILE=$USER_HOME/.ssh/$KEY_NAME.pem
@@ -99,7 +100,7 @@ eval "$MONGO_LAUNCH_COMMAND"
 sleep 60
 
 #capture the mongo ip address so we can rewrite database.properties with its value
-MONGO_IP=$(python find_server_ip.py Mongo_$INSTANCE_NAME)
+MONGO_IP=$(python $PFS_HOME/test/regression/shared/find_mongo_ip.py Mongo_$INSTANCE_NAME)
 
 # this script will be run as root after the EC2 instance is launched
 cat <<EOF > "$LAUNCH_SCRIPT_FILE"
@@ -150,6 +151,7 @@ ROOT_LAUNCH_COMMAND
 echo "$ROOT_LAUNCH_COMMAND"
 
 eval "$ROOT_LAUNCH_COMMAND"
+
 
 # copy launch information to the SFTP server
 LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
