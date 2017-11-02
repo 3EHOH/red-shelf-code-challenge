@@ -9,7 +9,6 @@ from utils import update_status
 from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from run_55 import Run55
 
-# from ec.postmapreport import PostMapReport
 from ec.normlauncher import NormLauncher
 
 STEP = 'normalization'

@@ -84,7 +84,7 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
-echo "export MONGO_IP=$MONGO_HOST" >> $USER_HOME/.bashrc
+echo "export MONGO_HOST=$MONGO_HOST" >> $USER_HOME/.bashrc
 echo "export MYSQL_HOST=$MYSQL_HOST" >> $USER_HOME/.bashrc
 echo "export KEY_PAIR=$KEY_PAIR" >> $USER_HOME/.bashrc
 echo "export NORMAN_AMI_ID=$NORMAN_AMI_ID" >> $USER_HOME/.bashrc
