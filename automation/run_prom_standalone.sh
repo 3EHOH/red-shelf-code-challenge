@@ -78,28 +78,15 @@ sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
 
 EOF
 
-
-# launch the root instance
-ROOT_LAUNCH_COMMAND=$(cat <<ROOT_LAUNCH_COMMAND
-aws ec2 run-instances \
-    --image-id $ROOT_AMI_ID \
-    --count 1 \
-    --instance-type "$ROOT_INSTANCE_TYPE" \
-    --key-name "$KEY_PAIR" \
-    --security-group-ids $ROOT_SECURITY_GROUPS \
-    --subnet-id "$SUBNET_ID" \
-    --user-data "file://$ROOT_LAUNCH_SCRIPT_FILE" \
-    --no-associate-public-ip-address \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$ROOT_INSTANCE_NAME}]' \
-> $LAUNCH_COMMAND_DIR/root_instance.launch
-ROOT_LAUNCH_COMMAND
-)
-
-echo "$ROOT_LAUNCH_COMMAND"
-
-eval "$ROOT_LAUNCH_COMMAND"
-
-
-
+launch_instance \
+    $ROOT_AMI_ID \
+    "$ROOT_INSTANCE_TYPE" \
+    "$KEY_PAIR" \
+    "$ROOT_SECURITY_GROUPS" \
+    "$SUBNET_ID" \
+    "$ROOT_INSTANCE_NAME" \
+    "${ROOT_LAUNCH_SCRIPT_FILE}"
+    
 upload_launch_commands
+
 

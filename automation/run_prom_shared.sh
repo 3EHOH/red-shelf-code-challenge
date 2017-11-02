@@ -31,60 +31,13 @@ fi
 # this is not safe, but will suffice for the moment
 source $1
 
-# TO-DO: check that AWS variables are defined
+# load library
+source lib_run_prom.sh
 
+check_root_defined_vars
+check_shared_defined_vars
 
-##########################################
-#
-# VARIABLE DEFINITIONS
-#
-# It should not be necessary to edit these variables
-#
-##########################################
-
-# seconds to sleep after starting a new server
-SLEEP_SECONDS=300
-
-# TO-DO - Check that RUN_ID only contains letters, numbers, and hyphens
-
-RUN_ID="$2"
-FILE_NAME="$3"
-EC2_USER="ec2-user"
-USER_HOME="/home/$EC2_USER"
-ECR_HOME="/ecrfiles"
-SFTP_FILE="/$USER_HOME/input/$FILE_NAME"
-
-# SFTP configuration
-SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_PAIR.pem
-SFTP_USER="$EC2_USER"
-
-LUIGI_DIR="$USER_HOME/payformance/luigi"
-
-# output file and startup script file locations on worker servers
-OUTPUT_DIR="$USER_HOME/${RUN_ID}__output"
-OUTPUT_FILE="$OUTPUT_DIR/$RUN_ID.log"
-
-# base arguments for scp
-# sudo is necessary because the script will run as root on startup
-SFTP_COMMAND="sudo -u $EC2_USER scp -i $SFTP_KEYFILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
-# location and command for copying the input .zip file to the runner instance
-DOWNLOAD_DIR="$ECR_HOME/input"
-DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME"
-DOWNLOAD_SFTP_FILE_PATH="$SFTP_FILE"
-DOWNLOAD_COMMAND="$SFTP_COMMAND ${SFTP_USER}@${SFTP_SERVER}:$DOWNLOAD_SFTP_FILE_PATH $DOWNLOAD_FILE"
-
-# location and command for copying output files back to to the file server
-UPLOAD_FILE="$USER_HOME/${RUN_ID}__output.zip"
-UPLOAD_SFTP_FILE_PATH="${SFTP_FILE}__output.zip"
-UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:$UPLOAD_SFTP_FILE_PATH"
-
-# local directory that contains output from AWS instance launching commands
-LAUNCH_COMMAND_FILE="$RUN_ID-launch-commands"
-LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
-
-# create output directory
-mkdir $LAUNCH_COMMAND_DIR
+init_launch_commands
 
 # launch the MySQL instance
 MYSQL_INSTANCE_NAME="${RUN_ID}__mysql"
@@ -109,7 +62,7 @@ eval "$MYSQL_LAUNCH_COMMAND"
 #sleep while we wait for mysql to reach running state
 sleep $SLEEP_SECONDS
 
-#capture the mongo ip address so we can rewrite database.properties with its value
+#capture the mysql ip address so we can rewrite database.properties with its value
 MYSQL_IP=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
 
 
@@ -158,61 +111,36 @@ echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
 # edit luigi.cfg to contain the new job ID and file location
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
-       -e 's/<SFTP_SERVER>/$SFTP_SERVER/'\
-       -e 's/<MYSQL_SERVER>/$MYSQL_IP/'\
+       -e 's/<SFTP_HOST>/$SFTP_HOST/'\
        -e 's/<KEY_PAIR>/$KEY_PAIR/'\
-       -e 's/prd_host=.*/prd_host=$MYSQL_IP/'\
-       -e 's/template_host=.*/template_host=$MYSQL_IP/'\
-       -e 's/epb_host=.*/epb_host=$MYSQL_IP/'\
+       -e 's/<MONGO_HOST>/$MONGO_IP/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_IP/'\
+       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
+       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
     $LUIGI_DIR/luigi.cfg
 
-# edit database.properties to contain mysql ip
-sed -i -e 's/md1.host=.*/md1.host=$MONGO_IP/'\
-       -e 's/prd.host=.*/prd.host=$MYSQL_IP/'\
-       -e 's/ecr.host=.*/ecr.host=$MYSQL_IP/'\
-       -e 's/template.host=.*/template.host=$MYSQL_IP/'\
+# edit database.properties
+sed -i -e 's/<MONGO_HOST>/$MONGO_IP/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_IP/'\
+       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
+       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
     $LUIGI_DIR/database.properties
 cp $LUIGI_DIR/database.properties $ECR_HOME/scripts/database.properties
 
-
-# set logging level
-echo -e "\n\n[core]\nlog_level=INFO\n" >> $LUIGI_DIR/luigi.cfg
-
-# ensure that local database servers are not running
-service mysqld stop
-service mongod stop
-
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $LUIGI_DIR/logs/${RUN_ID}__luigi.log 2>&1
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
 
 EOF
 
 
+launch_instance \
+    $ROOT_AMI_ID \
+    "$ROOT_INSTANCE_TYPE" \
+    "$KEY_PAIR" \
+    "$ROOT_SECURITY_GROUPS" \
+    "$SUBNET_ID" \
+    "$ROOT_INSTANCE_NAME" \
+    "${ROOT_LAUNCH_SCRIPT_FILE}"
 
-# launch the root instance
-ROOT_LAUNCH_COMMAND=$(cat <<ROOT_LAUNCH_COMMAND
-aws ec2 run-instances \
-    --image-id $ROOT_AMI_ID \
-    --count 1 \
-    --instance-type "$ROOT_INSTANCE_TYPE" \
-    --key-name "$KEY_PAIR" \
-    --security-group-ids $ROOT_SECURITY_GROUPS \
-    --subnet-id "$SUBNET_ID" \
-    --user-data "file://$ROOT_LAUNCH_SCRIPT_FILE" \
-    --no-associate-public-ip-address \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$ROOT_INSTANCE_NAME}]' \
-> $LAUNCH_COMMAND_DIR/root_instance.launch
-ROOT_LAUNCH_COMMAND
-)
-
-echo "$ROOT_LAUNCH_COMMAND"
-
-eval "$ROOT_LAUNCH_COMMAND"
-
-
-# copy launch information to the SFTP server
-LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
-zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
-$SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:${SFTP_FILE}-${LAUNCH_COMMAND_FILE}.zip
-#rm -rf $LAUNCH_COMMAND_DIR $LAUNCH_UPLOAD_FILE
+upload_launch_commands
 
 

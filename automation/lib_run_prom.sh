@@ -1,3 +1,5 @@
+#!/bin/sh
+
 
 check_def() {
     if [ -z "$1" ]; then
@@ -30,6 +32,38 @@ check_shared_defined_vars() {
 }
 
 
+launch_instance() {
+    # $1 AMI ID
+    # $2 INSTANCE_TYPE
+    # $3 KEY_NAME
+    # $4 SECURITY_GROUPS
+    # $5 SUBNET_ID
+    # $6 NAME
+    # (optional) $7 user-data file
+    
+    local USER_DATA=''
+    if [ -n "$7" ]; then
+        USER_DATA="--user-data file://$7"
+    fi
+    
+    # launch the root instance
+    local LAUNCH_COMMAND=$(cat <<LAUNCH_COMMAND_ARGS
+aws ec2 run-instances \
+    --image-id "$1" \
+    --count 1 \
+    --instance-type "$2" \
+    --key-name "$3" \
+    --security-group-ids $4 \
+    --subnet-id "$5" \
+    --no-associate-public-ip-address \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$6}]' \
+    $USER_DATA \
+> $LAUNCH_COMMAND_DIR/${6}__instance.launch
+LAUNCH_COMMAND_ARGS
+)
+    echo "$LAUNCH_COMMAND"
+    eval "$LAUNCH_COMMAND"
+}
 
 # seconds to sleep after starting a new server
 SLEEP_SECONDS=300
@@ -46,7 +80,6 @@ SFTP_FILE="/$USER_HOME/input/$FILE_NAME"
 # SFTP configuration
 SFTP_KEYFILE=$USER_HOME/.ssh/$KEY_PAIR.pem
 SFTP_USER="$EC2_USER"
-
 LUIGI_DIR="$PAYFORMANCE_HOME/luigi"
 
 # output file and startup script file locations on worker servers
@@ -71,7 +104,7 @@ LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
 init_launch_commands() {
     # create output directory
     if [ -d "$LAUNCH_COMMAND_DIR" ]; then
-        echo "Run with ID '${RUN_ID}' is already in use"
+        echo "Run with ID '$LAUNCH_COMMAND_DIR' is already in use"
         exit -1
     fi
     mkdir $LAUNCH_COMMAND_DIR
