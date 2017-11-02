@@ -37,7 +37,7 @@ class NormLauncher(luigi.Task):
         for security_group in all_security_groups.split():
             security_groups_formatted.append(ec2.SecurityGroup(security_group).group_name)
 
-        return security_groups_formatted
+        return list(set(security_groups_formatted))
 
     @staticmethod
     def create_user_data_script():
@@ -75,8 +75,10 @@ class NormLauncher(luigi.Task):
 
         norm_names = []
 
+        host_name = os.getenv('HOSTNAME')
+
         for instance in norm_instances:
-            tag_name = 'Norm_' + instance.id
+            tag_name = host_name + 'Norm_' + instance.id
             ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
             norm_names.append(tag_name)
 
@@ -86,7 +88,7 @@ class NormLauncher(luigi.Task):
 
         norm_ami_id = os.getenv('NORMAN_AMI_ID')
         norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
-        key_name = os.getenv('KEY_NAME')
+        key_name = os.getenv('KEY_PAIR')
 
         security_groups_formatted = self.format_security_groups()
         user_data_script = self.create_user_data_script()

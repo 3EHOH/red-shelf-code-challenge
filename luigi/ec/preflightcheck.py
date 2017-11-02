@@ -63,7 +63,7 @@ class PreflightCheck(luigi.Task):
 
     @staticmethod
     def check_mongo_connectivity():
-        mongo_ip = os.getenv('MONGO_IP')
+        mongo_ip = os.getenv('MONGO_HOST')
 
         try:
             client = pymongo.MongoClient("mongodb://" + mongo_ip + ":27017", serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
