@@ -110,12 +110,12 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         # Cleanup tasks
-        cleanup_tasks = [
-            CollectOutput(jobuid=self.jobuid),
-            UploadOutput(jobuid=self.jobuid),
-            CollectLogs(jobuid=self.jobuid),
-            UploadLogs(jobuid=self.jobuid)
-        ]
+        # cleanup_tasks = [
+        #     CollectOutput(jobuid=self.jobuid),
+        #     UploadOutput(jobuid=self.jobuid),
+        #     CollectLogs(jobuid=self.jobuid),
+        #     UploadLogs(jobuid=self.jobuid)
+        # ]
 
         # Let's go!
         tasks = setup_tasks + map_tasks + norm_tasks + conn_tasks + \
