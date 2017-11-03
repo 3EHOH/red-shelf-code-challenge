@@ -28,6 +28,7 @@ class PostNormalizationReport(ExternalProgramTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
+
     def run(self):
         super(PostNormalizationReport, self).run()
         self.output().open('w').close()

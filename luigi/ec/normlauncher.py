@@ -4,7 +4,7 @@ import os
 import time
 
 from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig
-from ec.postmap import PostMap
+from ec.postmap import PostMapReport
 from run_55 import Run55
 
 STEP = 'normlauncher'
@@ -17,7 +17,7 @@ class NormLauncher(luigi.Task):
     jobuid = luigi.IntParameter()
 
     def requires(self):
-        return [PostMap(jobuid=self.jobuid)]
+        return [PostMapReport(jobuid=self.jobuid)]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
