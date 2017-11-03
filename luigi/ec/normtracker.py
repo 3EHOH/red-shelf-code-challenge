@@ -55,7 +55,7 @@ class NormTracker(luigi.Task):
                 break
             else:
                 # till norm completes show the current count
-                print("Current Normalization count->" + count)
+                print("Current Normalization count-> ", count)
 
 
 if __name__ == "__main__":
