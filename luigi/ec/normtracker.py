@@ -24,34 +24,41 @@ class NormTracker(luigi.Task):
 
     @staticmethod
     def track_norman():
-        sql = "use ecr;"
-        update_status(sql)
-        sql1 = "drop view if exists normview;"
-        update_status(sql1)
+        select_database = "use ecr;"
+        update_status(select_database)
+        drop_view = "drop view if exists normview;"
+        update_status(drop_view)
 
         # creating view or ecr table named normview for reference
 
-        sql2 = "create view normview as select j.client_id, j.jobName , j.uid as jobUid, s.uid, s.sequence, " \
-               "s.stepName, s.description, s.status, s.updated from processJob j join processJobStep s " \
-               "on s.jobUid = j.uid and j.client_id = 'Test' order by j.uid, s.sequence asc;"
-        update_status(sql2)
+        create_view = "create view normview as select j.client_id, j.jobName , j.uid as jobUid, s.uid, s.sequence, s.stepName, s.description, s.status, s.updated from processJob j join processJobStep s on s.jobUid = j.uid and j.client_id = 'Test' order by j.uid, s.sequence asc;"
+        update_status(create_view)
 
-        sql3 = "select exists(select * from normview where stepName='normalization' and status='Complete');"
-        
-        while not sql3:
+        check_is_complete = "select exists(select * from normview where stepName='normalization' and status='Complete');"
+        cursor = update_status(check_is_complete)
+        is_complete = cursor.fetchone()[0]
+
+        while not is_complete:
 
             # sql3 = "select exists(select * from normview where stepName='normalization' and status='Complete');"
 
             sql4 = "select count(1) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
+
+            cursor = update_status(sql4)
+            complete_count = cursor.fetchone()[0]
+
             sql5 = "select count(1) from jobStepQueue where jobUid=1 and stepName ='normalization';"
 
+            cursor = update_status(sql5)
+            count = cursor.fetchone()[0]
+
             # the count will return empty set initially hence have to make sure that this step isn't skipped immediately
-            if 0 < sql4 == sql5 > 0:
+            if 0 < count == complete_count > 0:
                 return True
                 break
             else:
                 # till norm completes show the current count
-                print("Current Normalization count->" + sql4)
+                print("Current Normalization count->" + count)
 
 
 if __name__ == "__main__":

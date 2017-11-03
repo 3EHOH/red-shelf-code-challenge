@@ -54,7 +54,11 @@ class NormLauncher(luigi.Task):
         user_data_norm_command = ""
 
         for _ in range(NormanConfig().processes_per_instance):
-            user_data_norm_command = user_data_norm_command + '\n' + "cd {luigidir}/; java -d64 -Xms8G -Xmx48G -cp {cpath} -Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties control.NormalizationDriver configfolder={configfolder} chunksize={chunksize} stopafter={stopafter}"
+            user_data_norm_command = user_data_norm_command + '\n' + \
+                                     "cd {luigidir}/; java -d64 -Xms8G -Xmx48G -cp {cpath} " \
+                                     "-Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties " \
+                                     "control.NormalizationDriver configfolder={configfolder} " \
+                                     "chunksize={chunksize} stopafter={stopafter}"
 
         user_data_script = user_data_host_info + user_data_norm_command
 
@@ -111,7 +115,10 @@ class NormLauncher(luigi.Task):
 
         time.sleep(60) #buffer to let instances reach running state before ending this step
 
-        running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Name', 'Values': norm_names}])))
+        running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name',
+                                                                         'Values': ['running']},
+                                                                        {'Name': 'tag:Name',
+                                                                         'Values': norm_names}])))
 
         if not running_instance_count == NormanConfig().instance_count:
             ValueError("Error: Norm instances not all running. Shutting down.")

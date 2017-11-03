@@ -19,7 +19,7 @@ class MySQLConn(object):
             database=self.db,
             user=self.user,
             password=self.password,
-            port = self.port)
+            port=self.port)
         connection.autocommit = True
         return connection
 
