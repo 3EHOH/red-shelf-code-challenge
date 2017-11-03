@@ -1,7 +1,7 @@
 import os
 import luigi
-from utils import update_status, get_status
-from config import ModelConfig, PathConfig
+from utils import update_status, get_status, MySQLConn
+from config import ModelConfig, PathConfig, MySQLDBConfig
 from ec.normlauncher import NormLauncher
 
 STEP = 'normtracker'
@@ -35,6 +35,7 @@ class NormTracker(luigi.Task):
         update_status(create_view)
 
         check_is_complete = "select exists(select * from normview where stepName='normalization' and status='Complete');"
+
         is_complete = get_status(check_is_complete)
 
         while not is_complete:

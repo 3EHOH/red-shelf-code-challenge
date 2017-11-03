@@ -45,8 +45,9 @@ def get_status(sql):
                      MySQLDBConfig().prd_host,
                      MySQLDBConfig().prd_port).connect()
     cur = conn.cursor()
-    res = cur.execute(sql)
-    if res is not None:
-        return res[0]
-    else:
-        return 0
+    cur.execute(sql)
+    res = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return res
+
