@@ -93,6 +93,8 @@ class NormLauncher(luigi.Task):
         security_groups_formatted = self.format_security_groups()
         user_data_script = self.create_user_data_script()
 
+        print("USER DATA SCRIPT NORM LAUNCHER: ", user_data_script) #sanity check
+
         norm_instances = ec2.create_instances(
             MinCount=1,
             MaxCount=NormanConfig().instance_count,
