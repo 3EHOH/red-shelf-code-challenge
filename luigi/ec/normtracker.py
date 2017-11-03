@@ -1,6 +1,6 @@
 import os
 import luigi
-from utils import update_status
+from utils import update_status, get_status
 from config import ModelConfig, PathConfig
 from ec.normlauncher import NormLauncher
 
@@ -35,22 +35,19 @@ class NormTracker(luigi.Task):
         update_status(create_view)
 
         check_is_complete = "select exists(select * from normview where stepName='normalization' and status='Complete');"
-        cursor = update_status(check_is_complete)
-        is_complete = cursor.fetchone()[0]
+        is_complete = get_status(check_is_complete)
 
         while not is_complete:
 
             # sql3 = "select exists(select * from normview where stepName='normalization' and status='Complete');"
 
-            sql4 = "select count(1) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
+            sql4 = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
 
-            cursor = update_status(sql4)
-            complete_count = cursor.fetchone()[0]
+            complete_count = get_status(sql4)
 
-            sql5 = "select count(1) from jobStepQueue where jobUid=1 and stepName ='normalization';"
+            sql5 = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization';"
 
-            cursor = update_status(sql5)
-            count = cursor.fetchone()[0]
+            count = get_status(sql5)
 
             # the count will return empty set initially hence have to make sure that this step isn't skipped immediately
             if 0 < count == complete_count > 0:

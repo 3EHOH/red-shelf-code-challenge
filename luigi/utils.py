@@ -35,3 +35,18 @@ def update_status(sql):
     cur.execute(sql)
     cur.close()
     conn.close()
+
+
+def get_status(sql):
+
+    conn = MySQLConn(MySQLDBConfig().prd_schema,
+                     MySQLDBConfig().prd_user,
+                     MySQLDBConfig().prd_pass,
+                     MySQLDBConfig().prd_host,
+                     MySQLDBConfig().prd_port).connect()
+    cur = conn.cursor()
+    res = cur.execute(sql)
+    if res is not None:
+        return res[0]
+    else:
+        return 0
