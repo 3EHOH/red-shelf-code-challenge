@@ -93,6 +93,7 @@ echo "export ROOT_SECURITY_GROUPS='${ROOT_SECURITY_GROUPS[*]}'" >> $USER_HOME/.b
 echo "export MYSQL_SECURITY_GROUPS='${MYSQL_SECURITY_GROUPS[*]}'" >> $USER_HOME/.bashrc
 echo "export MONGO_SECURITY_GROUPS='${MONGO_SECURITY_GROUPS[*]}'" >> $USER_HOME/.bashrc
 echo "export LUIGI_DIR=$LUIGI_DIR" >> $USER_HOME/.bashrc
+echo "export RUN_ID=$RUN_ID" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
