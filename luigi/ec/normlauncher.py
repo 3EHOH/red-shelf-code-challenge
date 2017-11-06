@@ -44,12 +44,20 @@ class NormLauncher(luigi.Task):
         mongo_host = os.getenv('MONGO_HOST')
         mysql_host = os.getenv('MYSQL_HOST')
         luigi_dir = os.getenv('LUIGI_DIR')
+        mysql_user = os.getenv('MYSQL_USER')
+        mysql_pass = os.getenv('MYSQL_PASS')
 
         user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" {luigidir}/database.properties
         sed -i "s/prd.host=.*/prd.host={prdhost}/" {luigidir}/database.properties
+        sed -i "s/prd.user=.*/prd.user={mysqluser}/" {luigidir}/database.properties
+        sed -i "s/prd.pass=.*/prd.pass={mysqlpass}/" {luigidir}/database.properties
         sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" {luigidir}/database.properties
-        sed -i "s/template.host=.*/template.host={templatehost}/" {luigidir}/database.properties"""
+        sed -i "s/ecr.user=.*/ecr.user={mysqluser}/" {luigidir}/database.properties
+        sed -i "s/ecr.pass=.*/ecr.pass={mysqlpass}/" {luigidir}/database.properties
+        sed -i "s/template.host=.*/template.host={templatehost}/" {luigidir}/database.properties
+        sed -i "s/template.user=.*/template.user={mysqluser}/" {luigidir}/database.properties
+        sed -i "s/template.pass=.*/template.pass={mysqlpass}/" {luigidir}/database.properties"""
 
         user_data_norm_command = ""
 
@@ -69,6 +77,8 @@ class NormLauncher(luigi.Task):
             ecrhost=mysql_host,
             templatehost=mysql_host,
             epbhost=mysql_host,
+            mysqluser=mysql_user,
+            mysqlpass=mysql_pass,
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
