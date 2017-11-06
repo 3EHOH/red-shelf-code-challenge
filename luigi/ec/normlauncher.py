@@ -4,6 +4,7 @@ import os
 import time
 
 from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig
+import database.properties
 from ec.postmapreport import PostMapReport
 from run_55 import Run55
 
@@ -44,8 +45,6 @@ class NormLauncher(luigi.Task):
         mongo_host = os.getenv('MONGO_HOST')
         mysql_host = os.getenv('MYSQL_HOST')
         luigi_dir = os.getenv('LUIGI_DIR')
-        mysql_user = os.getenv('MYSQL_USER')
-        mysql_pass = os.getenv('MYSQL_PASS')
 
         user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" {luigidir}/database.properties
@@ -77,8 +76,8 @@ class NormLauncher(luigi.Task):
             ecrhost=mysql_host,
             templatehost=mysql_host,
             epbhost=mysql_host,
-            mysqluser=mysql_user,
-            mysqlpass=mysql_pass,
+            mysqluser=MySQLDBConfig.prd_user,
+            mysqlpass=MySQLDBConfig.prd_pass,
             cpath=Run55.cpath(),
             configfolder=ModelConfig().configfolder,
             chunksize=NormanConfig().chunksize,
