@@ -40,11 +40,9 @@ class NormTracker(luigi.Task):
 
         while not is_complete:
 
-            # sql3 = "select exists(select * from normview where stepName='normalization' and status='Complete');"
+            query_complete = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
 
-            sql4 = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
-
-            complete_count = get_status(sql4)
+            complete_count = get_status(query_complete)
 
             sql5 = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization';"
 
@@ -56,7 +54,7 @@ class NormTracker(luigi.Task):
                 break
             else:
                 # till norm completes show the current count
-                print("Current Normalization count-> ", count)
+                print("Current Normalization count-> ", complete_count)
 
 
 if __name__ == "__main__":

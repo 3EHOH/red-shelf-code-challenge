@@ -79,10 +79,10 @@ class NormLauncher(luigi.Task):
 
         norm_names = []
 
-        run_id = os.getenv('RUN_ID')
+        host_name = os.getenv('HOSTNAME')
 
         for instance in norm_instances:
-            tag_name = run_id + 'Norm_' + instance.id
+            tag_name = host_name + 'Norm_' + instance.id
             ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
             norm_names.append(tag_name)
 
