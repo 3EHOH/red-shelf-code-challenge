@@ -115,11 +115,6 @@ unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME=PROM-$JOB_ID" >> $USER_HOME/.bashrc
 echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
-echo "export KEY_NAME=$KEY_NAME" >> $USER_HOME/.bashrc
-echo "export NORMAN_AMI_ID=$NORMAN_AMI_ID" >> $USER_HOME/.bashrc
-echo "export NORMAN_INSTANCE_TYPE=$NORMAN_INSTANCE_TYPE" >> $USER_HOME/.bashrc
-echo "export SECURITY_GROUPS='${SECURITY_GROUPS[*]}'" >> $USER_HOME/.bashrc
-echo "export LUIGI_DIR=$LUIGI_DIR" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i 's/<JOB_ID>/$JOB_ID/; s/<FILE_NAME>/$FILE_NAME/' $LUIGI_DIR/luigi.cfg
@@ -143,6 +138,7 @@ aws ec2 run-instances \
     --security-group-ids $SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
     --user-data "file://$LAUNCH_SCRIPT_FILE" \
+    --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$INSTANCE_NAME}]' \
 > $LAUNCH_COMMAND_DIR/root_instance.launch
 ROOT_LAUNCH_COMMAND
