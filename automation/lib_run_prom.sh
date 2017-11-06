@@ -91,7 +91,7 @@ SFTP_COMMAND="sudo -u $EC2_USER scp -i $SFTP_KEYFILE -o StrictHostKeyChecking=no
 DOWNLOAD_DIR="$ECR_HOME/input"
 DOWNLOAD_FILE="$DOWNLOAD_DIR/$FILE_NAME"
 DOWNLOAD_SFTP_FILE_PATH="$SFTP_FILE"
-DOWNLOAD_COMMAND="$SFTP_COMMAND ${SFTP_USER}@${SFTP_SERVER}:$DOWNLOAD_SFTP_FILE_PATH $DOWNLOAD_FILE"
+DOWNLOAD_COMMAND="$SFTP_COMMAND ${SFTP_USER}@${SFTP_HOST}:$DOWNLOAD_SFTP_FILE_PATH $DOWNLOAD_FILE"
 
 # local directory that contains output from AWS instance launching commands
 LAUNCH_COMMAND_FILE="${RUN_ID}__launch-commands"
@@ -111,7 +111,7 @@ upload_launch_commands() {
     # location and command for copying output files back to to the file server
     local UPLOAD_FILE="$USER_HOME/${RUN_ID}__output.zip"
     local UPLOAD_SFTP_FILE_PATH="${SFTP_FILE}__output.zip"
-    local UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_SERVER}:$UPLOAD_SFTP_FILE_PATH"
+    local UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_HOST}:$UPLOAD_SFTP_FILE_PATH"
     
     local LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
     zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
