@@ -44,9 +44,7 @@ class NormTracker(luigi.Task):
 
             complete_count = get_status(query_complete)
 
-            sql5 = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization';"
-
-            count = get_status(sql5)
+            count = get_status("select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization';")
 
             # the count will return empty set initially hence have to make sure that this step isn't skipped immediately
             if 0 < count == complete_count > 0:
