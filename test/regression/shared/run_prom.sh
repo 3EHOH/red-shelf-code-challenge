@@ -87,6 +87,7 @@ aws ec2 run-instances \
     --key-name "$KEY_NAME" \
     --security-group-ids $SECURITY_GROUPS \
     --subnet-id "$SUBNET_ID" \
+    --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Mongo_$INSTANCE_NAME}]' \
 > $LAUNCH_COMMAND_DIR/mongo_instance.launch
 MONGO_LAUNCH_COMMAND
