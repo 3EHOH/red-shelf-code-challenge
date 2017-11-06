@@ -4,7 +4,6 @@ import os
 import time
 
 from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig
-import database.properties
 from ec.postmapreport import PostMapReport
 from run_55 import Run55
 
