@@ -49,13 +49,13 @@ class NormLauncher(luigi.Task):
         sed -i "s/md1.host=.*/md1.host={mongohost}/" {luigidir}/database.properties
         sed -i "s/prd.host=.*/prd.host={prdhost}/" {luigidir}/database.properties
         sed -i "s/prd.user=.*/prd.user={mysqluser}/" {luigidir}/database.properties
-        sed -i "s/prd.pass=.*/prd.pass={mysqlpass}/" {luigidir}/database.properties
+        sed -i "s/prd.password=.*/prd.password={mysqlpass}/" {luigidir}/database.properties
         sed -i "s/ecr.host=.*/ecr.host={ecrhost}/" {luigidir}/database.properties
         sed -i "s/ecr.user=.*/ecr.user={mysqluser}/" {luigidir}/database.properties
-        sed -i "s/ecr.pass=.*/ecr.pass={mysqlpass}/" {luigidir}/database.properties
+        sed -i "s/ecr.password=.*/ecr.password={mysqlpass}/" {luigidir}/database.properties
         sed -i "s/template.host=.*/template.host={templatehost}/" {luigidir}/database.properties
         sed -i "s/template.user=.*/template.user={mysqluser}/" {luigidir}/database.properties
-        sed -i "s/template.pass=.*/template.pass={mysqlpass}/" {luigidir}/database.properties"""
+        sed -i "s/template.password=.*/template.password={mysqlpass}/" {luigidir}/database.properties"""
 
         user_data_norm_command = ""
 
