@@ -3,11 +3,11 @@ import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
+from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
+from ec.normtracker import NormTracker
+from run_55 import Run55
 from utils import update_status
 
-from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
-from run_55 import Run55 
-from ec.normalization import Normalize
 
 STEP = 'postnormalization'
 
@@ -22,8 +22,7 @@ class PostNormalize(ExternalProgramTask):
     jobuid = luigi.IntParameter()
 
     def requires(self):
-        norm_ids = list(range(0, NormanConfig().count))
-        return [Normalize(jobuid=self.jobuid, norm_id=id) for id in norm_ids]
+        return [NormTracker(jobuid=self.jobuid)]
 
     def program_args(self):
         return '{} jobuid={}'.format(JARGS, self.jobuid).split(' ')
@@ -31,6 +30,7 @@ class PostNormalize(ExternalProgramTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
+
     def run(self):
         # HACK: it appears that sometimes the normalization status is not
         # updated correctly

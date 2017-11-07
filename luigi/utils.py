@@ -3,6 +3,7 @@ import mysql.connector
 
 from config import MySQLDBConfig
 
+
 class MySQLConn(object):
     """Stores the connection to mysql."""
     def __init__(self, db, user, password, host, port):
@@ -18,9 +19,10 @@ class MySQLConn(object):
             database=self.db,
             user=self.user,
             password=self.password,
-            port = self.port)
+            port=self.port)
         connection.autocommit = True
         return connection
+
 
 def update_status(sql):
 
@@ -33,3 +35,19 @@ def update_status(sql):
     cur.execute(sql)
     cur.close()
     conn.close()
+
+
+def get_status(sql):
+
+    conn = MySQLConn(MySQLDBConfig().prd_schema,
+                     MySQLDBConfig().prd_user,
+                     MySQLDBConfig().prd_pass,
+                     MySQLDBConfig().prd_host,
+                     MySQLDBConfig().prd_port).connect()
+    cur = conn.cursor()
+    cur.execute(sql)
+    res = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return res
+

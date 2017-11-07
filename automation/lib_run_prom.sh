@@ -53,7 +53,6 @@ aws ec2 run-instances \
     --key-name "$3" \
     --security-group-ids $4 \
     --subnet-id "$5" \
-    --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$6}]' \
     $USER_DATA \
 > $LAUNCH_COMMAND_DIR/${6}__instance.launch
