@@ -16,6 +16,7 @@ JARGS = 'java -d64 -Xms8G -Xmx100G -cp {cpath} -Dlog4j.configuration=file:/ecrfi
     chunksize=ConnieConfig().chunksize,
     stopafter=ConnieConfig().stopafter)
 
+
 class Construct(ExternalProgramTask):
     """ run construction """
     datafile = luigi.Parameter(default=STEP)
@@ -37,6 +38,7 @@ class Construct(ExternalProgramTask):
         sleep(600*self.conn_id)
         super(Construct, self).run()
         self.output().open('w').close()
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
