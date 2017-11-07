@@ -64,7 +64,7 @@ class NormLauncher(luigi.Task):
                                      "cd {luigidir}/; java -d64 -Xms8G -Xmx48G -cp {cpath} " \
                                      "-Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties " \
                                      "control.NormalizationDriver configfolder={configfolder} " \
-                                     "chunksize={chunksize} stopafter={stopafter}"
+                                     "chunksize={chunksize} stopafter={stopafter} &"
 
         user_data_script = user_data_host_info + user_data_norm_command
 

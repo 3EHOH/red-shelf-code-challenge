@@ -1,5 +1,7 @@
 import os
 import luigi
+import time
+
 from utils import update_status, get_status, MySQLConn
 from config import ModelConfig, PathConfig, MySQLDBConfig
 from ec.normlauncher import NormLauncher
@@ -49,6 +51,7 @@ class NormTracker(luigi.Task):
                 break
             else:
                 print("Current normalization count: ", complete_count)
+                time.sleep(60)
 
 
 if __name__ == "__main__":
