@@ -14,6 +14,7 @@ JARGS = 'java -d64 -Xms4G -Xmx20G -cp {cpath} -Dlog4j.configuration=file:/ecrfil
     jobstep=STEP,
     configfolder=ModelConfig().configfolder)
 
+
 class PostNormalizationReport(ExternalProgramTask):
     """ run the post normalization report """
     datafile = luigi.Parameter(default=STEP)
@@ -28,6 +29,7 @@ class PostNormalizationReport(ExternalProgramTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
+
     def run(self):
         super(PostNormalizationReport, self).run()
         self.output().open('w').close()
