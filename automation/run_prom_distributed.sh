@@ -105,10 +105,10 @@ sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
        -e 's/<MYSQL_USER>/$MYSQL_USER/'\
        -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
-       -e 's/<CHUNK_SIZE>/$CHUNK_SIZE/'\
-       -e 's/<STOP_AFTER>/$STOP_AFTER/'\
-       -e 's/<INSTANCE_COUNT>/$INSTANCE_COUNT/'\
-       -e 's/<PROCESSES_PER_INSTANCE>/$PROCESSES_PER_INSTANCE/'\
+       -e 's/<NORM_CHUNK_SIZE>/$NORM_CHUNK_SIZE/'\
+       -e 's/<NORM_STOP_AFTER>/$NORM_STOP_AFTER/'\
+       -e 's/<NORM_INSTANCE_COUNT>/$NORM_INSTANCE_COUNT/'\
+       -e 's/<NORM_PROCESSES_PER_INSTANCE>/$NORM_PROCESSES_PER_INSTANCE/'\
     $LUIGI_DIR/luigi.cfg
 
 # edit database.properties
