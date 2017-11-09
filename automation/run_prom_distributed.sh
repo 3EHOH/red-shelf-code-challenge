@@ -71,6 +71,7 @@ MYSQL_HOST=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
 MONGO_HOST=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
 
 # this script will be run as root after the EC2 instance is launched
+FILE_DIR=$(extract_input_path)
 ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
 ROOT_INSTANCE_NAME="${RUN_ID}__root"
 cat <<EOF > "$ROOT_LAUNCH_SCRIPT_FILE"
@@ -97,12 +98,17 @@ echo "export LUIGI_DIR=$LUIGI_DIR" >> $USER_HOME/.bashrc
 # edit luigi.cfg to contain the new job ID and file location
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<FILE_NAME>/$FILE_NAME/'\
+       -e 's/<FILE_DIR>/$FILE_DIR/'\
        -e 's/<SFTP_HOST>/$SFTP_HOST/'\
        -e 's/<KEY_PAIR>/$KEY_PAIR/'\
        -e 's/<MONGO_HOST>/$MONGO_HOST/'\
        -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
        -e 's/<MYSQL_USER>/$MYSQL_USER/'\
        -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
+       -e 's/<CHUNK_SIZE>/$CHUNK_SIZE/'\
+       -e 's/<STOP_AFTER>/$STOP_AFTER/'\
+       -e 's/<INSTANCE_COUNT>/$INSTANCE_COUNT/'\
+       -e 's/<PROCESSES_PER_INSTANCE>/$PROCESSES_PER_INSTANCE/'\
     $LUIGI_DIR/luigi.cfg
 
 # edit database.properties
