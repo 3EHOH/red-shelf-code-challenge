@@ -118,6 +118,10 @@ upload_launch_commands() {
     $SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_HOST}:${LAUNCH_COMMAND_FILE}.zip
 }
 
+extract_input_path() {
+    echo ${FILE_NAME%.*}
+}
+
 
 
 

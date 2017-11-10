@@ -26,7 +26,6 @@ class ModelConfig(luigi.Config):
     enroll_file1=luigi.Parameter()
 
 class NormanConfig(luigi.Config):
-    count=luigi.IntParameter()
     chunksize=luigi.IntParameter()
     stopafter=luigi.IntParameter()
     processes_per_instance=luigi.IntParameter()
