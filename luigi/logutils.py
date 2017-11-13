@@ -42,7 +42,7 @@ class LogUtils(object):
         sc = SlackClient(slack_token)
         c_name = SlackChannelName().channel_name
         now = datetime.datetime.now()
-        message = instancename+" with Instance_ID->("+id+") has stopped running "+STEP+" on "+now.strftime('%Y/%m/%d %H:%M:%S')
+        message = instancename+" with Instance_ID->("+id+") has finished running "+STEP+" on "+now.strftime('%Y/%m/%d %H:%M:%S')
         sc.api_call("chat.postMessage",channel=c_name,text=message)
 
     
