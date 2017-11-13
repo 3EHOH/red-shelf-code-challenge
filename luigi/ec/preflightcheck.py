@@ -6,6 +6,7 @@ from mysql.connector import errorcode
 import os
 import pymongo
 import psutil
+from logutils import LogUtils
 
 STEP = 'preflightcheck'
 MONGO_TIMEOUT_MS = 5000
@@ -26,8 +27,10 @@ class PreflightCheck(luigi.Task):
         if not (is_sftp_running and is_mongo_connection_established and is_mysql_connection_established):
             raise ValueError("Error: Unable to connect to one or more process")
         else:
+            LogUtils.log_start(STEP)
             self.output().open('w').close()
-
+            LogUtils.log_stop(STEP)
+            
     @staticmethod
     def check_sftp_status():
         ec2 = boto3.resource('ec2')

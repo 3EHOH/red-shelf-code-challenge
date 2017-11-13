@@ -4,7 +4,7 @@ import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
 from utils import update_status
-
+from logutils import LogUtils
 from config import ModelConfig, MySQLDBConfig, PathConfig
 from run_55 import Run55 
 from ec.map import Map
@@ -32,11 +32,13 @@ class PostMap(ExternalProgramTask):
                                               self.datafile))
 
     def run(self):
+        LogUtils.log_start(STEP)
         super(PostMap, self).run()
         # HACK: set the normalization status to READY.
         sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
         update_status(sql)
         self.output().open('w').close()
+        LogUtils.log_stop(STEP)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

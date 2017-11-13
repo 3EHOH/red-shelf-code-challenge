@@ -4,7 +4,7 @@ import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 
 import mysql.connector
-
+from logutils import LogUtils
 from config import ModelConfig, ConnieConfig, PathConfig, MySQLDBConfig
 from run_55 import Run55 
 from ec.construction import Construct
@@ -43,8 +43,10 @@ class PostConstructionReport(ExternalProgramTask):
         cur.execute(sql)
         db.commit()
         db.close()
+        LogUtils.log_start(STEP)
         super(PostConstructionReport, self).run()
         self.output().open('w').close()
+        LogUtils.log_stop(STEP)
 
 
 if __name__ == "__main__":

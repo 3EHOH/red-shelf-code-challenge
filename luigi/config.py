@@ -25,6 +25,11 @@ class ModelConfig(luigi.Config):
     member_file1=luigi.Parameter()
     enroll_file1=luigi.Parameter()
 
+
+class SlackChannelName(luigi.Config):
+    #User defined channel name
+    channel_name=luigi.Parameter()
+
 class NormanConfig(luigi.Config):
     chunksize=luigi.IntParameter()
     stopafter=luigi.IntParameter()

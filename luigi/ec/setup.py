@@ -4,6 +4,7 @@ import luigi
 from luigi.contrib.external_program import ExternalProgramTask
 import os
 from run_55 import Run55
+from logutils import LogUtils
 
 STEP = 'setup'
 
@@ -46,8 +47,10 @@ class Setup(ExternalProgramTask):
                                               self.datafile))
     
     def run(self):
+        LogUtils.log_start(STEP)
         super(Setup, self).run()
         self.output().open('w').close()
+        LogUtlis.log_stop(STEP)
 
 
 if __name__ == "__main__":
