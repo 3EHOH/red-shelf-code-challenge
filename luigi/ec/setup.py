@@ -50,7 +50,7 @@ class Setup(ExternalProgramTask):
         LogUtils.log_start(STEP)
         super(Setup, self).run()
         self.output().open('w').close()
-        LogUtlis.log_stop(STEP)
+        LogUtils.log_stop(STEP)
 
 
 if __name__ == "__main__":
