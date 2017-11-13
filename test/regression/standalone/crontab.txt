@@ -1,1 +1,1 @@
-30 6 * * 1-5 /bin/bash $HOME/test/payformance/test/regression/standalone/run_prom_standalone.sh $HOME/test/payformance/test/regression/standalone/job.cfg `date +'STANDALONE_\%Y-\%m-\%d'` 50K_Test_2016_03_16.zip
+30 6 * * 1-5 cd $HOME/test/payformance/test/regression/standalone && /bin/bash ./run_prom_standalone.sh ./job.cfg `date +'STANDALONE_\%Y-\%m-\%d'` 50K_Test_2016_03_16.zip
