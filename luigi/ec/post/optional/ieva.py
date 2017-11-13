@@ -4,7 +4,7 @@ import luigi
 import mysql.connector
 import subprocess
 from subprocess import Popen, PIPE
-from logutils import Log
+from logutils import LogUtils
 from config import ModelConfig, MySQLDBConfig, PathConfig
 from run_55 import Run55 
 from ec.post.optional.hci3_reliability_analysis import HCI3ReliabilityAnalysis

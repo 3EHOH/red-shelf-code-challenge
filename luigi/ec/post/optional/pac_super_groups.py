@@ -31,7 +31,7 @@ class PACSuperGroups(luigi.Task):
     def run(self):
         LogUtils.log_start(STEP)
         command = ['mysql', '-f', '-h{}'.format(MySQLDBConfig().prd_host),
-i                   '--database={}'.format(DB),
+                   '--database={}'.format(DB),
                    '-u{}'.format(MySQLDBConfig().prd_user),
                    '-p{}'.format(MySQLDBConfig().prd_pass)]
         with open(SQL_FILE) as input_file:
