@@ -35,7 +35,7 @@ source $1
 # load library
 source lib_run_prom.sh
 
-check_root_defined_vars
+check_defined_vars
 
 MYSQL_HOST=localhost
 MONGO_HOST=localhost

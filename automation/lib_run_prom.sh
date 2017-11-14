@@ -8,7 +8,7 @@ check_def() {
     fi
 }
 
-check_root_defined_vars() {
+check_defined_vars() {
     check_def PAYFORMANCE_HOME
     check_def KEY_PAIR
     check_def SFTP_HOST
@@ -18,9 +18,6 @@ check_root_defined_vars() {
     check_def ROOT_INSTANCE_TYPE
     check_def ROOT_SECURITY_GROUPS
     check_def SUBNET_ID
-}
-
-check_shared_defined_vars() {
     check_def MYSQL_AMI_ID
     check_def MONGO_AMI_ID
     check_def MYSQL_INSTANCE_TYPE
@@ -53,6 +50,7 @@ aws ec2 run-instances \
     --key-name "$3" \
     --security-group-ids $4 \
     --subnet-id "$5" \
+    --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$6}]' \
     $USER_DATA \
 > $LAUNCH_COMMAND_DIR/${6}__instance.launch
@@ -69,6 +67,7 @@ SLEEP_SECONDS=300
 
 RUN_ID="$2"
 FILE_NAME="$3"
+FILE_DIR=`basename -s .zip $FILE_NAME`
 EC2_USER="ec2-user"
 USER_HOME="/home/$EC2_USER"
 ECR_HOME="/ecrfiles"

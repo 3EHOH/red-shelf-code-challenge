@@ -34,8 +34,7 @@ source $1
 # load library
 source lib_run_prom.sh
 
-check_root_defined_vars
-check_shared_defined_vars
+check_defined_vars
 
 init_launch_commands
 
