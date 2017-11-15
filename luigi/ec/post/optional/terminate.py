@@ -26,6 +26,7 @@ class Terminate(ExternalProgramTask):
 
     def run(self):
         self.shut_down_ec2()
+        self.output().open('w').close()
 
 
     @staticmethod
