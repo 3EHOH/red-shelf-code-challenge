@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # verifies that a variable has been defined in aws_config.cfg
 check_def() {
     if [[ ! -v $1 ]]; then
@@ -8,25 +9,9 @@ check_def() {
     fi
 }
 
-check_defined_vars() {
-    check_def PAYFORMANCE_HOME
-    check_def KEY_PAIR
-    check_def SFTP_HOST
-    check_def MYSQL_USER
-    check_def MYSQL_PASS
-    check_def ROOT_AMI_ID
-    check_def ROOT_INSTANCE_TYPE
-    check_def ROOT_SECURITY_GROUPS
-    check_def SUBNET_ID
-    check_def MYSQL_AMI_ID
-    check_def MONGO_AMI_ID
-    check_def MYSQL_INSTANCE_TYPE
-    check_def MONGO_INSTANCE_TYPE
-    check_def MYSQL_SECURITY_GROUPS
-    check_def MONGO_SECURITY_GROUPS
-}
 
 
+# launches a new EC2 instance
 launch_instance() {
     # $1 AMI ID
     # $2 INSTANCE_TYPE
@@ -41,7 +26,7 @@ launch_instance() {
         USER_DATA="--user-data file://$7"
     fi
     
-    # launch the root instance
+    # launch the instance
     local LAUNCH_COMMAND=$(cat <<LAUNCH_COMMAND_ARGS
 aws ec2 run-instances \
     --image-id "$1" \
@@ -60,13 +45,61 @@ LAUNCH_COMMAND_ARGS
     eval "$LAUNCH_COMMAND"
 }
 
+
+
+
+# if no command-line parameters are provided, print usage message - 
+# requires SCRIPT_NAME and SCRIPT_DESC to be set in wrapper script
+if [[ $CONFIG_FILE == "" || $RUN_ID == "" || $FILE_NAME == "" ]]; then
+    cat <<EOF
+Usage: $SCRIPT_NAME <aws_config_file> <custom_run_id> <sftp_file_name>
+
+$SCRIPT_DESC
+
+Arguments:
+  <aws_config_file> is a file that contains AMI IDs, instance types, and security
+    groups that will be used for launching servers. See example_aws_config.cfg
+  <custom_run_id> is a user-defined identifier for this run. It will be used in the
+    name of the EC2 instance, and for reporting. It is not used by the actual
+    Prometheus code, only the automation script. It must only contain letters, numbers,
+    and hyphens.
+  <sftp_file_name> should be the name of the input .zip file on the SFTP server
+
+e.g. './$SCRIPT_NAME aws_shared_config.cfg my-run-1234 50K_Test_2016_03_16.zip'
+EOF
+    exit
+fi
+
+
+# load the config file
+source $CONFIG_FILE
+
+
+# load CONFIG_FILE and check variables
+check_def PAYFORMANCE_HOME
+check_def KEY_PAIR
+check_def SFTP_HOST
+check_def DISTRIBUTED_MODE
+check_def MYSQL_USER
+check_def MYSQL_PASS
+check_def ROOT_AMI_ID
+check_def ROOT_INSTANCE_TYPE
+check_def ROOT_SECURITY_GROUPS
+check_def SUBNET_ID
+check_def MYSQL_AMI_ID
+check_def MONGO_AMI_ID
+check_def MYSQL_INSTANCE_TYPE
+check_def MONGO_INSTANCE_TYPE
+check_def MYSQL_SECURITY_GROUPS
+check_def MONGO_SECURITY_GROUPS
+
+
+
 # seconds to sleep after starting a new server
 SLEEP_SECONDS=300
 
 # TO-DO - Check that RUN_ID only contains letters, numbers, and hyphens
 
-RUN_ID="$2"
-FILE_NAME="$3"
 FILE_DIR=`basename -s .zip $FILE_NAME`
 EC2_USER="ec2-user"
 USER_HOME="/home/$EC2_USER"
@@ -93,35 +126,76 @@ DOWNLOAD_SFTP_FILE_PATH="$SFTP_FILE"
 DOWNLOAD_COMMAND="$SFTP_COMMAND ${SFTP_USER}@${SFTP_HOST}:$DOWNLOAD_SFTP_FILE_PATH $DOWNLOAD_FILE"
 
 # local directory that contains output from AWS instance launching commands
-LAUNCH_COMMAND_FILE="${RUN_ID}__launch-commands"
-LAUNCH_COMMAND_DIR="/tmp/$LAUNCH_COMMAND_FILE"
+LOG_DIR="/tmp/$RUN_ID"
+LAUNCH_COMMAND_FILE="${RUN_ID}"
+LAUNCH_COMMAND_DIR="$LOG_DIR/launch"
 
+# check to see if this run is already in use
+if [[ -d "$LOG_DIR" ]]; then
+    echo "Run with ID '$RUN_ID' is already in use"
+    exit
+else
+    mkdir "$LOG_DIR"
+    mkdir "$LAUNCH_COMMAND_DIR"
+fi
 
-init_launch_commands() {
-    # create output directory
-    if [ -d "$LAUNCH_COMMAND_DIR" ]; then
-        echo "Run with ID '$LAUNCH_COMMAND_DIR' is already in use"
-        exit -1
-    fi
-    mkdir $LAUNCH_COMMAND_DIR
-}
+# now that everything is defined, set the database hosts
+# this may point to localhost, hardcoded IPs, or newly-spawned EC2 instances
+set_db_hosts
 
-upload_launch_commands() {
-    # location and command for copying output files back to to the file server
-    local UPLOAD_FILE="$USER_HOME/${RUN_ID}__output.zip"
-    local UPLOAD_SFTP_FILE_PATH="${SFTP_FILE}__output.zip"
-    local UPLOAD_COMMAND="$SFTP_COMMAND $UPLOAD_FILE ${SFTP_USER}@${SFTP_HOST}:$UPLOAD_SFTP_FILE_PATH"
-    
-    local LAUNCH_UPLOAD_FILE=${LAUNCH_COMMAND_DIR}.zip
-    zip -r $LAUNCH_UPLOAD_FILE $LAUNCH_COMMAND_DIR
-    $SFTP_COMMAND $LAUNCH_UPLOAD_FILE ${SFTP_USER}@${SFTP_HOST}:${LAUNCH_COMMAND_FILE}.zip
-}
+# this script will be run as root after the EC2 instance is launched
+ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
+ROOT_INSTANCE_NAME="${RUN_ID}__root"
+cat <<EOF > "$ROOT_LAUNCH_SCRIPT_FILE"
+#!/bin/bash
 
-extract_input_path() {
-    echo ${FILE_NAME%.*}
-}
+$DOWNLOAD_COMMAND
 
+# create output directory
+sudo -u $EC2_USER mkdir $OUTPUT_DIR
 
+unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
+echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
+echo "export MONGO_IP=$MONGO_HOST" >> $USER_HOME/.bashrc
 
+# edit luigi.cfg to contain the new job ID and file location
+sed -i -e 's/<RUN_ID>/$RUN_ID/'\
+       -e 's/<FILE_NAME>/$FILE_NAME/'\
+       -e 's|<FILE_DIR>|$FILE_DIR|'\
+       -e 's/<SFTP_HOST>/$SFTP_HOST/'\
+       -e 's/<KEY_PAIR>/$KEY_PAIR/'\
+       -e 's|<PAYFORMANCE_HOME>|$PAYFORMANCE_HOME|'\
+       -e 's/<DISTRIBUTED_MODE>/$DISTRIBUTED_MODE/'\
+       -e 's/<MONGO_HOST>/$MONGO_HOST/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
+       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
+       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
+       -e 's/<NORM_CHUNK_SIZE>/$NORM_CHUNK_SIZE/'\
+       -e 's/<NORM_STOP_AFTER>/$NORM_STOP_AFTER/'\
+       -e 's/<NORM_INSTANCE_COUNT>/$NORM_INSTANCE_COUNT/'\
+       -e 's/<NORM_PROCESSES_PER_INSTANCE>/$NORM_PROCESSES_PER_INSTANCE/'\
+    $LUIGI_DIR/luigi.cfg
+
+# edit database.properties
+sed -i -e 's/<MONGO_HOST>/$MONGO_HOST/'\
+       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
+       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
+       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
+    $LUIGI_DIR/database.properties
+cp $LUIGI_DIR/database.properties $ECR_HOME/scripts/database.properties
+
+sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
+
+EOF
+
+# launch the root instance
+launch_instance \
+    "$ROOT_AMI_ID" \
+    "$ROOT_INSTANCE_TYPE" \
+    "$KEY_PAIR" \
+    "$ROOT_SECURITY_GROUPS" \
+    "$SUBNET_ID" \
+    "$ROOT_INSTANCE_NAME" \
+    "${ROOT_LAUNCH_SCRIPT_FILE}"
 
