@@ -11,7 +11,6 @@ from ec.postmap import PostMap
 from ec.postmapreport import PostMapReport
 from ec.normtracker import NormTracker
 from ec.normlauncher import NormLauncher
-from ec.normalization import Normalize
 from ec.postnormalization import PostNormalize
 from ec.postnormalizationreport import PostNormalizationReport
 from ec.construction import Construct
