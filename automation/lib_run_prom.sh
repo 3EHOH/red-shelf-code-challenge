@@ -35,7 +35,6 @@ aws ec2 run-instances \
     --key-name "$3" \
     --security-group-ids $4 \
     --subnet-id "$5" \
-    --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$6}]' \
     $USER_DATA \
 > $LAUNCH_COMMAND_DIR/${6}__instance.launch
@@ -157,7 +156,7 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
-echo "export MONGO_IP=$MONGO_HOST" >> $USER_HOME/.bashrc
+echo "export MONGO_HOST=$MONGO_HOST" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
