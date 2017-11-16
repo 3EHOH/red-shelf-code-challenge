@@ -44,7 +44,7 @@ class NormLauncher(luigi.Task):
     @staticmethod
     def create_norman_command():
         """Creates a norman invocation command"""
-        norman_command = "cd {luigidir}/; java -d64 -Xms8G -Xmx48G -cp {cpath} " \
+        norman_command = "java -d64 -Xms8G -Xmx48G -cp {cpath} " \
                          "-Dlog4j.configuration=file:/ecrfiles/scripts/log4jNorman.properties " \
                          "control.NormalizationDriver configfolder={configfolder} " \
                          "chunksize={chunksize} stopafter={stopafter}"
@@ -87,9 +87,9 @@ class NormLauncher(luigi.Task):
         user_data_norm_command = ""
         
         for _ in range(NormanConfig().processes_per_instance):
-            user_data_norm_command = \
-                user_data_norm_command + "\n " + create_norman_command() + " &"
-                
+            user_data_norm_command = user_data_norm_command + "\n " + \
+                                     "cd {luigidir}/; " + create_norman_command() + " &"
+        
         user_data_script = user_data_host_info + user_data_norm_command
         
         return user_data_script
