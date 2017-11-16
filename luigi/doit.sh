@@ -9,6 +9,6 @@ export LD_LIBRARY_PATH=/usr/lib/jvm/java/jre/lib/amd64/server/:$LD_LIBRARY_PATH
 
 source ~/.bashrc
 
-cd /home/ec2-user/payformance/luigi
+cd /home/ec2-user/prom-rebuild/luigi
 
 python -m luigi --local-scheduler --workers 10 --module pipeline PipelineTask
