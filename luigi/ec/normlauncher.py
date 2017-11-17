@@ -56,8 +56,7 @@ class NormLauncher(luigi.Task):
             chunksize=NormanConfig().chunksize,
             stopafter=NormanConfig().stopafter)
 
-    @staticmethod
-    def create_user_data_script():
+    def create_user_data_script(self):
         mongo_host = os.getenv('MONGO_HOST')
         mysql_host = os.getenv('MYSQL_HOST')
         luigi_dir = os.getenv('LUIGI_DIR')
@@ -88,7 +87,7 @@ class NormLauncher(luigi.Task):
         
         for _ in range(NormanConfig().processes_per_instance):
             user_data_norm_command = user_data_norm_command + "\n " + \
-                                     "cd {luigidir}/; " + create_norman_command() + " &"
+                                     "cd {luigidir}/; " + self.create_norman_command() + " &"
         
         user_data_script = user_data_host_info + user_data_norm_command
         
