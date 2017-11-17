@@ -10,7 +10,7 @@ class LogUtils(object):
 
     
     def log_start(STEP):
-        slack_token = os.environ["SLACK_API_TOKEN"]
+        slack_token = SlackChannelName().SLACK_API_TOKEN
         response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
         id = response.text
         ec2 = boto3.resource('ec2')
@@ -28,7 +28,7 @@ class LogUtils(object):
 
     
     def log_stop(STEP):
-        slack_token = os.environ["SLACK_API_TOKEN"]
+        slack_token = SlackChannelName().SLACK_API_TOKEN
         #fetch instance_id
         response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
         id = response.text

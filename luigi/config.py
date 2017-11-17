@@ -29,6 +29,7 @@ class ModelConfig(luigi.Config):
 class SlackChannelName(luigi.Config):
     #User defined channel name
     channel_name=luigi.Parameter()
+    SLACK_API_TOKEN=luigi.Parameter()
 
 class NormanConfig(luigi.Config):
     chunksize=luigi.IntParameter()
@@ -66,9 +67,10 @@ class MongoDBConfig(luigi.Config):
 
 class AwsConfig(luigi.Config):
     job_id=luigi.Parameter()
-    sftp_server=luigi.Parameter()
+    sftp_host=luigi.Parameter()
     key_pair_name=luigi.Parameter()
     file_name=luigi.Parameter()
+    enable_distributed_mode=luigi.BoolParameter()
 
 
 #some default params

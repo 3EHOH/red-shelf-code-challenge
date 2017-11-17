@@ -9,6 +9,6 @@ export SLACK_API_TOKEN=<your_generated_toke>
 
 source ~/.bashrc
 
-cd /home/ec2-user/payformance/luigi
+cd /home/ec2-user/prom-rebuild/luigi
 
 python -m luigi --local-scheduler --workers 10 --module pipeline PipelineTask
