@@ -149,7 +149,7 @@ class NormLauncher(luigi.Task):
         total_norman_count = NormanConfig().instance_count * NormanConfig().processes_per_instance
         
         for _ in range(total_norman_count):
-            norman_command = create_norman_command()
+            norman_command = self.create_norman_command()
             subprocess.Popen(norman_command.split())
             
         
