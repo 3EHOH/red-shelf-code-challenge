@@ -28,7 +28,7 @@ class ModelConfig(luigi.Config):
 
 class SlackChannelName(luigi.Config):
     #User defined channel name
-    channel_name=luigi.Parameter()
+    CHANNEL_NAME=luigi.Parameter()
     SLACK_API_TOKEN=luigi.Parameter()
 
 class NormanConfig(luigi.Config):
