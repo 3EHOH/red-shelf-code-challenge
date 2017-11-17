@@ -20,7 +20,7 @@ class LogUtils(object):
             if tags["Key"] == 'Name':
                 instancename = tags["Value"]
         sc = SlackClient(slack_token)
-        c_name = SlackChannelName().channel_name
+        c_name = SlackChannelName().CHANNEL_NAME
         now = datetime.datetime.now()
         print (STEP)
         message = instancename+" with Instance_ID->("+id+") has started running "+STEP+" at "+now.strftime('%Y/%m/%d %H:%M:%S')
@@ -40,7 +40,7 @@ class LogUtils(object):
             if tags["Key"] == 'Name':
                 instancename = tags["Value"]
         sc = SlackClient(slack_token)
-        c_name = SlackChannelName().channel_name
+        c_name = SlackChannelName().CHANNEL_NAME
         now = datetime.datetime.now()
         message = instancename+" with Instance_ID->("+id+") has finished running "+STEP+" on "+now.strftime('%Y/%m/%d %H:%M:%S')
         sc.api_call("chat.postMessage",channel=c_name,text=message)
