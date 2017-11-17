@@ -1,95 +1,23 @@
 #!/bin/bash
 
-# first: set up a user and group (go to IAM in the AWS console) http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
-# The group should have full admin privileges
+# 1. Set command-line input parameters
+CONFIG_FILE="$1"
+RUN_ID="$2"
+FILE_NAME="$3"
 
-# instructions on running a script on startup: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+# 2. Descriptive data used in lib_run_prom.sh if no parameters are provided
+SCRIPT_NAME="run_prom_standalone.sh"
+SCRIPT_DESC="Runs Prometheus with all Norman, Connie, and DB processes on one server"
 
-# check for arguments
-if [ $# -lt 3 ]; then
-    cat <<EOF
-Usage: run_prom_standalone.sh <aws_config_file> <custom_run_id> <sftp_file_name>
+# 3. callback function that will be used to determine database host addresses
+set_db_hosts() {
+    MYSQL_HOST=localhost
+    MONGO_HOST=localhost
+}
 
-Runs Prometheus on a single standalone server, with MongoDB, MySQL, and all Connie
-and Norman workers running on the same machine.
+# 4. if true, runs normans/connies on separate EC2 instances
+DISTRIBUTED_MODE=false
 
-Arguments:
-  <aws_standalone_config_file> is a file that contains AMI IDs, instance types, and security
-    groups that will be used for the standalone server. See example_aws_standalone_config.cfg
-  <custom_run_id> is a user-defined identifier for this run. It will be used in the
-    name of the EC2 instance, and for reporting. It is not used by the actual
-    Prometheus code, only the automation script. It must only contain letters, numbers,
-    and hyphens.
-  <sftp_file_name> should be the name of the input .zip file on the SFTP server
-
-e.g. './run_prom_standalone.sh aws_standalone_config.cfg my-run-1234 50K_Test_2016_03_16.zip'
-EOF
-    exit
-fi
-
-
-# load AWS-specific configuration
-# this is not safe, but will suffice for the moment
-source $1
-
-# load library
+# 5. Run the launcher
 source lib_run_prom.sh
-
-check_root_defined_vars
-
-MYSQL_HOST=localhost
-MONGO_HOST=localhost
-
-init_launch_commands
-
-# this script will be run as root after the EC2 instance is launched
-ROOT_LAUNCH_SCRIPT_FILE="$LAUNCH_COMMAND_DIR/${RUN_ID}__root.sh"
-ROOT_INSTANCE_NAME="${RUN_ID}__root"
-cat <<EOF > "$ROOT_LAUNCH_SCRIPT_FILE"
-#!/bin/bash
-
-$DOWNLOAD_COMMAND
-
-# create output directory
-sudo -u $EC2_USER mkdir $OUTPUT_DIR
-
-unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
-
-echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
-echo "export MONGO_IP=$MONGO_IP" >> $USER_HOME/.bashrc
-
-# edit luigi.cfg to contain the new job ID and file location
-sed -i -e 's/<RUN_ID>/$RUN_ID/'\
-       -e 's/<FILE_NAME>/$FILE_NAME/'\
-       -e 's/<SFTP_HOST>/$SFTP_HOST/'\
-       -e 's/<KEY_PAIR>/$KEY_PAIR/'\
-       -e 's/<MONGO_HOST>/$MONGO_HOST/'\
-       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
-       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
-       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
-    $LUIGI_DIR/luigi.cfg
-
-# edit database.properties
-sed -i -e 's/<MONGO_HOST>/$MONGO_HOST/'\
-       -e 's/<MYSQL_HOST>/$MYSQL_HOST/'\
-       -e 's/<MYSQL_USER>/$MYSQL_USER/'\
-       -e 's/<MYSQL_PASS>/$MYSQL_PASS/'\
-    $LUIGI_DIR/database.properties
-cp $LUIGI_DIR/database.properties $ECR_HOME/scripts/database.properties
-
-sudo -u $EC2_USER $LUIGI_DIR/doit.sh > $OUTPUT_DIR/${RUN_ID}__luigi.log 2>&1
-
-EOF
-
-launch_instance \
-    $ROOT_AMI_ID \
-    "$ROOT_INSTANCE_TYPE" \
-    "$KEY_PAIR" \
-    "$ROOT_SECURITY_GROUPS" \
-    "$SUBNET_ID" \
-    "$ROOT_INSTANCE_NAME" \
-    "${ROOT_LAUNCH_SCRIPT_FILE}"
-    
-upload_launch_commands
-
 
