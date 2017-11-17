@@ -110,7 +110,7 @@ class NormLauncher(luigi.Task):
         
     
     
-    def run_distributed():
+    def run_distributed(self):
         norm_ami_id = os.getenv('NORMAN_AMI_ID')
         norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
         key_name = os.getenv('KEY_PAIR')
