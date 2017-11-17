@@ -60,7 +60,7 @@ class MongoDBConfig(luigi.Config):
     md1_schema=luigi.Parameter()
 
 class AwsConfig(luigi.Config):
-    job_id=luigi.Parameter()
+    run_id=luigi.Parameter()
     sftp_host=luigi.Parameter()
     key_pair_name=luigi.Parameter()
     file_name=luigi.Parameter()
