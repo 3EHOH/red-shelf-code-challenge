@@ -157,6 +157,7 @@ unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
 echo "export HOSTNAME='$ROOT_INSTANCE_NAME'" >> $USER_HOME/.bashrc
 echo "export MONGO_HOST='$MONGO_HOST'" >> $USER_HOME/.bashrc
+echo "export MYSQL_HOST='$MYSQL_HOST'" >> $USER_HOME/.bashrc
 echo "export ROOT_SECURITY_GROUPS='$ROOT_SECURITY_GROUPS'" >> $USER_HOME/.bashrc
 echo "export MYSQL_SECURITY_GROUPS='$MYSQL_SECURITY_GROUPS'" >> $USER_HOME/.bashrc
 echo "export MONGO_SECURITY_GROUPS='$MONGO_SECURITY_GROUPS'" >> $USER_HOME/.bashrc
