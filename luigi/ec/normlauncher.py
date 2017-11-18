@@ -87,7 +87,7 @@ class NormLauncher(luigi.Task):
         
         for _ in range(NormanConfig().processes_per_instance):
             user_data_norm_command = user_data_norm_command + "\n " + \
-                                     "cd {luigidir}/; " + self.create_norman_command() + " &"
+                                     "cd " + luigi_dir + "; " + self.create_norman_command() + " &"
         
         user_data_script = user_data_host_info + user_data_norm_command
         
@@ -118,7 +118,10 @@ class NormLauncher(luigi.Task):
         user_data_script = self.create_user_data_script()
         
         print("USER DATA SCRIPT NORM LAUNCHER: ", user_data_script) #sanity check
-        
+        log_file = open(AwsConfig().run_id + "__norman_user_data.sh", "w")
+        log_file.write(user_data_script)
+        log_file.close()
+
         norm_instances = ec2.create_instances(
             MinCount=1,
             MaxCount=NormanConfig().instance_count,
