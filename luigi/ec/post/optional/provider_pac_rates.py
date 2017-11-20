@@ -4,7 +4,7 @@ import luigi
 import mysql.connector
 import subprocess
 from subprocess import Popen, PIPE
-
+from logutils import LogUtils
 from config import ModelConfig, MySQLDBConfig, PathConfig
 from run_55 import Run55 
 from ec.post.optional.pac_rate_ra_program import PACRateRAProgram 
@@ -29,6 +29,7 @@ class ProviderPACRates(luigi.Task):
                                               self.datafile))
 
     def run(self):
+        LogUtils.log_start(STEP)
         command = ['mysql', '-f', '-h{}'.format(MySQLDBConfig().prd_host),
                    '--database={}'.format(DB),
                    '-u{}'.format(MySQLDBConfig().prd_user),
@@ -39,6 +40,8 @@ class ProviderPACRates(luigi.Task):
             output,error = proc.communicate()
             with self.output().open('w') as out:
                 out.write(str(error))
+        LogUtils.log_stop(STEP)
+
 
 if __name__ == "__main__":
     luigi.run([

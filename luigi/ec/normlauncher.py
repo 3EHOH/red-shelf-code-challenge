@@ -2,7 +2,7 @@ import boto3
 import luigi
 import os
 import time
-
+from logutils import LogUtils
 from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig
 from ec.postmapreport import PostMapReport
 from run_55 import Run55
@@ -104,7 +104,7 @@ class NormLauncher(luigi.Task):
 
         security_groups_formatted = self.format_security_groups()
         user_data_script = self.create_user_data_script()
-
+        LogUtils.log_start(STEP)
         print("USER DATA SCRIPT NORM LAUNCHER: ", user_data_script) #sanity check
 
         norm_instances = ec2.create_instances(
@@ -132,7 +132,8 @@ class NormLauncher(luigi.Task):
             ValueError("Error: Norm instances not all running. Shutting down.")
         else:
             self.output().open('w').close()
-
+        
+        LogUtils.log_stop(STEP)
 
 if __name__ == "__main__":
     luigi.run([

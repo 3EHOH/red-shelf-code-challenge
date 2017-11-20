@@ -2,10 +2,11 @@ import os
 import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-
 from config import ModelConfig, PathConfig
 from run_55 import Run55
 from ec.postmap import PostMap
+from logutils import LogUtils
+
 
 STEP = 'postmapreport'
 
@@ -29,8 +30,11 @@ class PostMapReport(ExternalProgramTask):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
     def run(self):
+        LogUtils.log_start(STEP)
         super(PostMapReport, self).run()
         self.output().open('w').close()
+        LogUtils.log_stop(STEP)        
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -2,7 +2,7 @@ import os
 import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-
+from logutils import LogUtils
 from config import ModelConfig, PathConfig
 from run_55 import Run55 
 from ec.post.rasamodel import RASAModel
@@ -31,8 +31,10 @@ class RED(ExternalProgramTask):
                                               self.datafile))
     
     def run(self):
+        LogUtils.log_start(STEP)
         super(RED, self).run()
         self.output().open('w').close()
+        LogUtils.log_stop(STEP)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

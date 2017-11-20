@@ -2,7 +2,7 @@ import os
 import sys
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-
+from logutils import LogUtils
 from config import ModelConfig, MySQLDBConfig, NormanConfig, PathConfig
 from ec.normtracker import NormTracker
 from run_55 import Run55
@@ -34,6 +34,7 @@ class PostNormalize(ExternalProgramTask):
     def run(self):
         # HACK: it appears that sometimes the normalization status is not
         # updated correctly
+        LogUtils.log_start(STEP)
         sql = "update processJobStep set status = 'Complete' where jobUid = {jobuid} and stepName = 'normalization';".format(jobuid=self.jobuid)
         update_status(sql)
         super(PostNormalize, self).run()
@@ -41,6 +42,7 @@ class PostNormalize(ExternalProgramTask):
         sql = "update processJobStep set status = 'Ready' where jobUid = {jobuid} and stepName = 'construct';".format(jobuid=self.jobuid)
         update_status(sql)
         self.output().open('w').close()
+        LogUtils.log_stop(STEP)
 
 
 if __name__ == "__main__":

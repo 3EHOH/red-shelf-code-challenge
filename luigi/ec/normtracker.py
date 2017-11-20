@@ -1,7 +1,7 @@
 import os
 import luigi
 import time
-
+from logutils import LogUtils
 from utils import update_status, get_status, MySQLConn
 from config import ModelConfig, PathConfig, MySQLDBConfig
 from ec.normlauncher import NormLauncher
@@ -21,9 +21,11 @@ class NormTracker(luigi.Task):
                                               self.datafile))
 
     def run(self):
+        LogUtils.log_start(STEP)
         self.track_norman()
         self.output().open('w').close()
-
+        LogUtils.log_stop(STEP)
+        
     @staticmethod
     def track_norman():
         select_database = "use ecr;"
