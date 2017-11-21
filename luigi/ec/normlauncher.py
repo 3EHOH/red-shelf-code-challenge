@@ -5,6 +5,7 @@ import time
 import subprocess
 
 from config import PathConfig, ModelConfig, MySQLDBConfig,  NormanConfig, MongoDBConfig, AwsConfig
+from logutils import LogUtils
 from ec.postmapreport import PostMapReport
 from run_55 import Run55
 
@@ -116,7 +117,6 @@ class NormLauncher(luigi.Task):
         
         security_groups_formatted = self.format_security_groups()
         user_data_script = self.create_user_data_script()
-        
         print("USER DATA SCRIPT NORM LAUNCHER: ", user_data_script) #sanity check
         log_file = open(AwsConfig().run_id + "__norman_user_data.sh", "w")
         log_file.write(user_data_script)
@@ -156,13 +156,13 @@ class NormLauncher(luigi.Task):
             
         
     def run(self):
+        LogUtils.log_start(STEP)
         if AwsConfig().enable_distributed_mode:
             self.run_distributed()
         else:
             self.run_standalone()
-            
+        LogUtils.log_stop(STEP)
         self.output().open('w').close()
-        
 
 if __name__ == "__main__":
     luigi.run([

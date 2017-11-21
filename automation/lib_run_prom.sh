@@ -91,6 +91,9 @@ check_def MYSQL_INSTANCE_TYPE
 check_def MONGO_INSTANCE_TYPE
 check_def MYSQL_SECURITY_GROUPS
 check_def MONGO_SECURITY_GROUPS
+check_def CHANNEL_NAME
+check_def SLACK_API_TOKEN
+
 
 
 
@@ -182,6 +185,8 @@ sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<NORM_STOP_AFTER>/$NORM_STOP_AFTER/'\
        -e 's/<NORM_INSTANCE_COUNT>/$NORM_INSTANCE_COUNT/'\
        -e 's/<NORM_PROCESSES_PER_INSTANCE>/$NORM_PROCESSES_PER_INSTANCE/'\
+       -e 's/<SLACK_API_TOKEN>/$SLACK_API_TOKEN/'\
+       -e 's/<CHANNEL_NAME>/$CHANNEL_NAME/'\
     $LUIGI_DIR/luigi.cfg
 
 # edit database.properties

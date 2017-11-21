@@ -4,7 +4,7 @@ import luigi
 from utils import update_status
 import subprocess
 from subprocess import Popen, PIPE
-
+from logutils import LogUtils
 from config import ModelConfig, MySQLDBConfig, PathConfig
 from run_55 import Run55 
 from ec.post.epidedupe import Dedupe
@@ -31,6 +31,7 @@ class ProviderAttribution(luigi.Task):
         # update the status
         sql = "update processJobStep set status = 'Active', stepStart = now() where jobUid = {jobuid} and stepName = 'providerattribution';".format(jobuid=self.jobuid)
         update_status(sql)
+        LogUtils.log_start(STEP)
         # run the SQL script
         command = ['mysql', '-f', '-h{}'.format(MySQLDBConfig().prd_host),
                    '--database={}'.format(DB),
@@ -45,6 +46,7 @@ class ProviderAttribution(luigi.Task):
         # update the status
         sql = "update processJobStep set status = 'Complete', stepEnd = now() where jobUid = {jobuid} and stepName = 'providerattribution';".format(jobuid=self.jobuid)
         update_status(sql)
+        LogUtils.log_stop(STEP)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import sys
 from time import sleep
 import luigi
 from luigi.contrib.external_program import ExternalProgramTask
-
+from logutils import LogUtils
 from config import ModelConfig, MySQLDBConfig, ConnieConfig, PathConfig
 from run_55 import Run55 
 from ec.postnormalizationreport import PostNormalizationReport
@@ -36,8 +36,10 @@ class Construct(ExternalProgramTask):
 
     def run(self):
         sleep(600*self.conn_id)
+        LogUtils.log_start(STEP)
         super(Construct, self).run()
         self.output().open('w').close()
+        LogUtils.log_stop(STEP)
 
 
 if __name__ == "__main__":
