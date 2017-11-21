@@ -38,9 +38,10 @@ class NormanConfig(luigi.Config):
     instance_count=luigi.IntParameter()
 
 class ConnieConfig(luigi.Config):
-    count=luigi.IntParameter()
     chunksize=luigi.IntParameter()
     stopafter=luigi.IntParameter()
+    processes_per_instance=luigi.IntParameter()
+    instance_count=luigi.IntParameter()
 
 class MySQLDBConfig(luigi.Config):
     # job database

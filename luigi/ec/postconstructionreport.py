@@ -7,7 +7,7 @@ import mysql.connector
 from logutils import LogUtils
 from config import ModelConfig, ConnieConfig, PathConfig, MySQLDBConfig
 from run_55 import Run55 
-from ec.construction import Construct
+from ec.constructiontracker import ConstructionTracker
 
 STEP = 'postconstructionreport'
 
@@ -22,8 +22,7 @@ class PostConstructionReport(ExternalProgramTask):
     jobuid = luigi.IntParameter()
 
     def requires(self):
-        conn_ids = list(range(0, ConnieConfig().count))
-        return [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
+        return [ConstructionTracker(jobuid=self.jobuid)]
 
     def program_args(self):
         return '{} jobuid={}'.format(JARGS, self.jobuid).split(' ')
