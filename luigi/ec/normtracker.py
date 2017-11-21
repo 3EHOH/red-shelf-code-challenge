@@ -3,7 +3,7 @@ import luigi
 import time
 from logutils import LogUtils
 from utils import update_status, get_status, MySQLConn
-from config import ModelConfig, PathConfig, MySQLDBConfig
+from config import ModelConfig, PathConfig, MySQLDBConfig, NormanConfig
 from ec.normlauncher import NormLauncher
 
 STEP = 'normtracker'
@@ -45,9 +45,11 @@ class NormTracker(luigi.Task):
             query_complete = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
             complete_count = get_status(query_complete)
 
+            #known failure - eliminate this once we resolve the missing record issue
+            complete_count = complete_count - NormanConfig().knownfailedrecordcount
+
             count = get_status("select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization';")
 
-            # the count will return empty set initially hence have to make sure that this step isn't skipped immediately
             if 0 < count == complete_count > 0:
                 return True
                 break

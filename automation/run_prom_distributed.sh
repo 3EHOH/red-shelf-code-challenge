@@ -36,7 +36,7 @@ set_db_hosts() {
     # capture the server IP addresses so we can rewrite database.properties
     MYSQL_HOST=$(python find_server_ip.py $MYSQL_INSTANCE_NAME)
     MONGO_HOST=$(python find_server_ip.py $MONGO_INSTANCE_NAME)
-    
+
     echo "MySQL: $MYSQL_HOST"
     echo "Mongo: $MONGO_HOST"
 }
@@ -46,4 +46,3 @@ DISTRIBUTED_MODE=true
 
 # 5. Run the launcher
 source lib_run_prom.sh
-
