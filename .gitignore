@@ -5,6 +5,7 @@ aws_shared_config.cfg
 
 
 *.swp
+*.bak
 *~
 
 # Byte-compiled / optimized / DLL files

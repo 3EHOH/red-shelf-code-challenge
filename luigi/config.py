@@ -38,9 +38,10 @@ class NormanConfig(luigi.Config):
     instance_count=luigi.IntParameter()
 
 class ConnieConfig(luigi.Config):
-    count=luigi.IntParameter()
     chunksize=luigi.IntParameter()
     stopafter=luigi.IntParameter()
+    processes_per_instance=luigi.IntParameter()
+    instance_count=luigi.IntParameter()
 
 class MySQLDBConfig(luigi.Config):
     # job database
@@ -66,7 +67,7 @@ class MongoDBConfig(luigi.Config):
     md1_schema=luigi.Parameter()
 
 class AwsConfig(luigi.Config):
-    job_id=luigi.Parameter()
+    run_id=luigi.Parameter()
     sftp_host=luigi.Parameter()
     key_pair_name=luigi.Parameter()
     file_name=luigi.Parameter()

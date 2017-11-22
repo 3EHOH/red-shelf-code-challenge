@@ -11,10 +11,11 @@ from ec.postmap import PostMap
 from ec.postmapreport import PostMapReport
 from ec.normtracker import NormTracker
 from ec.normlauncher import NormLauncher
-from ec.normalization import Normalize
 from ec.postnormalization import PostNormalize
 from ec.postnormalizationreport import PostNormalizationReport
 from ec.construction import Construct
+from ec.constructionlauncher import ConstructionLauncher
+from ec.constructiontracker import ConstructionTracker
 from ec.postconstructionreport import PostConstructionReport
 from ec.post.epidedupe import Dedupe
 from ec.post.providerattribution import ProviderAttribution
@@ -67,9 +68,14 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         # construction tasks
-        conn_ids = list(range(0, ConnieConfig().count))
-        conn_tasks = [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
-        conn_tasks.append(PostConstructionReport(jobuid=self.jobuid))
+        conn_tasks = [
+            ConstructionLauncher(jobuid=self.jobuid),
+            ConstructionTracker(jobuid=self.jobuid),
+            PostConstructionReport(jobuid=self.jobuid)
+        ]
+        # conn_ids = list(range(0, ConnieConfig().count))
+        # conn_tasks = [Construct(jobuid=self.jobuid, conn_id=id) for id in conn_ids]
+        # conn_tasks.append(PostConstructionReport(jobuid=self.jobuid))
 
         # post EC tasks
         postec_tasks = [
@@ -110,14 +116,6 @@ class PipelineTask(luigi.WrapperTask):
         shutdown_task = [
             Terminate(jobuid=self.jobuid)
         ]
-
-        # Cleanup tasks
-        # cleanup_tasks = [
-        #     CollectOutput(jobuid=self.jobuid),
-        #     UploadOutput(jobuid=self.jobuid),
-        #     CollectLogs(jobuid=self.jobuid),
-        #     UploadLogs(jobuid=self.jobuid)
-        # ]
 
         # Let's go!
         tasks = setup_tasks + map_tasks + norm_tasks + conn_tasks + \

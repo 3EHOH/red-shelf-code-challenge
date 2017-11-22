@@ -35,7 +35,6 @@ aws ec2 run-instances \
     --key-name "$3" \
     --security-group-ids $4 \
     --subnet-id "$5" \
-    --no-associate-public-ip-address \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$6}]' \
     $USER_DATA \
 > $LAUNCH_COMMAND_DIR/${6}__instance.launch
@@ -159,8 +158,16 @@ sudo -u $EC2_USER mkdir $OUTPUT_DIR
 
 unzip -d $DOWNLOAD_DIR $DOWNLOAD_FILE
 
-echo "export HOSTNAME=$ROOT_INSTANCE_NAME" >> $USER_HOME/.bashrc
-echo "export MONGO_IP=$MONGO_HOST" >> $USER_HOME/.bashrc
+echo "export HOSTNAME='$ROOT_INSTANCE_NAME'" >> $USER_HOME/.bashrc
+echo "export MONGO_HOST='$MONGO_HOST'" >> $USER_HOME/.bashrc
+echo "export MYSQL_HOST='$MYSQL_HOST'" >> $USER_HOME/.bashrc
+echo "export ROOT_SECURITY_GROUPS='$ROOT_SECURITY_GROUPS'" >> $USER_HOME/.bashrc
+echo "export MYSQL_SECURITY_GROUPS='$MYSQL_SECURITY_GROUPS'" >> $USER_HOME/.bashrc
+echo "export MONGO_SECURITY_GROUPS='$MONGO_SECURITY_GROUPS'" >> $USER_HOME/.bashrc
+echo "export NORMAN_AMI_ID='$NORMAN_AMI_ID'" >> $USER_HOME/.bashrc
+echo "export NORMAN_INSTANCE_TYPE='$NORMAN_INSTANCE_TYPE'" >> $USER_HOME/.bashrc
+echo "export KEY_PAIR='$KEY_PAIR'" >> $USER_HOME/.bashrc
+echo "export LUIGI_DIR='$LUIGI_DIR'" >> $USER_HOME/.bashrc
 
 # edit luigi.cfg to contain the new job ID and file location
 sed -i -e 's/<RUN_ID>/$RUN_ID/'\
@@ -178,6 +185,10 @@ sed -i -e 's/<RUN_ID>/$RUN_ID/'\
        -e 's/<NORM_STOP_AFTER>/$NORM_STOP_AFTER/'\
        -e 's/<NORM_INSTANCE_COUNT>/$NORM_INSTANCE_COUNT/'\
        -e 's/<NORM_PROCESSES_PER_INSTANCE>/$NORM_PROCESSES_PER_INSTANCE/'\
+       -e 's/<CONNIE_CHUNK_SIZE>/$CONNIE_CHUNK_SIZE/'\
+       -e 's/<CONNIE_STOP_AFTER>/$CONNIE_STOP_AFTER/'\
+       -e 's/<CONNIE_INSTANCE_COUNT>/$CONNIE_INSTANCE_COUNT/'\
+       -e 's/<CONNIE_PROCESSES_PER_INSTANCE>/$CONNIE_PROCESSES_PER_INSTANCE/'\
        -e 's/<SLACK_API_TOKEN>/$SLACK_API_TOKEN/'\
        -e 's/<CHANNEL_NAME>/$CHANNEL_NAME/'\
     $LUIGI_DIR/luigi.cfg
