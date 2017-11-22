@@ -17,17 +17,17 @@ class NormLauncher(luigi.Task):
     """ launch external normalization services """
     datafile = luigi.Parameter(default=STEP)
     jobuid = luigi.IntParameter()
-    
+
     def requires(self):
         return [PostMapReport(jobuid=self.jobuid)]
-    
+
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,
                                               self.datafile))
-    
+
     @staticmethod
     def format_security_groups():
-        
+
         root_security_groups = os.getenv('ROOT_SECURITY_GROUPS')
         mysql_security_groups = os.getenv('MYSQL_SECURITY_GROUPS')
         mongo_security_groups = os.getenv('MONGO_SECURITY_GROUPS')
@@ -61,7 +61,7 @@ class NormLauncher(luigi.Task):
         mongo_host = os.getenv('MONGO_HOST')
         mysql_host = os.getenv('MYSQL_HOST')
         luigi_dir = os.getenv('LUIGI_DIR')
-        
+
         user_data_host_info = """#!/bin/bash
         sed -i "s/md1.host=.*/md1.host={mongohost}/" {luigidir}/database.properties
         sed -i "s/prd.host=.*/prd.host={prdhost}/" {luigidir}/database.properties
@@ -73,48 +73,48 @@ class NormLauncher(luigi.Task):
         sed -i "s/template.host=.*/template.host={templatehost}/" {luigidir}/database.properties
         sed -i "s/template.user=.*/template.user={mysqluser}/" {luigidir}/database.properties
         sed -i "s/template.password=.*/template.password={mysqlpass}/" {luigidir}/database.properties"""
-        
+
         user_data_host_info = user_data_host_info.format(
             mongohost=mongo_host,
             luigidir=luigi_dir,
-            prdhost=mysql_host,
-            ecrhost=mysql_host,
-            templatehost=mysql_host,
-            epbhost=mysql_host,
+            prdhost=MySQLDBConfig().prd_host,
+            ecrhost=MySQLDBConfig().prd_host, #there is no ecr_host var
+            templatehost=MySQLDBConfig().template_host,
+            epbhost=MySQLDBConfig().epb_host,
             mysqluser=MySQLDBConfig().prd_user,
             mysqlpass=MySQLDBConfig().prd_pass)
-        
+
         user_data_norm_command = ""
-        
+
         for _ in range(NormanConfig().processes_per_instance):
             user_data_norm_command = user_data_norm_command + "\n " + \
                                      "cd " + luigi_dir + "; " + self.create_norman_command() + " &"
-        
+
         user_data_script = user_data_host_info + user_data_norm_command
-        
+
         return user_data_script
-        
+
     @staticmethod
     def name_norms(norm_instances):
-        
+
         norm_names = []
-        
+
         host_name = os.getenv('HOSTNAME')
-        
+
         for instance in norm_instances:
             tag_name = host_name + 'Norm_' + instance.id
             ec2.create_tags(Resources=[instance.id], Tags=[{'Key': 'Name', 'Value': tag_name}])
             norm_names.append(tag_name)
-            
+
         return norm_names
-        
-    
-    
+
+
+
     def run_distributed(self):
         norm_ami_id = os.getenv('NORMAN_AMI_ID')
         norm_instance_type = os.getenv('NORMAN_INSTANCE_TYPE')
         key_name = os.getenv('KEY_PAIR')
-        
+
         security_groups_formatted = self.format_security_groups()
         user_data_script = self.create_user_data_script()
         print("USER DATA SCRIPT NORM LAUNCHER: ", user_data_script) #sanity check
@@ -131,30 +131,30 @@ class NormLauncher(luigi.Task):
             SecurityGroups=security_groups_formatted,
             UserData=user_data_script
         )
-        
+
         time.sleep(30) #time buffer before iterating over and adding name tags
-        
+
         norm_names = self.name_norms(norm_instances)
-        
+
         time.sleep(60) #buffer to let instances reach running state before ending this step
-        
+
         running_instance_count = len(list(ec2.instances.filter(Filters=[{'Name': 'instance-state-name',
                                                                          'Values': ['running']},
                                                                         {'Name': 'tag:Name',
                                                                          'Values': norm_names}])))
-        
+
         if not running_instance_count == NormanConfig().instance_count:
             ValueError("Error: Norm instances not all running. Shutting down.")
-            
-        
+
+
     def run_standalone(self):
         total_norman_count = NormanConfig().instance_count * NormanConfig().processes_per_instance
-        
+
         for _ in range(total_norman_count):
             norman_command = self.create_norman_command()
             subprocess.Popen(norman_command.split())
-            
-        
+
+
     def run(self):
         LogUtils.log_start(STEP)
         if AwsConfig().enable_distributed_mode:
