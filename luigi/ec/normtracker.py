@@ -45,9 +45,6 @@ class NormTracker(luigi.Task):
             query_complete = "select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization' and status='Complete';"
             complete_count = get_status(query_complete)
 
-            #known failure - eliminate this once we resolve the missing record issue
-            complete_count = complete_count - NormanConfig().knownfailedrecordcount
-
             count = get_status("select count(*) from jobStepQueue where jobUid=1 and stepName ='normalization';")
 
             if 0 < count == complete_count > 0:
