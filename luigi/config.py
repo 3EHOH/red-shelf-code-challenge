@@ -42,6 +42,7 @@ class ConnieConfig(luigi.Config):
     stopafter=luigi.IntParameter()
     processes_per_instance=luigi.IntParameter()
     instance_count=luigi.IntParameter()
+    knownfailedrecordcount=luigi.IntParameter()
 
 class MySQLDBConfig(luigi.Config):
     # job database
@@ -65,6 +66,7 @@ class MySQLDBConfig(luigi.Config):
 
 class MongoDBConfig(luigi.Config):
     md1_schema=luigi.Parameter()
+    md1_host=luigi.Parameter()
 
 class AwsConfig(luigi.Config):
     run_id=luigi.Parameter()

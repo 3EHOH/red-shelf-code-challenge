@@ -75,7 +75,7 @@ class NormLauncher(luigi.Task):
         sed -i "s/template.password=.*/template.password={mysqlpass}/" {luigidir}/database.properties"""
 
         user_data_host_info = user_data_host_info.format(
-            mongohost=mongo_host,
+            mongohost=MongoDBConfig().md1_host,
             luigidir=luigi_dir,
             prdhost=MySQLDBConfig().prd_host,
             ecrhost=MySQLDBConfig().prd_host, #there is no ecr_host var
