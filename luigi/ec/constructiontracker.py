@@ -45,7 +45,6 @@ class ConstructionTracker(luigi.Task):
             complete_count = get_status(query_complete)
 
             #known failure - eliminate this once we resolve the missing record issue
-            complete_count = complete_count
 
             count = get_status("select count(*) from jobStepQueue where jobUid=1 and stepName ='construct';")
             count = count - ConnieConfig().knownfailedrecordcount
