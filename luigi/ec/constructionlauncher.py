@@ -67,10 +67,10 @@ class ConstructionLauncher(luigi.Task):
 
         return user_data_script.format(
             luigidir=luigi_dir,
-            prdhost=mysql_host,
-            ecrhost=mysql_host,
-            templatehost=mysql_host,
-            epbhost=mysql_host,
+            prdhost=MySQLDBConfig().prd_host,
+            ecrhost=MySQLDBConfig().prd_host, #there's no ecr_host var
+            templatehost=MySQLDBConfig().template_host,
+            epbhost=MySQLDBConfig().epb_port,
             mysqluser=MySQLDBConfig().prd_user,
             mysqlpass=MySQLDBConfig().prd_pass,
             cpath=Run55.cpath(),

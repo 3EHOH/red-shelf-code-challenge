@@ -3,7 +3,7 @@ import luigi
 import time
 
 from utils import update_status, get_status, MySQLConn
-from config import ModelConfig, PathConfig, MySQLDBConfig
+from config import ModelConfig, PathConfig, MySQLDBConfig, ConnieConfig
 from ec.constructionlauncher import ConstructionLauncher
 
 STEP = 'constructiontracker'
@@ -44,7 +44,10 @@ class ConstructionTracker(luigi.Task):
             query_complete = "select count(*) from jobStepQueue where jobUid=1 and stepName ='construct' and status='Complete';"
             complete_count = get_status(query_complete)
 
-            count = 49998  #get_status("select count(*) from jobStepQueue where jobUid=1 and stepName ='construct';")
+            #known failure - eliminate this once we resolve the missing record issue
+
+            count = get_status("select count(*) from jobStepQueue where jobUid=1 and stepName ='construct';")
+            count = count - ConnieConfig().knownfailedrecordcount
 
             # the count will return empty set initially hence have to make sure that this step isn't skipped immediately
             if 0 < count == complete_count > 0:
