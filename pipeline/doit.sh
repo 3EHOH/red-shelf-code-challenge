@@ -8,7 +8,7 @@ export LD_LIBRARY_PATH=/usr/lib/jvm/java/jre/lib/amd64/server/:$LD_LIBRARY_PATH
 
 source ~/.bashrc
 
-cd /home/ec2-user/prom-rebuild/luigi
+cd /home/ec2-user/prom-rebuild/pipeline
 
 if [ $# -gt 0 ]; then
     echo "Your command line contains $# arguments"
@@ -16,9 +16,10 @@ else
     echo "Your command line contains no arguments"
 fi
 
-CONFIG_FILE="$1"
-RUN_ID="$2"
+PURCHASE_BUCKETS="$1"
+PURCHASE_DATA="$2"
 
-echo $CONFIG_FILE
+export PURCHASE_BUCKETS
+export PURCHASE_DATA
 
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask

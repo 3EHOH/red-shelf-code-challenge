@@ -1,6 +1,8 @@
 import os
 import sys
 import luigi
+from config import PathConfig
+from steps.preflightcheck import PreflightCheck
 
 class PipelineTask(luigi.WrapperTask):
 
@@ -10,9 +12,7 @@ class PipelineTask(luigi.WrapperTask):
             PreflightCheck()
         ]
 
-
-
-        return tasks
+        return setup_tasks
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,"dummy"))
