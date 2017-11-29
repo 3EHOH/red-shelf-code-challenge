@@ -4,7 +4,6 @@ import csv
 import json
 
 
-
 def main():
 
     purchase_keys = ['order_id', 'isbn', 'publisher', 'school', 'price', 'duration', 'order_datetime']
@@ -14,12 +13,6 @@ def main():
     purchase_data = []
 
     bucket_data = []
-
-    def find_and_assign(compare):
-        for i, dic in enumerate(final_buckets):
-            if dic['bucket'].lower() == compare and record_values not in dic['purchases']:
-                dic['purchases'].append(record_values)
-
 
     with open('purchase_data.csv') as csvfile:
             purchase_reader = csv.reader(csvfile)
@@ -40,7 +33,8 @@ def main():
     final_buckets = []
 
     for bucket in bucket_data:
-        final_buckets.append({"bucket": ','.join(bucket.values()), "purchases": []})
+        bucket_name = ','.join(bucket.values())
+        final_buckets.append({"bucket": bucket_name, "purchases": []})
 
     for record in purchase_data:
 
@@ -51,38 +45,37 @@ def main():
             if record['publisher'].lower() == bucket['publisher'].lower() and record['price'] == bucket['price'] and \
                             record['duration'].lower() == bucket['duration'].lower():
 
-                for i, dic in enumerate(final_buckets):
-                    if dic['bucket'] == ','.join(bucket.values()) and ','.join(record.values()) not in dic['purchases']:
-                        dic['purchases'].append(','.join(record.values()))
+                compare = record_values
+                find_and_assign(compare, final_buckets, record_values)
 
             elif record['publisher'].lower() == bucket['publisher'].lower() and record['price'] == bucket['price']:
 
                 compare = record['publisher'].lower() + "," + record['price'] + "," + "*"
-                find_and_assign(compare)
+                find_and_assign(compare, final_buckets, record_values)
 
             elif record['price'].lower() == bucket['price'].lower() and record['duration'] == bucket['duration']:
 
                 compare = "*" + "," + record['price'] + "," + record['duration']
-                find_and_assign(compare)
+                find_and_assign(compare, final_buckets, record_values)
 
             elif record['publisher'].lower() == bucket['publisher'].lower():
 
                 compare = record['publisher'].lower() + "," + "*" + "," + "*"
-                find_and_assign(compare)
+                find_and_assign(compare, final_buckets, record_values)
 
             elif record['price'].lower() == bucket['price'].lower():
 
                 compare = "*" + "," + record['price'] + "," + "*"
-                find_and_assign(compare)
+                find_and_assign(compare, final_buckets, record_values)
 
             elif record['duration'].lower() == bucket['duration'].lower():
 
                 compare = record['publisher'].lower() + "," + "*" + "," + record['duration']
-                find_and_assign(compare)
+                find_and_assign(compare, final_buckets, record_values)
 
             else:
                 compare = "*,*,*"
-                find_and_assign(compare)
+                find_and_assign(compare, final_buckets, record_values)
 
     # for d in final_buckets):
     #     for purchases in d['purchases']:
@@ -95,6 +88,10 @@ def main():
     print(json_data)
 
 
+def find_and_assign(compare, final_buckets, record_values):
+    for i, dic in enumerate(final_buckets):
+        if dic['bucket'].lower() == compare and record_values not in dic['purchases']:
+            dic['purchases'].append(record_values)
 
 
 if __name__ == "__main__":
