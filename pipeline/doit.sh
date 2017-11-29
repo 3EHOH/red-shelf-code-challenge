@@ -16,4 +16,9 @@ else
     echo "Your command line contains no arguments"
 fi
 
+CONFIG_FILE="$1"
+RUN_ID="$2"
+
+echo $CONFIG_FILE
+
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask

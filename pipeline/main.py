@@ -30,11 +30,11 @@ def main():
                 bucket_record[bucket_keys[i]] = row[i]
             bucket_data.append(bucket_record)
 
-    final_buckets = []
+    output_buckets = []
 
     for bucket in bucket_data:
         bucket_name = ','.join(bucket.values())
-        final_buckets.append({"bucket": bucket_name, "purchases": []})
+        output_buckets.append({"bucket": bucket_name, "purchases": []})
 
     for record in purchase_data:
 
@@ -46,50 +46,50 @@ def main():
                             record['duration'].lower() == bucket['duration'].lower():
 
                 compare = record_values
-                find_and_assign(compare, final_buckets, record_values)
+                find_and_assign(compare, output_buckets, record_values)
 
             elif record['publisher'].lower() == bucket['publisher'].lower() and record['price'] == bucket['price']:
 
                 compare = record['publisher'].lower() + "," + record['price'] + "," + "*"
-                find_and_assign(compare, final_buckets, record_values)
+                find_and_assign(compare, output_buckets, record_values)
 
             elif record['price'].lower() == bucket['price'].lower() and record['duration'] == bucket['duration']:
 
                 compare = "*" + "," + record['price'] + "," + record['duration']
-                find_and_assign(compare, final_buckets, record_values)
+                find_and_assign(compare, output_buckets, record_values)
 
             elif record['publisher'].lower() == bucket['publisher'].lower():
 
                 compare = record['publisher'].lower() + "," + "*" + "," + "*"
-                find_and_assign(compare, final_buckets, record_values)
+                find_and_assign(compare, output_buckets, record_values)
 
             elif record['price'].lower() == bucket['price'].lower():
 
                 compare = "*" + "," + record['price'] + "," + "*"
-                find_and_assign(compare, final_buckets, record_values)
+                find_and_assign(compare, output_buckets, record_values)
 
             elif record['duration'].lower() == bucket['duration'].lower():
 
                 compare = record['publisher'].lower() + "," + "*" + "," + record['duration']
-                find_and_assign(compare, final_buckets, record_values)
+                find_and_assign(compare, output_buckets, record_values)
 
             else:
                 compare = "*,*,*"
-                find_and_assign(compare, final_buckets, record_values)
+                find_and_assign(compare, output_buckets, record_values)
 
-    # for d in final_buckets):
+    # for d in output_buckets):
     #     for purchases in d['purchases']:
     #
     #         d['purchase'] = set(purchase)
 
     #either use a set and convert to lists here or use list insert if not exists
 
-    json_data = json.dumps(final_buckets)
+    json_data = json.dumps(output_buckets)
     print(json_data)
 
 
-def find_and_assign(compare, final_buckets, record_values):
-    for i, dic in enumerate(final_buckets):
+def find_and_assign(compare, output_buckets, record_values):
+    for i, dic in enumerate(output_buckets):
         if dic['bucket'].lower() == compare and record_values not in dic['purchases']:
             dic['purchases'].append(record_values)
 
