@@ -13,10 +13,10 @@ class PreflightCheck(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-        purchase_data_file = os.getenv('PURCHASE_DATA')
+        purchase_data_file = PathConfig().purchase_data
         does_purchase_data_file_exist = self.file_exists_check(purchase_data_file)
 
-        purchase_data_file = os.getenv('PURCHASE_BUCKETS')
+        purchase_data_file = PathConfig().purchase_buckets
         does_purchase_buckets_file_exist = self.file_exists_check(purchase_data_file)
 
         if not does_purchase_data_file_exist:
