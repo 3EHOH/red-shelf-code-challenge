@@ -82,7 +82,7 @@ class SortPurchaseData(luigi.Task):
         purchase_data = self.read_files("readpurchasedata")
         bucket_data = self.read_files("readbucketdata")
 
-        self.sort_data(purchase_data, bucket_data, output_buckets)
+        self.sort_data(self, purchase_data, bucket_data, output_buckets)
 
         with self.output().open('w') as out_file:
             out_file.write(json.dumps(output_buckets))
