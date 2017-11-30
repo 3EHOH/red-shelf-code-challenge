@@ -30,6 +30,6 @@ PURCHASE_DATA="$2"
 echo "PURCHASE_BUCKETS='$PURCHASE_BUCKETS'" >> /home/ec2-user/.bashrc
 echo "PURCHASE_DATA='$PURCHASE_BUCKETS'" >> /home/ec2-user/.bashrc
 
-source ~/.bashrc
+source /home/ec2-user/.bashrc
 
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask
