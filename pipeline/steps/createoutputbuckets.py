@@ -25,16 +25,12 @@ class CreateOutputBuckets(luigi.Task):
         with open(bucket_data_path, 'r') as f:
             bucket_data = json.load(f)
 
-        print("BUCKET DATA ", bucket_data)
-
         output_buckets = []
 
         for bucket in bucket_data:
 
             bucket_name = ','.join(bucket.values())
             output_buckets.append({"bucket": bucket_name, "purchases": []})
-
-        print("BUCKET DATA ", output_buckets)
 
         with self.output().open('w') as out_file:
             out_file.write(json.dumps(output_buckets))

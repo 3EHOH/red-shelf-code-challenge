@@ -12,48 +12,7 @@ class SortPurchaseData(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
     @staticmethod
-    def find_and_assign(compare, output_buckets, record_values):
-        for i, dic in enumerate(output_buckets):
-            if dic['bucket'].lower() == compare and record_values not in dic['purchases']:
-                dic['purchases'].append(record_values)
-
-    @staticmethod
-    def requires():
-        return [CreateOutputBuckets()]
-
-    def output(self):
-        return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
-
-    @staticmethod
-    def read_files(pathname):
-        path_to_file = os.path.join(PathConfig().target_path, pathname)
-
-        with open(path_to_file, 'r') as f:
-            file_output = json.load(f)
-
-        return file_output
-
-    def run(self):
-
-        # output_buckets_path = os.path.join(PathConfig().target_path, "createoutputbuckets")
-        #
-        # with open(output_buckets_path, 'r') as f:
-        #     output_buckets = json.load(f)
-
-        output_buckets = self.read_files("createoutputbuckets")
-        purchase_data = self.read_files("readpurchasedata")
-        bucket_data = self.read_files("readbucketdata")
-
-        # purchase_data_path = os.path.join(PathConfig().target_path, "readpurchasedata")
-        #
-        # with open(purchase_data_path, 'r') as f:
-        #     purchase_data = json.load(f)
-        #
-        # bucket_data_path = os.path.join(PathConfig().target_path, "readbucketdata")
-        #
-        # with open(bucket_data_path, 'r') as f:
-        #     bucket_data = json.load(f)
-
+    def sort_data(self, purchase_data, bucket_data, output_buckets):
         for record in purchase_data:
 
             record_values = ','.join(record.values())
@@ -94,6 +53,36 @@ class SortPurchaseData(luigi.Task):
                 else:
                     compare = "*,*,*"
                     self.find_and_assign(compare, output_buckets, record_values)
+
+    @staticmethod
+    def find_and_assign(compare, output_buckets, record_values):
+        for i, dic in enumerate(output_buckets):
+            if dic['bucket'].lower() == compare and record_values not in dic['purchases']:
+                dic['purchases'].append(record_values)
+
+    @staticmethod
+    def requires():
+        return [CreateOutputBuckets()]
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
+
+    @staticmethod
+    def read_files(pathname):
+        path_to_file = os.path.join(PathConfig().target_path, pathname)
+
+        with open(path_to_file, 'r') as f:
+            file_output = json.load(f)
+
+        return file_output
+
+    def run(self):
+
+        output_buckets = self.read_files("createoutputbuckets")
+        purchase_data = self.read_files("readpurchasedata")
+        bucket_data = self.read_files("readbucketdata")
+
+        self.sort_data(purchase_data, bucket_data, output_buckets)
 
         with self.output().open('w') as out_file:
             out_file.write(json.dumps(output_buckets))

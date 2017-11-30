@@ -10,3 +10,5 @@ class PathConfig(luigi.Config):
     target_path = luigi.Parameter(default=TARGET_PATH)
     purchase_buckets = luigi.Parameter()
     purchase_data = luigi.Parameter()
+    purchase_keys = luigi.Parameter()
+    bucket_keys = luigi.Parameter()

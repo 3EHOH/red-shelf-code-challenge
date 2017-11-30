@@ -21,7 +21,7 @@ class ReadPurchaseData(luigi.Task):
 
     def run(self):
 
-        purchase_keys = ['order_id', 'isbn', 'publisher', 'school', 'price', 'duration', 'order_datetime']
+        purchase_keys = PathConfig().purchase_keys()
 
         purchase_data = []
 

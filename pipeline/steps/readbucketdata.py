@@ -21,7 +21,7 @@ class ReadBucketData(luigi.Task):
 
     def run(self):
 
-        bucket_keys = ['publisher', 'price', 'duration']
+        bucket_keys = PathConfig().bucket_keys
 
         bucket_data = []
 
