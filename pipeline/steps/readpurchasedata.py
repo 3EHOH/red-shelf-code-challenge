@@ -21,7 +21,7 @@ class ReadPurchaseData(luigi.Task):
 
     def run(self):
         purchase_data_file = PurchaseConfig().purchase_data
-        purchase_keys = PurchaseConfig().purchase_keys().split(",")
+        purchase_keys = PurchaseConfig().purchase_keys.split(",")
         purchase_data = []
 
         with open(purchase_data_file) as csvfile:
