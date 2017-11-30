@@ -13,6 +13,7 @@ class SortPurchaseData(luigi.Task):
 
     @staticmethod
     def sort_data(self, purchase_data, bucket_data, output_buckets):
+
         for record in purchase_data:
 
             record_values = ','.join(record.values())
