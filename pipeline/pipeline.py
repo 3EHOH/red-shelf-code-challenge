@@ -2,7 +2,9 @@ import os
 import sys
 import luigi
 from config import PathConfig
-from steps.preflightcheck import PreflightCheck, ReadFiles
+from steps.preflightcheck import PreflightCheck
+from steps.readpurchasedata import ReadPurchaseData
+from steps.readbucketdata import ReadBucketData
 
 
 class PipelineTask(luigi.WrapperTask):
@@ -14,13 +16,16 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         read_files = [
-            ReadFiles()
+            ReadPurchaseData(),
+            ReadBucketData()
         ]
 
         return setup_tasks + read_files
 
-    def output(self):
+    @staticmethod
+    def output():
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,"dummy"))
+
 
 if __name__ == "__main__":
     luigi.run([

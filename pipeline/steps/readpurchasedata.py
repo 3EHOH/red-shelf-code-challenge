@@ -5,15 +5,16 @@ import csv
 import json
 from steps.preflightcheck import PreflightCheck
 
-STEP = 'readfiles'
+STEP = 'readpurchasedata'
 
 
-class ReadFiles(luigi.Task):
+class ReadPurchaseData(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
 
-    def requires(self):
-        return [PreflightCheck(jobuid=self.jobuid)]
+    @staticmethod
+    def requires():
+        return [PreflightCheck()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
@@ -22,11 +23,7 @@ class ReadFiles(luigi.Task):
 
         purchase_keys = ['order_id', 'isbn', 'publisher', 'school', 'price', 'duration', 'order_datetime']
 
-        bucket_keys = ['publisher', 'price', 'duration']
-
         purchase_data = []
-
-        bucket_data = []
 
         with open('purchase_data.csv') as csvfile:
             purchase_reader = csv.reader(csvfile)
@@ -36,20 +33,12 @@ class ReadFiles(luigi.Task):
                     purchase_record[purchase_keys[i]] = row[i]
                 purchase_data.append(purchase_record)
 
-        with open('purchase_buckets.csv') as csvfile:
-            bucket_reader = csv.reader(csvfile)
-            for row in bucket_reader:
-                bucket_record = {}
-                for i in range(len(bucket_keys)):
-                    bucket_record[bucket_keys[i]] = row[i]
-                bucket_data.append(bucket_record)
-
         with self.output().open('w') as out_file:
-            out_file.write(json.dumps(bucket_data))
+            out_file.write(json.dumps(purchase_data))
 
 
 if __name__ == "__main__":
     luigi.run([
-        'ReadFiles',
+        'ReadPurchaseData',
         '--workers', '1',
         '--local-scheduler'])
