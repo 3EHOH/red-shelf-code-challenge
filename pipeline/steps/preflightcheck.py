@@ -1,6 +1,7 @@
 import luigi
 import os
 from config import PathConfig
+from pathlib import Path
 
 STEP = 'preflightcheck'
 
@@ -27,9 +28,8 @@ class PreflightCheck(luigi.Task):
             self.output().open('w').close()
 
     @staticmethod
-    def file_exists_check(file_env):
-        file_name = os.getenv(file_env)
-        if file_name.is_file():
+    def file_exists_check(file_name):
+        if Path(file_name).is_file():
             return True
 
 
