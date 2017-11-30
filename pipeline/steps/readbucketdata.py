@@ -5,10 +5,10 @@ import csv
 import json
 from steps.preflightcheck import PreflightCheck
 
-STEP = 'readfiles'
+STEP = 'readbucketdata'
 
 
-class ReadFiles(luigi.Task):
+class ReadBucketData(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
 
@@ -39,6 +39,6 @@ class ReadFiles(luigi.Task):
 
 if __name__ == "__main__":
     luigi.run([
-        'ReadFiles',
+        'ReadBucketData',
         '--workers', '1',
         '--local-scheduler'])
