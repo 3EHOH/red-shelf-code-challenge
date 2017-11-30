@@ -23,13 +23,8 @@ fi
 PURCHASE_BUCKETS="$1"
 PURCHASE_DATA="$2"
 
-#sed -i -e 's/<PURCHASE_BUCKETS>/'$PURCHASE_BUCKETS'/'\
-#       -e 's/<PURCHASE_DATA>/'$PURCHASE_DATA'/'\
-#    /home/ec2-user/prom-rebuild/pipeline/luigi.cfg
-
-echo "PURCHASE_BUCKETS='$PURCHASE_BUCKETS'" >> /home/ec2-user/.bashrc
-echo "PURCHASE_DATA='$PURCHASE_BUCKETS'" >> /home/ec2-user/.bashrc
-
-source /home/ec2-user/.bashrc
+sed -i -e 's/<PURCHASE_BUCKETS>/'$PURCHASE_BUCKETS'/'\
+       -e 's/<PURCHASE_DATA>/'$PURCHASE_DATA'/'\
+    /home/ec2-user/prom-rebuild/pipeline/luigi.cfg
 
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask

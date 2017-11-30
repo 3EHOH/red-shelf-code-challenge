@@ -20,7 +20,7 @@ class ReadBucketData(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-        purchase_buckets_file = os.path(os.getenv('PURCHASE_BUCKETS'))
+        purchase_buckets_file = BucketConfig().purchase_buckets
         bucket_keys = BucketConfig().bucket_keys
         bucket_data = []
 

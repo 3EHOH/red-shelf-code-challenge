@@ -1,6 +1,6 @@
 import luigi
 import os
-from config import PathConfig
+from config import PathConfig, PurchaseConfig, BucketConfig
 from pathlib import Path
 
 STEP = 'preflightcheck'
@@ -14,10 +14,10 @@ class PreflightCheck(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-        purchase_data_file = os.getenv('PURCHASE_DATA') #PathConfig().purchase_data
+        purchase_data_file = PurchaseConfig().purchase_data
         does_purchase_data_file_exist = self.file_exists_check(purchase_data_file)
 
-        purchase_buckets_file = os.getenv('PURCHASE_BUCKETS') #PathConfig().purchase_buckets
+        purchase_buckets_file = BucketConfig().purchase_buckets
         does_purchase_buckets_file_exist = self.file_exists_check(purchase_buckets_file)
 
         if not does_purchase_data_file_exist:

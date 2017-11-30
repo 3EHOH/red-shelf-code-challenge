@@ -20,7 +20,7 @@ class ReadPurchaseData(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-        purchase_data_file = os.path(os.getenv('PURCHASE_DATA'))
+        purchase_data_file = PurchaseConfig().purchase_data
         purchase_keys = PurchaseConfig().purchase_keys()
         purchase_data = []
 
