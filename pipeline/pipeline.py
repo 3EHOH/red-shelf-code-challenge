@@ -2,7 +2,8 @@ import os
 import sys
 import luigi
 from config import PathConfig
-from steps.preflightcheck import PreflightCheck
+from steps.preflightcheck import PreflightCheck, ReadFiles
+
 
 class PipelineTask(luigi.WrapperTask):
 
@@ -12,7 +13,11 @@ class PipelineTask(luigi.WrapperTask):
             PreflightCheck()
         ]
 
-        return setup_tasks
+        read_files = [
+            ReadFiles()
+        ]
+
+        return setup_tasks + read_files
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path,"dummy"))
