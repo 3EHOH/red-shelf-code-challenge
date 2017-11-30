@@ -21,7 +21,7 @@ class ReadBucketData(luigi.Task):
 
     def run(self):
         purchase_buckets_file = BucketConfig().purchase_buckets
-        bucket_keys = BucketConfig().bucket_keys
+        bucket_keys = BucketConfig().bucket_keys.split(",")
         bucket_data = []
 
         with open(purchase_buckets_file) as csvfile:
