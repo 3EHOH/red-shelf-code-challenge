@@ -57,7 +57,7 @@ class SortPurchaseData(luigi.Task):
 
                 else:
                     compare = "*,*,*"
-                    self.find_and_assign(compare, output_buckets, record_values)
+                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
     @staticmethod
     def find_and_assign(compare, output_buckets, record_values, no_duplicates):
