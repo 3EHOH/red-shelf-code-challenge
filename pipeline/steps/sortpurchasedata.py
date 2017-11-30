@@ -11,8 +11,12 @@ class SortPurchaseData(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
 
+
+
     @staticmethod
     def sort_data(self, purchase_data, bucket_data, output_buckets):
+
+        no_duplicates = []
 
         for record in purchase_data:
 
@@ -24,42 +28,44 @@ class SortPurchaseData(luigi.Task):
                                 record['duration'].lower() == bucket['duration'].lower():
 
                     compare = record_values
-                    self.find_and_assign(compare, output_buckets, record_values)
+                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
                 elif record['publisher'].lower() == bucket['publisher'].lower() and record['price'] == bucket['price']:
 
                     compare = record['publisher'].lower() + "," + record['price'] + "," + "*"
-                    self.find_and_assign(compare, output_buckets, record_values)
+                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
                 elif record['price'].lower() == bucket['price'].lower() and record['duration'] == bucket['duration']:
 
                     compare = "*" + "," + record['price'] + "," + record['duration']
-                    self.find_and_assign(compare, output_buckets, record_values)
+                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
                 elif record['publisher'].lower() == bucket['publisher'].lower():
 
                     compare = record['publisher'].lower() + "," + "*" + "," + "*"
-                    self.find_and_assign(compare, output_buckets, record_values)
+                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
                 elif record['price'].lower() == bucket['price'].lower():
 
                     compare = "*" + "," + record['price'] + "," + "*"
-                    self.find_and_assign(compare, output_buckets, record_values)
+                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
                 elif record['duration'].lower() == bucket['duration'].lower():
 
                     compare = record['publisher'].lower() + "," + "*" + "," + record['duration']
-                    self.find_and_assign(compare, output_buckets, record_values)
+                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
                 else:
                     compare = "*,*,*"
                     self.find_and_assign(compare, output_buckets, record_values)
 
     @staticmethod
-    def find_and_assign(compare, output_buckets, record_values):
+    def find_and_assign(compare, output_buckets, record_values, no_duplicates):
         for i, dic in enumerate(output_buckets):
-            if dic['bucket'].lower() == compare and record_values not in dic['purchases']:
+            if dic['bucket'].lower() == compare and record_values not in dic['purchases'] and not \
+                    any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in no_duplicates):
                 dic['purchases'].append(record_values)
+                no_duplicates.append({"bucket_name": compare, "purchase": record_values})
 
     @staticmethod
     def requires():
