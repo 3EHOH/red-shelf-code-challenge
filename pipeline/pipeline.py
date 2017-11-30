@@ -6,6 +6,7 @@ from steps.preflightcheck import PreflightCheck
 from steps.readpurchasedata import ReadPurchaseData
 from steps.readbucketdata import ReadBucketData
 from steps.createoutputbuckets import CreateOutputBuckets
+from steps.sortpurchasedata import SortPurchaseData
 
 
 class PipelineTask(luigi.WrapperTask):
@@ -25,7 +26,13 @@ class PipelineTask(luigi.WrapperTask):
             CreateOutputBuckets()
         ]
 
-        return setup_tasks + read_files + create_output_buckets
+        sort_purchase_data = [
+            SortPurchaseData()
+        ]
+
+        pipeline = setup_tasks + read_files + create_output_buckets + sort_purchase_data
+
+        return pipeline
 
     @staticmethod
     def output():
