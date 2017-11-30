@@ -1,6 +1,6 @@
 import luigi
 import os
-from config import PathConfig
+from config import PathConfig, PurchaseConfig
 import csv
 import json
 from steps.preflightcheck import PreflightCheck
@@ -20,12 +20,11 @@ class ReadPurchaseData(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-
-        purchase_keys = PathConfig().purchase_keys()
-
+        purchase_data_file = os.path(os.getenv('PURCHASE_DATA'))
+        purchase_keys = PurchaseConfig().purchase_keys()
         purchase_data = []
 
-        with open('purchase_data.csv') as csvfile:
+        with open(purchase_data_file) as csvfile:
             purchase_reader = csv.reader(csvfile)
             for row in purchase_reader:
                 purchase_record = {}

@@ -1,6 +1,6 @@
 import luigi
 import os
-from config import PathConfig
+from config import PathConfig, BucketConfig
 import csv
 import json
 from steps.preflightcheck import PreflightCheck
@@ -20,12 +20,11 @@ class ReadBucketData(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-
-        bucket_keys = PathConfig().bucket_keys
-
+        purchase_buckets_file = os.path(os.getenv('PURCHASE_BUCKETS'))
+        bucket_keys = BucketConfig().bucket_keys
         bucket_data = []
 
-        with open('purchase_buckets.csv') as csvfile:
+        with open(purchase_buckets_file) as csvfile:
             bucket_reader = csv.reader(csvfile)
             for row in bucket_reader:
                 bucket_record = {}

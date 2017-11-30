@@ -19,16 +19,13 @@ class CreateOutputBuckets(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-
         bucket_data_path = os.path.join(PathConfig().target_path, "readbucketdata")
+        output_buckets = []
 
         with open(bucket_data_path, 'r') as f:
             bucket_data = json.load(f)
 
-        output_buckets = []
-
         for bucket in bucket_data:
-
             bucket_name = ','.join(bucket.values())
             output_buckets.append({"bucket": bucket_name, "purchases": []})
 
