@@ -5,6 +5,7 @@ from config import PathConfig
 from steps.preflightcheck import PreflightCheck
 from steps.readpurchasedata import ReadPurchaseData
 from steps.readbucketdata import ReadBucketData
+from steps.createoutputbuckets import CreateOutputBuckets
 
 
 class PipelineTask(luigi.WrapperTask):
@@ -20,7 +21,11 @@ class PipelineTask(luigi.WrapperTask):
             ReadBucketData()
         ]
 
-        return setup_tasks + read_files
+        create_output_buckets = [
+            CreateOutputBuckets()
+        ]
+
+        return setup_tasks + read_files + create_output_buckets
 
     @staticmethod
     def output():
