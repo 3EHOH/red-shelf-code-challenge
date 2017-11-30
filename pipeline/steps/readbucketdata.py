@@ -32,8 +32,6 @@ class ReadBucketData(luigi.Task):
                     bucket_record[bucket_keys[i]] = row[i]
                 bucket_data.append(bucket_record)
 
-        print(bucket_data)
-
         with self.output().open('w') as out_file:
             out_file.write(json.dumps(bucket_data))
 
