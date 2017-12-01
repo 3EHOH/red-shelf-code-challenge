@@ -13,7 +13,7 @@ class CreateOutputBuckets(luigi.Task):
 
     @staticmethod
     def requires():
-        return [ReadBucketData()]
+        return [ReadBucketData('purchase_buckets.csv', ['order_id','isbn','publisher','school','price','duration','order_datetime'])]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
