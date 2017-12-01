@@ -24,14 +24,73 @@ class SortPurchaseData(luigi.Task):
             record_publisher_lc = record['publisher'].lower()
             record_duration_lc = record['duration'].lower()
 
-            if next((bucket for bucket in bucket_data if bucket['publisher'].lower() == record_publisher_lc and record['price'] == bucket['price'] and record_duration_lc == bucket['duration'].lower()), None) is not None:
+            if next((bucket for bucket in bucket_data
+                    if bucket['publisher'].lower() == record_publisher_lc
+                    and record['price'] == bucket['price']
+                    and record_duration_lc == bucket['duration'].lower()), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(record['publisher'].lower(), record['price'], record['duration'].lower())
+                bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'], record['duration'])
+
+                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                if matched_bucket is not None:
+                    matched_bucket['purchases'].append(record_values)
+
+            elif next((bucket for bucket in bucket_data
+                       if bucket['publisher'].lower() == record_publisher_lc
+                       and record['price'] == bucket['price']), None) is not None:
+
+                bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'])
                 print(bucket_name_match)
 
                 matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
+
+            elif next((bucket for bucket in bucket_data
+                       if record['price'] == bucket['price']
+                       and record_duration_lc == bucket['duration'].lower()), None) is not None:
+
+                bucket_name_match = self.mock_bucket_name(None, record['price'], record['duration'])
+                print(bucket_name_match)
+
+                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                if matched_bucket is not None:
+                    matched_bucket['purchases'].append(record_values)
+
+            elif next((bucket for bucket in bucket_data
+                       if bucket['publisher'].lower() == record_publisher_lc), None) is not None:
+
+                bucket_name_match = self.mock_bucket_name(record['publisher'])
+
+                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                if matched_bucket is not None:
+                    matched_bucket['purchases'].append(record_values)
+
+            elif next((bucket for bucket in bucket_data
+                       if record['price'] == bucket['price']), None) is not None:
+
+                bucket_name_match = self.mock_bucket_name(None, record['price'])
+
+                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                if matched_bucket is not None:
+                    matched_bucket['purchases'].append(record_values)
+
+            elif next((bucket for bucket in bucket_data
+                     if record_duration_lc == bucket['duration'].lower()), None) is not None:
+
+                bucket_name_match = self.mock_bucket_name(None, None, record['duration'])
+
+                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                if matched_bucket is not None:
+                    matched_bucket['purchases'].append(record_values)
+
+            else:
+                bucket_name_match = self.mock_bucket_name()
+
+                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                if matched_bucket is not None:
+                    matched_bucket['purchases'].append(record_values)
+
 
 
     @staticmethod
