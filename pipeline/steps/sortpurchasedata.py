@@ -25,37 +25,42 @@ class SortPurchaseData(luigi.Task):
                 if record['publisher'].lower() == bucket['publisher'].lower() and record['price'] == bucket['price'] and \
                                 record['duration'].lower() == bucket['duration'].lower():
 
-                    compare = record_values
-                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
+                    potential_bucket_name_match = self.mock_bucket_name(record['publisher'].lower(), record['price'], record['duration'].lower())
+                    self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
                 elif record['publisher'].lower() == bucket['publisher'].lower() and record['price'] == bucket['price']:
 
-                    compare = record['publisher'].lower() + "," + record['price'] + "," + "*"
-                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
+                    potential_bucket_name_match = self.mock_bucket_name(record['publisher'].lower(), record['price'])
+                    self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
                 elif record['price'].lower() == bucket['price'].lower() and record['duration'] == bucket['duration']:
 
-                    compare = "*" + "," + record['price'] + "," + record['duration']
-                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
+                    # compare = "*" + "," + record['price'] + "," + record['duration']
+                    potential_bucket_name_match = self.mock_bucket_name(record['price'], record['duration'].lower(), publisher=None)
+                    self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
                 elif record['publisher'].lower() == bucket['publisher'].lower():
 
-                    compare = record['publisher'].lower() + "," + "*" + "," + "*"
-                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
+                    # compare = record['publisher'].lower() + "," + "*" + "," + "*"
+                    potential_bucket_name_match = self.mock_bucket_name(record['publisher'].lower())
+                    self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
                 elif record['price'].lower() == bucket['price'].lower():
 
-                    compare = "*" + "," + record['price'] + "," + "*"
-                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
+                    # compare = "*" + "," + record['price'] + "," + "*"
+                    potential_bucket_name_match = self.mock_bucket_name(record['price'])
+                    self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
                 elif record['duration'].lower() == bucket['duration'].lower():
 
-                    compare = record['publisher'].lower() + "," + "*" + "," + record['duration']
-                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
+                    # compare = record['publisher'].lower() + "," + "*" + "," + record['duration']
+                    potential_bucket_name_match = self.mock_bucket_name(record['duration'].lower())
+                    self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
                 else:
-                    compare = "*,*,*"
-                    self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
+
+                    potential_bucket_name_match = self.mock_bucket_name()
+                    self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
     @staticmethod
     def find_and_assign(compare, output_buckets, record_values, unique_buckets_and_purchases):
@@ -64,6 +69,30 @@ class SortPurchaseData(luigi.Task):
                     any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in unique_buckets_and_purchases):
                 dic['purchases'].append(record_values)
                 unique_buckets_and_purchases.append({"bucket_name": compare, "purchase": record_values})
+
+    @staticmethod
+    def mock_bucket_name(publisher=None, price=None, duration=None):
+
+        if publisher is None:
+            bucket_name = "*"
+        else:
+            bucket_name = publisher
+
+        bucket_name = bucket_name + ","
+
+        if price is None:
+            bucket_name = bucket_name + "*"
+        else:
+            bucket_name = bucket_name + price
+
+        bucket_name = bucket_name + ","
+
+        if duration is None:
+            bucket_name = bucket_name + "*"
+        else:
+            bucket_name = bucket_name + duration
+
+        return bucket_name
 
     @staticmethod
     def requires():
