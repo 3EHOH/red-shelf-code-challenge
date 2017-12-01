@@ -17,7 +17,7 @@ class ReadBucketData(ReadData):
         # self.task_id = ReadData.task_id
         # super(ReadBucketData, self).__init__('purchase_buckets.csv', BucketConfig().bucket_keys.split(","))
 
-        ReadData.__init__(self, csv_file, csv_file_keys)
+        ReadData.__init__(self)
         self.csv_file = csv_file
         self.csv_file_keys = csv_file_keys
 
@@ -80,5 +80,4 @@ if __name__ == "__main__":
     luigi.run([
         'ReadBucketData',
         '--workers', '1',
-        'test', 'test'
         '--local-scheduler'])
