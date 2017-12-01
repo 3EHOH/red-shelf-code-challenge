@@ -21,11 +21,10 @@ class SortPurchaseData(luigi.Task):
         for record in purchase_data:
 
             record_values = ','.join(record.values())
+            record_publisher_lc = record['publisher'].lower()
+            record_duration_lc = record['duration'].lower()
 
-            if next((bucket for bucket in bucket_data if
-                     bucket['publisher'] == record['publisher'].lower() and
-                    record['price'] == bucket['price'] and
-                    record['duration'].lower() == bucket['duration'].lower()), None) is not None:
+            if next((bucket for bucket in bucket_data if bucket['publisher'].lower() == record_publisher_lc and record['price'] == bucket['price'] and record_duration_lc == bucket['duration'].lower()), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'].lower(), record['price'], record['duration'].lower())
 
