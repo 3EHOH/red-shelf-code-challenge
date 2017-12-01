@@ -36,7 +36,7 @@ class SortPurchaseData(luigi.Task):
                 elif record['price'].lower() == bucket['price'].lower() and record['duration'] == bucket['duration']:
 
                     # compare = "*" + "," + record['price'] + "," + record['duration']
-                    potential_bucket_name_match = self.mock_bucket_name(record['price'], record['duration'].lower(), publisher=None)
+                    potential_bucket_name_match = self.mock_bucket_name(None, record['price'], record['duration'].lower())
                     self.find_and_assign(potential_bucket_name_match, output_buckets, record_values, no_duplicates)
 
                 elif record['publisher'].lower() == bucket['publisher'].lower():
