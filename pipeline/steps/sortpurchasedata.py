@@ -29,7 +29,7 @@ class SortPurchaseData(luigi.Task):
                 bucket_name_match = self.mock_bucket_name(record['publisher'].lower(), record['price'], record['duration'].lower())
                 print(bucket_name_match)
 
-                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match), None)
+                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
