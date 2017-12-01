@@ -4,7 +4,7 @@ from config import PathConfig, BucketConfig
 import csv
 import json
 from steps.preflightcheck import PreflightCheck
-from steps.readfile import ReadData
+from steps.readdata import ReadData
 
 STEP = 'readbucketdata'
 
