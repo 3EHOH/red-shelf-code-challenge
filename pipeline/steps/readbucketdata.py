@@ -9,7 +9,7 @@ from steps.readfile import ReadData
 STEP = 'readbucketdata'
 
 
-class ReadBucketData(luigi.Task, ReadData):
+class ReadBucketData(ReadData):
 
     datafile = luigi.Parameter(default=STEP)
 
