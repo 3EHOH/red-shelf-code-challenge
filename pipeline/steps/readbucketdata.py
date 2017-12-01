@@ -14,7 +14,7 @@ class ReadBucketData(luigi.Task, ReadData):
     datafile = luigi.Parameter(default=STEP)
 
     def __init__(self):
-        ReadData.__init__(self)
+        ReadData.__init__(self, BucketConfig(), BucketConfig().bucket_keys.split(","))
 
     @staticmethod
     def requires():
@@ -23,12 +23,12 @@ class ReadBucketData(luigi.Task, ReadData):
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
-    def run(self):
-        purchase_buckets_file = BucketConfig().purchase_buckets
-        bucket_keys = BucketConfig().bucket_keys.split(",")
+    # def run(self):
+    #     purchase_buckets_file = BucketConfig().purchase_buckets
+    #     bucket_keys = BucketConfig().bucket_keys.split(",")
         #bucket_data = []
 
-        ReadData.run(self, purchase_buckets_file, bucket_keys)
+        # ReadData.run(self, purchase_buckets_file, bucket_keys)
         #
         # with open(purchase_buckets_file) as csvfile:
         #     bucket_reader = csv.reader(csvfile)
