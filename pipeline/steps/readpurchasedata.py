@@ -9,7 +9,7 @@ from steps.readdata import ReadData
 STEP = 'readpurchasedata'
 
 
-class ReadPurchaseData(luigi.Task):
+class ReadPurchaseData(ReadData):
 
     datafile = luigi.Parameter(default=STEP)
 
