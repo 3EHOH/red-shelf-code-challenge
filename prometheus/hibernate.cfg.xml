@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration SYSTEM 
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+   <session-factory>
+   <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+   <!-- property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property -->
+   <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+
+   <property name="hibernate.hbm2ddl.auto">update</property>
+
+   <property name="hibernate.c3p0.acquireRetryAttempts">3</property>
+   <property name="hibernate.c3p0.acquireRetryDelay">3000</property>
+   <property name="hibernate.c3p0.breakAfterAcquireFailure">false</property>
+   <property name="hibernate.c3p0.maxConnectionAge">6000</property>
+   <property name="hibernate.c3p0.timeout">6000</property>
+   <property name="hibernate.c3p0.maxIdleTimeExcessConnections">1800</property>
+   <property name="hibernate.c3p0.min_size">2</property>
+   <property name="hibernate.c3p0.max_size">10</property>
+   <property name="hibernate.c3p0.max_statements">100</property>
+   <property name="hibernate.c3p0.validate">true</property>
+   <property name="hibernate.c3p0.idle_test_period">60</property>
+   <property name="hibernate.c3p0.statementCacheNumDeferredCloseThreads">1</property>
+   <property name="hibernate.c3p0.preferredTestQuery">SELECT 1</property> 
+   <property name="hibernate.c3p0.numHelperThreads">10</property>
+
+   <property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
+	
+
+
+   </session-factory>
+   
+   
+   
+</hibernate-configuration>
