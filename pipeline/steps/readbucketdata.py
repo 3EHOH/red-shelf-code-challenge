@@ -16,7 +16,7 @@ class ReadBucketData(ReadData):
     def __init__(self, csv_file, csv_file_keys):
         # self.task_id = ReadData.task_id
         #super(ReadBucketData, self).__init__('purchase_buckets.csv', BucketConfig().bucket_keys.split(","))
-        ReadData.__init__(self,'purchase_buckets.csv',BucketConfig().bucket_keys.split(","))
+        ReadData.__init__(self, 'purchase_buckets.csv', BucketConfig().bucket_keys.split(","))
         self.csv_file = csv_file
         self.csv_file_keys = csv_file_keys
 
