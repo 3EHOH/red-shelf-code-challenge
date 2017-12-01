@@ -14,14 +14,15 @@ class ReadBucketData(luigi.Task, ReadData):
     datafile = luigi.Parameter(default=STEP)
 
     def __init__(self):
-        ReadData.__init__(self, BucketConfig(), BucketConfig().bucket_keys.split(","))
+        #ReadData.__init__(self, BucketConfig(), BucketConfig().bucket_keys.split(","))
+        super(ReadBucketData, self).__init__(BucketConfig(), BucketConfig().bucket_keys.split(","))
 
-    @staticmethod
-    def requires():
-        return [PreflightCheck()]
-
-    def output(self):
-        return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
+    # @staticmethod
+    # def requires():
+    #     return [PreflightCheck()]
+    #
+    # def output(self):
+    #     return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     # def run(self):
     #     purchase_buckets_file = BucketConfig().purchase_buckets
