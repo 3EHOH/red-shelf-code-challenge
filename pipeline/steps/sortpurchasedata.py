@@ -82,7 +82,10 @@ class SortPurchaseData(luigi.Task):
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
-            else:
+            elif next((bucket for bucket in bucket_data
+                       if bucket['publisher'].lower() == record_publisher_lc
+                       and record['price'] == bucket['price']
+                       and record_duration_lc == bucket['duration'].lower()), None) is None:
                 bucket_name_match = self.mock_bucket_name()
 
                 print("HIT THE ELSE CASE")
