@@ -15,7 +15,7 @@ class ReadData(luigi.Task):
     def __init__(self, csv_file, csv_file_keys):
         self.csv_file = csv_file
         self.csv_file_keys = csv_file_keys
-        super(ReadData, self).__init__(csv_file, csv_file_keys)
+        super(ReadData, self).__init__(self, csv_file, csv_file_keys)
 
     @staticmethod
     def requires():
