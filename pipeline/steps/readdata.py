@@ -42,7 +42,4 @@ class ReadData(luigi.Task):
 
 
 if __name__ == "__main__":
-    luigi.run([
-        'ReadData',
-        '--workers', '1',
-        '--local-scheduler'])
+    luigi.run()

@@ -155,10 +155,7 @@ class SortPurchaseData(luigi.Task):
 
 
 if __name__ == "__main__":
-    luigi.run([
-        'SortPurchaseData',
-        '--workers', '1',
-        '--local-scheduler'])
+    luigi.run()
 
 
 

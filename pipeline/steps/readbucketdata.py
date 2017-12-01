@@ -108,7 +108,4 @@ class ReadBucketData(ReadData):
 
 
 if __name__ == "__main__":
-    luigi.run([
-        'ReadBucketData',
-        '--workers', '1',
-        '--local-scheduler'])
+    luigi.run()

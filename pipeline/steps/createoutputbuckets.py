@@ -34,7 +34,4 @@ class CreateOutputBuckets(luigi.Task):
 
 
 if __name__ == "__main__":
-    luigi.run([
-        'CreateOutputBuckets',
-        '--workers', '1',
-        '--local-scheduler'])
+    luigi.run()

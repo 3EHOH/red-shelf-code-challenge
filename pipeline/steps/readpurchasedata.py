@@ -46,7 +46,4 @@ class ReadPurchaseData(ReadData):
 
 
 if __name__ == "__main__":
-    luigi.run([
-        'ReadPurchaseData',
-        '--workers', '1',
-        '--local-scheduler'])
+    luigi.run()
