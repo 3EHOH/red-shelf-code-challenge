@@ -15,7 +15,8 @@ class ReadBucketData(luigi.Task, ReadData):
 
     def __init__(self):
         #ReadData.__init__(self, BucketConfig(), BucketConfig().bucket_keys.split(","))
-        super(ReadBucketData, self).__init__(BucketConfig(), BucketConfig().bucket_keys.split(","))
+        #super(ReadBucketData, self).__init__(BucketConfig(), BucketConfig().bucket_keys.split(","))
+        super().__init__(BucketConfig(), BucketConfig().bucket_keys.split(","))
 
     # @staticmethod
     # def requires():

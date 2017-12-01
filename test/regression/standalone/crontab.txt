@@ -1,1 +1,0 @@
-30 6 * * 1-5 cd $HOME/test/payformance/test/regression/standalone && /bin/bash ./run_prom_standalone.sh ./job.cfg `date +'STANDALONE_\%Y-\%m-\%d'` 50K_Test_2016_03_16.zip

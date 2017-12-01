@@ -1,1 +1,0 @@
-50 6 * * 1-5 cd $HOME/test/payformance/test/regression/distributed && ./run_prom_distributed.sh ./job.cfg `date +'DISTRIBUTED_\%Y-\%m-\%d'` 50K_Test_2016_03_16.zip
