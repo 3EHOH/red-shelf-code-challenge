@@ -26,7 +26,7 @@ class ReadData(luigi.Task):
 
     def run(self):
         purchase_buckets_file = self.csv_file
-        bucket_keys = self.csv_file_key
+        bucket_keys = self.csv_file_keys
         bucket_data = []
 
         with open(purchase_buckets_file) as csvfile:
