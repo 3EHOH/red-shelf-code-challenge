@@ -13,14 +13,13 @@ class PipelineTask(luigi.WrapperTask):
 
     def requires(self):
 
-        test = ReadBucketData("test", "test")
         setup_tasks = [
             PreflightCheck()
         ]
 
         read_files = [
             ReadPurchaseData(),
-            test
+            ReadBucketData()
         ]
 
         create_output_buckets = [
