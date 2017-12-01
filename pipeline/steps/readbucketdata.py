@@ -14,6 +14,7 @@ class ReadBucketData(ReadData):
     datafile = luigi.Parameter(default=STEP)
 
     def __init__(self):
+        self.task_id = ReadData.task_id
         self.csv_file = 'purchase_buckets.csv'
         self.csv_file_keys = BucketConfig().bucket_keys.split(",")
 
