@@ -19,7 +19,7 @@ class PipelineTask(luigi.WrapperTask):
 
         read_files = [
             ReadPurchaseData(),
-            ReadBucketData('purchase_buckets.csv', ['order_id','isbn','publisher','school','price','duration','order_datetime'])
+            ReadBucketData()
         ]
 
         create_output_buckets = [
