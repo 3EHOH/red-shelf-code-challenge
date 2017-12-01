@@ -4,19 +4,19 @@ from config import PathConfig, BucketConfig
 import csv
 import json
 from steps.preflightcheck import PreflightCheck
-from steps.readdata import ReadData
+from steps.readdata import ReadData as Parent
 
 STEP = 'readbucketdata'
 
 
-class ReadBucketData(ReadData):
+class ReadBucketData(Parent):
 
     datafile = luigi.Parameter(default=STEP)
 
     def __init__(self, csv_file, csv_file_keys):
         # self.task_id = ReadData.task_id
         #super(ReadBucketData, self).__init__('purchase_buckets.csv', BucketConfig().bucket_keys.split(","))
-        ReadData.__init__(self, 'purchase_buckets.csv', BucketConfig().bucket_keys.split(","))
+        Parent.__init__(self, 'purchase_buckets.csv', BucketConfig().bucket_keys.split(","))
         self.csv_file = csv_file
         self.csv_file_keys = csv_file_keys
 
