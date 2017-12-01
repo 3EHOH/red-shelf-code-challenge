@@ -4,13 +4,17 @@ from config import PathConfig, BucketConfig
 import csv
 import json
 from steps.preflightcheck import PreflightCheck
+from steps.readfile import ReadData
 
 STEP = 'readbucketdata'
 
 
-class ReadBucketData(luigi.Task):
+class ReadBucketData(luigi.Task, ReadData):
 
     datafile = luigi.Parameter(default=STEP)
+
+    def __init__(self):
+        ReadData.__init__(self)
 
     @staticmethod
     def requires():
@@ -22,18 +26,20 @@ class ReadBucketData(luigi.Task):
     def run(self):
         purchase_buckets_file = BucketConfig().purchase_buckets
         bucket_keys = BucketConfig().bucket_keys.split(",")
-        bucket_data = []
+        #bucket_data = []
 
-        with open(purchase_buckets_file) as csvfile:
-            bucket_reader = csv.reader(csvfile)
-            for row in bucket_reader:
-                bucket_record = {}
-                for i in range(len(bucket_keys)):
-                    bucket_record[bucket_keys[i]] = row[i]
-                bucket_data.append(bucket_record)
-
-        with self.output().open('w') as out_file:
-            out_file.write(json.dumps(bucket_data))
+        ReadData.run(self, purchase_buckets_file, bucket_keys)
+        #
+        # with open(purchase_buckets_file) as csvfile:
+        #     bucket_reader = csv.reader(csvfile)
+        #     for row in bucket_reader:
+        #         bucket_record = {}
+        #         for i in range(len(bucket_keys)):
+        #             bucket_record[bucket_keys[i]] = row[i]
+        #         bucket_data.append(bucket_record)
+        #
+        # with self.output().open('w') as out_file:
+        #     out_file.write(json.dumps(bucket_data))
 
 
 if __name__ == "__main__":

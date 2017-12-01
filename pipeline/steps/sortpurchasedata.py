@@ -11,8 +11,6 @@ class SortPurchaseData(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
 
-
-
     @staticmethod
     def sort_data(self, purchase_data, bucket_data, output_buckets):
 
@@ -60,12 +58,12 @@ class SortPurchaseData(luigi.Task):
                     self.find_and_assign(compare, output_buckets, record_values, no_duplicates)
 
     @staticmethod
-    def find_and_assign(compare, output_buckets, record_values, no_duplicates):
+    def find_and_assign(compare, output_buckets, record_values, unique_buckets_and_purchases):
         for i, dic in enumerate(output_buckets):
             if dic['bucket'].lower() == compare and record_values not in dic['purchases'] and not \
-                    any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in no_duplicates):
+                    any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in unique_buckets_and_purchases):
                 dic['purchases'].append(record_values)
-                no_duplicates.append({"bucket_name": compare, "purchase": record_values})
+                unique_buckets_and_purchases.append({"bucket_name": compare, "purchase": record_values})
 
     @staticmethod
     def requires():
