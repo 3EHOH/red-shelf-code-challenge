@@ -27,6 +27,7 @@ class SortPurchaseData(luigi.Task):
             if next((bucket for bucket in bucket_data if bucket['publisher'].lower() == record_publisher_lc and record['price'] == bucket['price'] and record_duration_lc == bucket['duration'].lower()), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'].lower(), record['price'], record['duration'].lower())
+                print(bucket_name_match)
 
                 matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match), None)
                 if matched_bucket is not None:
