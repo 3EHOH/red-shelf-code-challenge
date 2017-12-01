@@ -9,7 +9,6 @@ STEP = 'sortpurchasedata'
 
 
 class SortPurchaseData(luigi.Task):
-
     datafile = luigi.Parameter(default=STEP)
 
     @staticmethod
@@ -26,13 +25,15 @@ class SortPurchaseData(luigi.Task):
             record_duration_lc = record['duration'].lower()
 
             if next((bucket for bucket in bucket_data
-                    if bucket['publisher'].lower() == record_publisher_lc
-                    and record['price'] == bucket['price']
-                    and record_duration_lc == bucket['duration'].lower()), None) is not None:
+                     if bucket['publisher'].lower() == record_publisher_lc
+                     and record['price'] == bucket['price']
+                     and record_duration_lc == bucket['duration'].lower()), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'], record['duration'])
 
-                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                matched_bucket = next(
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    None)
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
@@ -41,7 +42,9 @@ class SortPurchaseData(luigi.Task):
                        and record['price'] == bucket['price']), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'])
-                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                matched_bucket = next(
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    None)
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
@@ -50,7 +53,9 @@ class SortPurchaseData(luigi.Task):
                        and record_duration_lc == bucket['duration'].lower()), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(None, record['price'], record['duration'])
-                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                matched_bucket = next(
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    None)
 
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
@@ -60,7 +65,9 @@ class SortPurchaseData(luigi.Task):
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'])
 
-                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                matched_bucket = next(
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    None)
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
             #
@@ -84,21 +91,24 @@ class SortPurchaseData(luigi.Task):
 
             else:
 
+                bucket_name_match = self.mock_bucket_name()
+
                 print("HIT THE ELSE CASE")
                 print("BUCKET NAME ELSE CASE ", bucket_name_match)
 
-                matched_bucket = next((bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
+                matched_bucket = next(
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    None)
 
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
-
-
 
     @staticmethod
     def find_and_assign(compare, output_buckets, record_values, unique_buckets_and_purchases):
         for i, dic in enumerate(output_buckets):
             if dic['bucket'].lower() == compare and record_values not in dic['purchases'] and not \
-                    any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in unique_buckets_and_purchases):
+                    any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in
+                        unique_buckets_and_purchases):
                 dic['purchases'].append(record_values)
                 unique_buckets_and_purchases.append({"bucket_name": compare, "purchase": record_values})
 
