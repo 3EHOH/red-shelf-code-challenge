@@ -3,6 +3,7 @@ import os
 from config import PathConfig
 import json
 from steps.createoutputbuckets import CreateOutputBuckets
+from steps.readpurchasedata import ReadPurchaseData
 
 STEP = 'sortpurchasedata'
 
@@ -76,7 +77,7 @@ class SortPurchaseData(luigi.Task):
                     matched_bucket['purchases'].append(record_values)
 
             elif next((bucket for bucket in bucket_data
-                     if record_duration_lc == bucket['duration'].lower()), None) is not None:
+                       if record_duration_lc == bucket['duration'].lower()), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(None, None, record['duration'])
 
@@ -127,7 +128,7 @@ class SortPurchaseData(luigi.Task):
 
     @staticmethod
     def requires():
-        return [CreateOutputBuckets()]
+        return [CreateOutputBuckets(), ReadPurchaseData()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
