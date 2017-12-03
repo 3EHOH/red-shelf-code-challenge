@@ -15,7 +15,7 @@ class OrderPurchaseLists(luigi.Task):
     def order_purchase_lists(purchase_data):
 
         for bucket in purchase_data:
-            print(bucket['purchases'])
+            print(bucket)
             sorted_lists = sorted(bucket['purchases'], lambda x: int(x.split(",")[0]))
             bucket['purchases'] = sorted_lists
 
@@ -31,7 +31,6 @@ class OrderPurchaseLists(luigi.Task):
     def run(self):
 
         deduped_data = ReadFile.read_file("dedupepurchaselists")
-        print(deduped_data)
         ordered_purchase_lists = self.order_purchase_lists(deduped_data)
 
         with self.output().open('w') as out_file:
