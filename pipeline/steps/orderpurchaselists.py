@@ -15,8 +15,7 @@ class OrderPurchaseLists(luigi.Task):
     def order_purchase_lists(purchase_data):
 
         for bucket in purchase_data:
-            print(bucket['purchases'])
-            bucket['purchases'].sort(lambda x: int(x.split(",")[0]))
+            bucket['purchases'].sort(key=lambda x: int(x.split(",")[0]))
 
         return purchase_data
 
