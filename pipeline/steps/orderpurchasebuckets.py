@@ -13,7 +13,15 @@ class OrderPurchaseBuckets(luigi.Task):
 
     @staticmethod
     def order_buckets(bucket_data, output_buckets):
-        return sorted(output_buckets, key=lambda item: bucket_data.index(item['bucket']))
+
+        ordered_list = []
+
+        for i, original_list_item in enumerate(bucket_data):
+            for j, output_list_item in enumerate(output_buckets):
+                if output_list_item == original_list_item:
+                    ordered_list.append(output_list_item)
+
+        return ordered_list
 
     @staticmethod
     def requires():
