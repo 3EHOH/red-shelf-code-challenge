@@ -8,7 +8,8 @@ class ReadFile:
     def __init__(self):
         pass
 
-    def readfile(self, pathname):
+    @staticmethod
+    def readfile(pathname):
         path_to_file = os.path.join(PathConfig().target_path, pathname)
 
         with open(path_to_file, 'r') as f:
