@@ -2,7 +2,7 @@ import luigi
 import os
 from config import PathConfig
 import json
-from steps.sortpurchasedata import PurchaseDataBucketer
+from steps.purchasedatabucketer import PurchaseDataBucketer
 from steps.filereader import FileReader
 
 STEP = 'purchaselistsdeduper'

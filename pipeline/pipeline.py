@@ -6,7 +6,7 @@ from steps.preflightcheck import PreflightCheck
 from steps.purchasedatareader import PurchaseDataReader
 from steps.bucketdatareader import BucketDataReader
 from steps.outputbucketmaker import OutputBucketMaker
-from steps.sortpurchasedata import PurchaseDataBucketer
+from steps.purchasedatabucketer import PurchaseDataBucketer
 from steps.dedupepurchaselists import DedupePurchaseLists
 from steps.orderpurchasebuckets import OrderPurchaseBuckets
 from steps.purchaselistsorderer import PurchaseListsOrderer
