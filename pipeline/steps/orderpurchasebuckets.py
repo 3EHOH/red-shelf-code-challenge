@@ -14,14 +14,14 @@ class OrderPurchaseBuckets(luigi.Task):
     @staticmethod
     def order_buckets(bucket_data, output_buckets):
 
-        ordered_list = []
+        ordered_set = set()
 
         for i, original_list_item in enumerate(bucket_data):
             for j, output_list_item in enumerate(output_buckets):
-                if output_list_item == original_list_item:
-                    ordered_list.append(output_list_item)
+                if output_list_item['bucket'] == original_list_item:
+                    ordered_set.add(output_list_item)
 
-        return ordered_list
+        return ordered_set
 
     @staticmethod
     def requires():
