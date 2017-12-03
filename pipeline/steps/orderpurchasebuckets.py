@@ -29,6 +29,8 @@ class OrderPurchaseBuckets(luigi.Task):
             reader = csv.reader(f)
             purchase_data = list(reader)
 
+        print(purchase_data)
+
         deduped_data = ReadFile.read_file("dedupepurchaselists")
 
         ordered_buckets = self.order_buckets(purchase_data, deduped_data)
