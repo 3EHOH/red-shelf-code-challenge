@@ -5,7 +5,7 @@ import json
 from steps.dedupepurchaselists import DedupePurchaseLists
 from steps.readfile import ReadFile
 
-STEP = 'orderpurchasebuckets'
+STEP = 'orderpurchaselists'
 
 
 class OrderPurchaseBuckets(luigi.Task):
