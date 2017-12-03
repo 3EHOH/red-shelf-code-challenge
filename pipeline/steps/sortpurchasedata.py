@@ -65,6 +65,8 @@ class SortPurchaseData(luigi.Task):
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'])
 
+                print("BUCKET NAME MATCH ", bucket_name_match)
+
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
