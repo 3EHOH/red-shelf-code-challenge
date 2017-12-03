@@ -27,9 +27,9 @@ class OrderPurchaseBuckets(luigi.Task):
 
         purchase_data = []
 
-        with open(BucketConfig().purchase_buckets) as csvfile:
-            bucket_reader = csv.reader(csvfile, delimiter='')
-            for row in bucket_reader:
+        with open(BucketConfig().purchase_buckets) as f:
+            content = f.readlines()
+            for row in content:
                 purchase_data.append(row)
 
         print(purchase_data)
