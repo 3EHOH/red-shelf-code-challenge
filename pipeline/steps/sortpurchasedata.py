@@ -179,7 +179,7 @@ class SortPurchaseData(luigi.Task):
 
     @staticmethod
     def read_files(pathname):
-        path_to_file = os.path.join(PathConfig().target_path, pathname)
+        path_to_file = os.path.join(PathConfig().target_path, str(pathname))
 
         with open(path_to_file, 'r') as f:
             file_output = json.load(f)
