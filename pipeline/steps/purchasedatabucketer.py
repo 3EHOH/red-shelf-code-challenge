@@ -172,7 +172,7 @@ class PurchaseDataBucketer(luigi.Task):
 
     @staticmethod
     def requires():
-        return [CreateOutputBuckets(), PurchaseDataReader()]
+        return [OutputBucketMaker(), PurchaseDataReader()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
