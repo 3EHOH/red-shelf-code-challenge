@@ -4,7 +4,7 @@ from config import PathConfig
 import json
 from steps.createoutputbuckets import CreateOutputBuckets
 from steps.readpurchasedata import ReadPurchaseData
-import ReadFile
+from steps.readfile import ReadFile
 
 STEP = 'sortpurchasedata'
 WILDCARD = '*'
