@@ -24,18 +24,11 @@ class OrderPurchaseLists(luigi.Task):
 
     def run(self):
 
-        purchase_data = []
-
-        with open(PurchaseConfig().purchase_data) as f:
-            content = f.read().splitlines()
-            for row in content:
-                purchase_data.append(row)
-
         deduped_data = ReadFile.read_file("dedupepurchaselists")
-        ordered_buckets = self.order_buckets(purchase_data, deduped_data)
+        ordered_purchase_lists = self.order_buckets(deduped_data)
 
         with self.output().open('w') as out_file:
-            out_file.write(json.dumps(ordered_buckets))
+            out_file.write(json.dumps(ordered_purchase_lists))
 
 
 if __name__ == "__main__":
