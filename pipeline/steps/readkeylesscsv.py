@@ -5,10 +5,10 @@ import csv
 import json
 from steps.preflightcheck import PreflightCheck
 
-STEP = 'readdata'
+STEP = 'readkeylesscsv'
 
 
-class ReadData(luigi.Task):
+class ReadKeylessCSV(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
 
@@ -18,6 +18,20 @@ class ReadData(luigi.Task):
         luigi.Task.__init__(self)
 
     @staticmethod
+    def add_keys_to_data(csv_file, keys):
+        bucket_data = []
+
+        with open(csv_file) as f:
+            bucket_reader = csv.reader(f)
+            for row in bucket_reader:
+                bucket_record = {}
+                for i in range(len(keys)):
+                    bucket_record[keys[i]] = row[i]
+                bucket_data.append(bucket_record)
+
+        return bucket_data
+
+    @staticmethod
     def requires():
         return [PreflightCheck()]
 
@@ -25,20 +39,12 @@ class ReadData(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-        purchase_buckets_file = self.csv_file
-        bucket_keys = self.csv_file_keys
-        bucket_data = []
-
-        with open(purchase_buckets_file) as csvfile:
-            bucket_reader = csv.reader(csvfile)
-            for row in bucket_reader:
-                bucket_record = {}
-                for i in range(len(bucket_keys)):
-                    bucket_record[bucket_keys[i]] = row[i]
-                bucket_data.append(bucket_record)
+        csv_file = self.csv_file
+        keys = self.csv_file_keys
+        data = self.add_keys_to_data(csv_file, keys)
 
         with self.output().open('w') as out_file:
-            out_file.write(json.dumps(bucket_data))
+            out_file.write(json.dumps(data))
 
 
 if __name__ == "__main__":
