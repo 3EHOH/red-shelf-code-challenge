@@ -3,7 +3,7 @@ import os
 from config import PathConfig
 import json
 from steps.createoutputbuckets import CreateOutputBuckets
-from steps.readbucketdata import ReadPurchaseData
+from steps.readpurchasedata import ReadPurchaseData
 import ReadFile
 
 STEP = 'sortpurchasedata'
