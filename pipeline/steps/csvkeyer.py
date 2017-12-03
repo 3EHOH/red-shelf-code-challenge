@@ -5,12 +5,11 @@ import csv
 import json
 from steps.preflightcheck import PreflightCheck
 
-STEP = 'csvkeyer'
+# this class itself isn't actually part of the pipeline
+# but PurchaseDataReader and BucketDataReader are subclasses of it
 
 
 class CsvKeyer(luigi.Task):
-
-    datafile = luigi.Parameter(default=STEP)
 
     def __init__(self, csv_file, csv_file_keys):
         self.csv_file = csv_file

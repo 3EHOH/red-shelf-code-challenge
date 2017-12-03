@@ -7,7 +7,7 @@ from steps.purchasedatareader import PurchaseDataReader
 from steps.bucketdatareader import BucketDataReader
 from steps.filereader import FileReader
 
-STEP = 'sortpurchasedata'
+STEP = 'purchasedatasorter'
 WILDCARD = '*'
 
 
