@@ -59,7 +59,7 @@ class SortPurchaseData(luigi.Task):
                     matched_bucket['purchases'].append(record_values)
 
             elif next((bucket for bucket in bucket_data
-                       if bucket['publisher'].lower() == record_publisher_lc
+                       if bucket['publisher'].lower() == "scipub"
                        and record['price'] == '*'
                        and record_duration_lc == '*'), None) is not None:
 
