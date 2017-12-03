@@ -19,7 +19,7 @@ class CreateOutputBuckets(luigi.Task):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-        bucket_data_path = os.path.join(PathConfig().target_path, "readbucketdata")
+        bucket_data_path = os.path.join(PathConfig().target_path, ReadBucketData().datafile)
         output_buckets = []
 
         with open(bucket_data_path, 'r') as f:

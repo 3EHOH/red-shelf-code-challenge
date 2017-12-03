@@ -4,6 +4,7 @@ from config import PathConfig
 import json
 from steps.createoutputbuckets import CreateOutputBuckets
 from steps.readpurchasedata import ReadPurchaseData
+from steps.readpurchasedata import ReadBucketData
 from steps.readfile import ReadFile
 
 STEP = 'sortpurchasedata'
@@ -177,9 +178,9 @@ class SortPurchaseData(luigi.Task):
 
     def run(self):
 
-        output_buckets = ReadFile.read_file("createoutputbuckets")
-        purchase_data = ReadFile.read_file("readpurchasedata")
-        bucket_data = ReadFile.read_file("readbucketdata")
+        output_buckets = ReadFile.read_file(CreateOutputBuckets().datafile)
+        purchase_data = ReadFile.read_file(ReadPurchaseData().datafile)
+        bucket_data = ReadFile.read_file(ReadBucketData().datafile)
 
         self.sort_data(self, purchase_data, bucket_data, output_buckets)
 

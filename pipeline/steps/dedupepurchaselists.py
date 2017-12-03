@@ -7,6 +7,9 @@ from steps.readfile import ReadFile
 
 STEP = 'dedupepurchaselists'
 
+# This class is actually redundant at this point, because we use a generator to ensure that any duplicate buckets aren't
+# inserted into if a first one is found. But, one can imagine needing this if additional steps or functionality were added,
+# so it's anticipatory robustness diligence.
 
 class DedupePurchaseLists(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
@@ -33,7 +36,7 @@ class DedupePurchaseLists(luigi.Task):
 
     def run(self):
 
-        output_buckets = ReadFile.read_file("sortpurchasedata")
+        output_buckets = ReadFile.read_file(SortPurchaseData().datafile)
         deduped_data = self.dedupe_purchase_lists(output_buckets)
 
         with self.output().open('w') as out_file:

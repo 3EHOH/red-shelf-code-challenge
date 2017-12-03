@@ -8,6 +8,9 @@ from steps.readfile import ReadFile
 STEP = 'orderpurchaselists'
 
 
+# This class is actually redundant at this point, because the order of purchases is maintained from the original list
+# But, one can imagine needing this if additional steps or functionality were added, so it's anticipatory robustness diligence.
+
 class OrderPurchaseLists(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
