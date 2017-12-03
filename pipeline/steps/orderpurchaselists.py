@@ -28,7 +28,7 @@ class OrderPurchaseLists(luigi.Task):
 
     def run(self):
 
-        deduped_data = ReadFile.read_file("dedupepurchaselists")
+        deduped_data = ReadFile.read_file(DedupePurchaseLists().datafile)
         ordered_purchase_lists = self.order_purchase_lists(deduped_data)
 
         with self.output().open('w') as out_file:

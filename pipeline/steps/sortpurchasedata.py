@@ -30,7 +30,7 @@ class SortPurchaseData(luigi.Task):
                      and bucket['price']             == record_price
                      and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'], record['duration'])
+                bucket_name_match = self.concat_bucket_name(record['publisher'], record['price'], record['duration'])
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -45,7 +45,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == WILDCARD
                        and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'])
+                bucket_name_match = self.concat_bucket_name(record['publisher'], record['price'])
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
@@ -59,7 +59,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == record_price
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'])
+                bucket_name_match = self.concat_bucket_name(record['publisher'], record['price'])
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
@@ -73,7 +73,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == record_price
                        and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(None, record['price'], record['duration'])
+                bucket_name_match = self.concat_bucket_name(None, record['price'], record['duration'])
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
@@ -88,7 +88,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == WILDCARD
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(record['publisher'])
+                bucket_name_match = self.concat_bucket_name(record['publisher'])
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -103,7 +103,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == WILDCARD
                        and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(None, None, record['duration'])
+                bucket_name_match = self.concat_bucket_name(None, None, record['duration'])
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -118,7 +118,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == record_price
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
-                bucket_name_match = self.mock_bucket_name(None, record['price'])
+                bucket_name_match = self.concat_bucket_name(None, record['price'])
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -130,7 +130,7 @@ class SortPurchaseData(luigi.Task):
 
             else:
 
-                bucket_name_match = self.mock_bucket_name()
+                bucket_name_match = self.concat_bucket_name()
 
                 bucket = next(bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match)
                 bucket['purchases'].append(record_values)
@@ -145,7 +145,7 @@ class SortPurchaseData(luigi.Task):
                 unique_buckets_and_purchases.append({"bucket_name": compare, "purchase": record_values})
 
     @staticmethod
-    def mock_bucket_name(publisher=None, price=None, duration=None):
+    def concat_bucket_name(publisher=None, price=None, duration=None):
 
         if publisher is None:
             bucket_name = WILDCARD
