@@ -2,7 +2,7 @@ import luigi
 import os
 from config import PathConfig
 import json
-from steps.createoutputbuckets import CreateOutputBuckets
+from steps.outputbucketmaker import OutputBucketMaker
 from steps.purchasedatareader import PurchaseDataReader
 from steps.bucketdatareader import BucketDataReader
 from steps.filereader import FileReader
@@ -179,7 +179,7 @@ class PurchaseDataBucketer(luigi.Task):
 
     def run(self):
 
-        output_buckets = FileReader.read_file(CreateOutputBuckets().datafile)
+        output_buckets = FileReader.read_file(OutputBucketMaker().datafile)
         purchase_data = FileReader.read_file(PurchaseDataReader().datafile)
         bucket_data = FileReader.read_file(BucketDataReader().datafile)
 
