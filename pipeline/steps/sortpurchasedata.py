@@ -14,10 +14,6 @@ class SortPurchaseData(luigi.Task):
     @staticmethod
     def sort_data(self, purchase_data, bucket_data, output_buckets):
 
-        no_duplicates = []
-
-        unique_records = set()
-
         for record in purchase_data:
 
             record_values = ','.join(record.values())
@@ -105,14 +101,7 @@ class SortPurchaseData(luigi.Task):
 
                 bucket_name_match = self.mock_bucket_name()
 
-                print("HIT THE ELSE CASE")
-                print("BUCKET NAME ELSE CASE ", bucket_name_match)
-                #
-                # matched_bucket = next(
-                #     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()), None)
-                #
-                # if matched_bucket is not None:
-                bucket = next(bucket for bucket in output_buckets if bucket['bucket'] == "*,*,*")
+                bucket = next(bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match)
                 bucket['purchases'].append(record_values)
 
     @staticmethod
