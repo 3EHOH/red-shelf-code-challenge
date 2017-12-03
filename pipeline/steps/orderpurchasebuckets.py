@@ -19,7 +19,7 @@ class OrderPurchaseBuckets(luigi.Task):
 
     @staticmethod
     def requires():
-        return [DedupePurchaseData()]
+        return [DedupePurchaseLists()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
