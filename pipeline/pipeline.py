@@ -8,6 +8,7 @@ from steps.readbucketdata import ReadBucketData
 from steps.createoutputbuckets import CreateOutputBuckets
 from steps.sortpurchasedata import SortPurchaseData
 from steps.dedupepurchaselists import DedupePurchaseLists
+from steps.orderpurchasebuckets import OrderPurchaseBuckets
 
 
 class PipelineTask(luigi.WrapperTask):
@@ -27,7 +28,7 @@ class PipelineTask(luigi.WrapperTask):
             CreateOutputBuckets()
         ]
 
-        sort_purchase_data = [
+        insert_purchase_data = [
             SortPurchaseData()
         ]
 
@@ -35,7 +36,12 @@ class PipelineTask(luigi.WrapperTask):
             DedupePurchaseLists()
         ]
 
-        pipeline = setup_tasks + read_files + create_output_buckets + sort_purchase_data + dedupe_purchase_lists
+        sort_data = [
+            OrderPurchaseBuckets()
+        ]
+
+
+        pipeline = setup_tasks + read_files + create_output_buckets + insert_purchase_data + dedupe_purchase_lists + sort_data
 
         return pipeline
 
