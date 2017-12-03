@@ -25,6 +25,8 @@ PURCHASE_DATA="$2"
 
 cd ..
 
+print realpath
+
 sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
        -e 's/.*purchase_data.*/'purchase_data=$PURCHASE_DATA'/'\
     realpath/luigi.cfg
