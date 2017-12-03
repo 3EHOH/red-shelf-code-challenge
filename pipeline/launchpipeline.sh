@@ -2,6 +2,9 @@
 
 #cd /home/ec2-user/prom-rebuild/pipeline
 
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+
 if [ -z "$1" ]
   then
     echo "No purchase buckets file supplied"
@@ -17,12 +20,9 @@ fi
 PURCHASE_BUCKETS="$1"
 PURCHASE_DATA="$2"
 
-sed -i -e 's/<PURCHASE_BUCKETS>/'$PURCHASE_BUCKETS'/'\
-       -e 's/<PURCHASE_DATA>/'$PURCHASE_DATA'/'\
+sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
+       -e 's/.*purchase_data.*/'purchase_buckets=$PURCHASE_DATA'/'\
     /home/ec2-user/prom-rebuild/pipeline/luigi.cfg
 
-export TEST=dummy
-
-source ~/.bashrc
 
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask
