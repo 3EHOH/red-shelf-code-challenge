@@ -14,8 +14,8 @@ class ReadBucketData(ReadData):
         # super(ReadBucketData, self).__init__('purchase_buckets.csv', BucketConfig().bucket_keys.split(","))
 
         ReadData.__init__(self, BucketConfig().purchase_buckets, BucketConfig().bucket_keys.split(","))
-        self.csv_file = BucketConfig().purchase_buckets
-        self.csv_file_keys = BucketConfig().bucket_keys.split(",")
+        # self.csv_file = BucketConfig().purchase_buckets
+        # self.csv_file_keys = BucketConfig().bucket_keys.split(",")
 
 
 if __name__ == "__main__":

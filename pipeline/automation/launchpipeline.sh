@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#cd /home/ec2-user/prom-rebuild/pipeline
-
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
@@ -20,8 +18,8 @@ fi
 PURCHASE_BUCKETS="$1"
 PURCHASE_DATA="$2"
 
-PURCHASE_BUCKETS=$(echo "PURCHASE_BUCKETS" | sed 's/\//\\\//g')
-PURCHASE_DATA=$(echo "PURCHASE_DATA" | sed 's/\//\\\//g')
+PURCHASE_BUCKETS=$(echo "$PURCHASE_BUCKETS" | sed 's/\//\\\//g')
+PURCHASE_DATA=$(echo "$PURCHASE_DATA" | sed 's/\//\\\//g')
 
 sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
        -e 's/.*purchase_data.*/'purchase_data=$PURCHASE_DATA'/'\
