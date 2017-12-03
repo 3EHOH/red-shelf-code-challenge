@@ -20,10 +20,9 @@ fi
 PURCHASE_BUCKETS="$1"
 PURCHASE_DATA="$2"
 
-cd ..
-
 sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
        -e 's/.*purchase_data.*/'purchase_data=$PURCHASE_DATA'/'\
     luigi.cfg
+
 
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask
