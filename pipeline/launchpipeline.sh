@@ -21,4 +21,8 @@ sed -i -e 's/<PURCHASE_BUCKETS>/'$PURCHASE_BUCKETS'/'\
        -e 's/<PURCHASE_DATA>/'$PURCHASE_DATA'/'\
     /home/ec2-user/prom-rebuild/pipeline/luigi.cfg
 
+export TEST=dummy
+
+source ~/.bashrc
+
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask
