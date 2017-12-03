@@ -6,7 +6,7 @@ import csv
 from steps.dedupepurchaselists import DedupePurchaseLists
 from steps.readfile import ReadFile
 
-STEP = 'orderpurchasedata'
+STEP = 'orderpurchasebuckets'
 
 
 class OrderPurchaseBuckets(luigi.Task):
@@ -32,7 +32,7 @@ class OrderPurchaseBuckets(luigi.Task):
 
         deduped_data = ReadFile.read_file("dedupepurchaselists")
 
-        ordered_buckets = self.order_buckets(self, purchase_data, deduped_data)
+        ordered_buckets = self.order_buckets(purchase_data, deduped_data)
 
         with self.output().open('w') as out_file:
             out_file.write(json.dumps(ordered_buckets))
