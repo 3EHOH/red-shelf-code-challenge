@@ -9,21 +9,16 @@ STEP = 'dedupepurchasedata'
 class DedupePurchaseLists(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
-    @staticmethod
-    def sort_data(self, purchase_data):
 
-        for record in purchase_data:
+    def dedupe_purchase_lists(self, output_buckets):
 
+        unique_buckets = set()
 
-    @staticmethod
-    def find_and_assign(compare, output_buckets, record_values, unique_buckets_and_purchases):
-        for i, dic in enumerate(output_buckets):
-            if dic['bucket'].lower() == compare and record_values not in dic['purchases'] and not \
-                    any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in
-                        unique_buckets_and_purchases):
-                dic['purchases'].append(record_values)
-                unique_buckets_and_purchases.append({"bucket_name": compare, "purchase": record_values})
-
+        for bucket in output_buckets:
+            if bucket['bucket'] not in unique_buckets:
+                unique_buckets.add(bucket['bucket'])
+            else:
+                bucket['purchases'] = []
 
     @staticmethod
     def requires():
@@ -43,7 +38,7 @@ class DedupePurchaseLists(luigi.Task):
 
     def run(self):
 
-        output_buckets = self.read_files(SortPurchaseData.STEP)
+        output_buckets = self.read_files("sortpurchasedata")
 
         self.dedupe_purchase_lists(self, output_buckets)
 

@@ -3,8 +3,8 @@ import os
 from config import PathConfig
 import json
 from steps.createoutputbuckets import CreateOutputBuckets
-from steps.readpurchasedata import ReadPurchaseData
-from steps.readbucketdata import ReadBucketData
+from steps.readbucketdata import ReadPurchaseData
+import ReadFile
 
 STEP = 'sortpurchasedata'
 WILDCARD = '*'
@@ -179,7 +179,7 @@ class SortPurchaseData(luigi.Task):
 
     @staticmethod
     def read_files(pathname):
-        path_to_file = os.path.join(PathConfig().target_path, str(pathname))
+        path_to_file = os.path.join(PathConfig().target_path, pathname)
 
         with open(path_to_file, 'r') as f:
             file_output = json.load(f)
@@ -188,9 +188,9 @@ class SortPurchaseData(luigi.Task):
 
     def run(self):
 
-        output_buckets = self.read_files(CreateOutputBuckets.datafile)
-        purchase_data = self.read_files(ReadPurchaseData.datafile)
-        bucket_data = self.read_files(ReadBucketData.datafile)
+        output_buckets = ReadFile.readfile("createoutputbuckets") #self.read_files("createoutputbuckets")
+        purchase_data = ReadFile.readfile("readpurchasedata") #self.read_files("readpurchasedata")
+        bucket_data = ReadFile.readfile("readbucketdata") #self.read_files("readbucketdata")
 
         self.sort_data(self, purchase_data, bucket_data, output_buckets)
 
