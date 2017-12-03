@@ -188,9 +188,9 @@ class SortPurchaseData(luigi.Task):
 
     def run(self):
 
-        output_buckets = self.read_files(CreateOutputBuckets.STEP)
-        purchase_data = self.read_files(ReadPurchaseData.STEP)
-        bucket_data = self.read_files(ReadBucketData.STEP)
+        output_buckets = self.read_files(CreateOutputBuckets.datafile)
+        purchase_data = self.read_files(ReadPurchaseData.datafile)
+        bucket_data = self.read_files(ReadBucketData.datafile)
 
         self.sort_data(self, purchase_data, bucket_data, output_buckets)
 
