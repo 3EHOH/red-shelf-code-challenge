@@ -40,7 +40,7 @@ class OrderPurchaseBuckets(luigi.Task):
             for row in content:
                 purchase_data.append(row)
 
-        deduped_data = ReadFile.read_file("orderpurchaselists")
+        deduped_data = ReadFile.read_file(OrderPurchaseLists().datafile)
         ordered_buckets = self.order_buckets(purchase_data, deduped_data)
 
         with self.output().open('w') as out_file:
