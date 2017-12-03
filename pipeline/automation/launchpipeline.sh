@@ -24,5 +24,6 @@ sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
        -e 's/.*purchase_data.*/'purchase_data=$PURCHASE_DATA'/'\
     ../luigi.cfg
 
+cd ..
 
-python -m luigi --local-scheduler --workers 1 --module ../pipeline PipelineTask
+python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask
