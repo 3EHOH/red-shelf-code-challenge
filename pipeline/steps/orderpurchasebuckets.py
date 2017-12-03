@@ -26,7 +26,7 @@ class OrderPurchaseBuckets(luigi.Task):
 
     def run(self):
 
-        with open(BucketConfig().purchase_buckets, 'rb') as f:
+        with open(BucketConfig().purchase_buckets, 'r') as f:
             reader = csv.reader(f)
             purchase_data = list(reader)
 
