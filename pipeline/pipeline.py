@@ -9,6 +9,7 @@ from steps.createoutputbuckets import CreateOutputBuckets
 from steps.sortpurchasedata import SortPurchaseData
 from steps.dedupepurchaselists import DedupePurchaseLists
 from steps.orderpurchasebuckets import OrderPurchaseBuckets
+from steps.orderpurchaselists import OrderPurchaseLists
 
 
 class PipelineTask(luigi.WrapperTask):
@@ -37,6 +38,7 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         sort_data = [
+            OrderPurchaseLists(),
             OrderPurchaseBuckets()
         ]
 

@@ -1,8 +1,7 @@
 import luigi
 import os
-from config import PathConfig, BucketConfig
+from config import PathConfig, PurchaseConfig
 import json
-import csv
 from steps.dedupepurchaselists import DedupePurchaseLists
 from steps.readfile import ReadFile
 
@@ -13,8 +12,8 @@ class OrderPurchaseBuckets(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
     @staticmethod
-    def order_buckets(bucket_data, output_buckets):
-        return sorted(output_buckets, key=lambda item: bucket_data.index(item['bucket']))
+    def order_purchases(purchase_data):
+        return sorted(purchase_data, lambda x: int(x.split()[-1]))
 
     @staticmethod
     def requires():
@@ -27,7 +26,7 @@ class OrderPurchaseBuckets(luigi.Task):
 
         purchase_data = []
 
-        with open(BucketConfig().purchase_buckets) as f:
+        with open(PurchaseConfig().purchase_data) as f:
             content = f.read().splitlines()
             for row in content:
                 purchase_data.append(row)
