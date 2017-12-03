@@ -8,7 +8,7 @@ from steps.readfile import ReadFile
 STEP = 'orderpurchaselists'
 
 
-class OrderPurchaseBuckets(luigi.Task):
+class OrderPurchaseLists(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
     @staticmethod

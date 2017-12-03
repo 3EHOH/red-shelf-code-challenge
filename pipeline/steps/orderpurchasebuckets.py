@@ -2,7 +2,6 @@ import luigi
 import os
 from config import PathConfig, BucketConfig
 import json
-import csv
 from steps.orderpurchaselists import OrderPurchaseLists
 from steps.readfile import ReadFile
 
