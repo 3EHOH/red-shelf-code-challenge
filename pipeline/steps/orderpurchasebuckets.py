@@ -3,8 +3,7 @@ import os
 from config import PathConfig, BucketConfig
 import json
 import csv
-from steps.createoutputbuckets import CreateOutputBuckets
-from steps.dedupepurchasedata import DedupePurchaseData
+from steps.dedupepurchaselists import DedupePurchaseData
 from steps.readfile import ReadFile
 
 STEP = 'orderpurchasedata'
