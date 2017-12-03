@@ -3,7 +3,7 @@ import os
 from config import PathConfig, BucketConfig
 import json
 import csv
-from steps.dedupepurchaselists import DedupePurchaseData
+from steps.dedupepurchaselists import DedupePurchaseLists
 from steps.readfile import ReadFile
 
 STEP = 'orderpurchasedata'
@@ -30,7 +30,7 @@ class OrderPurchaseBuckets(luigi.Task):
             reader = csv.reader(f)
             purchase_data = list(reader)
 
-        deduped_data = ReadFile.read_file("dedupepurchasedata")
+        deduped_data = ReadFile.read_file("dedupepurchaselists")
 
         ordered_buckets = self.order_buckets(self, purchase_data, deduped_data)
 
