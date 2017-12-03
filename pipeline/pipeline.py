@@ -3,13 +3,13 @@ import sys
 import luigi
 from config import PathConfig
 from steps.preflightcheck import PreflightCheck
-from steps.readpurchasedata import ReadPurchaseData
-from steps.readbucketdata import ReadBucketData
-from steps.createoutputbuckets import CreateOutputBuckets
-from steps.sortpurchasedata import SortPurchaseData
+from steps.purchasedatareader import PurchaseDataReader
+from steps.bucketdatareader import BucketDataReader
+from steps.outputbucketmaker import OutputBucketMaker
+from steps.sortpurchasedata import PurchaseDataBucketer
 from steps.dedupepurchaselists import DedupePurchaseLists
 from steps.orderpurchasebuckets import OrderPurchaseBuckets
-from steps.orderpurchaselists import OrderPurchaseLists
+from steps.purchaselistsorderer import PurchaseListsOrderer
 
 
 class PipelineTask(luigi.WrapperTask):
@@ -21,16 +21,16 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         read_files = [
-            ReadPurchaseData(),
-            ReadBucketData()
+            PurchaseDataReader(),
+            BucketDataReader()
         ]
 
         create_output_buckets = [
-            CreateOutputBuckets()
+            OutputBucketMaker()
         ]
 
         insert_purchase_data = [
-            SortPurchaseData()
+            PurchaseDataBucketer()
         ]
 
         dedupe_purchase_lists = [
@@ -38,7 +38,7 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         sort_data = [
-            OrderPurchaseLists(),
+            PurchaseListsOrderer(),
             # OrderPurchaseBuckets()
         ]
 

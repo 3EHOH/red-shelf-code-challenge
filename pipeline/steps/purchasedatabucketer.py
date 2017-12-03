@@ -3,15 +3,15 @@ import os
 from config import PathConfig
 import json
 from steps.createoutputbuckets import CreateOutputBuckets
-from steps.readpurchasedata import ReadPurchaseData
-from steps.readpurchasedata import ReadBucketData
-from steps.readfile import ReadFile
+from steps.purchasedatareader import PurchaseDataReader
+from steps.bucketdatareader import BucketDataReader
+from steps.filereader import FileReader
 
 STEP = 'sortpurchasedata'
 WILDCARD = '*'
 
 
-class SortPurchaseData(luigi.Task):
+class PurchaseDataBucketer(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
     @staticmethod
@@ -20,8 +20,10 @@ class SortPurchaseData(luigi.Task):
         for record in purchase_data:
 
             record_values = ','.join(record.values())
-            record_publisher_lc = record['publisher'].lower()
-            record_duration_lc = record['duration'].lower()
+            record_publisher = record['publisher']
+            record_publisher_lc = record_publisher.lower()
+            record_duration = record['duration']
+            record_duration_lc = record_duration
             record_price = record['price']
 
             # match all fields
@@ -31,7 +33,7 @@ class SortPurchaseData(luigi.Task):
                      and bucket['price']             == record_price
                      and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.concat_bucket_name(record['publisher'], record['price'], record['duration'])
+                bucket_name_match = self.concat_bucket_name(record_publisher, record_price, record_duration)
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -46,7 +48,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == WILDCARD
                        and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.concat_bucket_name(record['publisher'], record['price'])
+                bucket_name_match = self.concat_bucket_name(record_publisher, record_price)
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
@@ -60,7 +62,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == record_price
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
-                bucket_name_match = self.concat_bucket_name(record['publisher'], record['price'])
+                bucket_name_match = self.concat_bucket_name(record_publisher, record_price)
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
@@ -74,7 +76,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == record_price
                        and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.concat_bucket_name(None, record['price'], record['duration'])
+                bucket_name_match = self.concat_bucket_name(None, record_price, record_duration)
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
@@ -89,7 +91,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == WILDCARD
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
-                bucket_name_match = self.concat_bucket_name(record['publisher'])
+                bucket_name_match = self.concat_bucket_name(record_publisher)
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -104,7 +106,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == WILDCARD
                        and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
-                bucket_name_match = self.concat_bucket_name(None, None, record['duration'])
+                bucket_name_match = self.concat_bucket_name(None, None, record_duration)
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -119,7 +121,7 @@ class SortPurchaseData(luigi.Task):
                        and bucket['price']             == record_price
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
-                bucket_name_match = self.concat_bucket_name(None, record['price'])
+                bucket_name_match = self.concat_bucket_name(None, record_price)
 
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
@@ -130,10 +132,9 @@ class SortPurchaseData(luigi.Task):
             # match none
 
             else:
-
                 bucket_name_match = self.concat_bucket_name()
-
                 bucket = next(bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match)
+
                 bucket['purchases'].append(record_values)
 
     @staticmethod
@@ -171,16 +172,16 @@ class SortPurchaseData(luigi.Task):
 
     @staticmethod
     def requires():
-        return [CreateOutputBuckets(), ReadPurchaseData()]
+        return [CreateOutputBuckets(), PurchaseDataReader()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
 
-        output_buckets = ReadFile.read_file(CreateOutputBuckets().datafile)
-        purchase_data = ReadFile.read_file(ReadPurchaseData().datafile)
-        bucket_data = ReadFile.read_file(ReadBucketData().datafile)
+        output_buckets = FileReader.read_file(CreateOutputBuckets().datafile)
+        purchase_data = FileReader.read_file(PurchaseDataReader().datafile)
+        bucket_data = FileReader.read_file(BucketDataReader().datafile)
 
         self.sort_data(self, purchase_data, bucket_data, output_buckets)
 

@@ -5,10 +5,10 @@ import csv
 import json
 from steps.preflightcheck import PreflightCheck
 
-STEP = 'readkeylesscsv'
+STEP = 'csvkeyer'
 
 
-class ReadKeylessCSV(luigi.Task):
+class CsvKeyer(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
 

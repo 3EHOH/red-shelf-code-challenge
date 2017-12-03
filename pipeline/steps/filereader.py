@@ -3,7 +3,7 @@ import os
 from config import PathConfig
 
 
-class ReadFile:
+class FileReader:
 
     def __init__(self):
         pass

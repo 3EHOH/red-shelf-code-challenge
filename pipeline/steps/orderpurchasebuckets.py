@@ -2,8 +2,8 @@ import luigi
 import os
 from config import PathConfig, BucketConfig
 import json
-from steps.orderpurchaselists import OrderPurchaseLists
-from steps.readfile import ReadFile
+from steps.purchaselistsorderer import PurchaseListsOrderer
+from steps.filereader import FileReader
 
 STEP = 'orderpurchasebuckets'
 
@@ -26,7 +26,7 @@ class OrderPurchaseBuckets(luigi.Task):
 
     @staticmethod
     def requires():
-        return [OrderPurchaseLists()]
+        return [PurchaseListsOrderer()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
@@ -40,7 +40,7 @@ class OrderPurchaseBuckets(luigi.Task):
             for row in content:
                 purchase_data.append(row)
 
-        deduped_data = ReadFile.read_file(OrderPurchaseLists().datafile)
+        deduped_data = FileReader.read_file(PurchaseListsOrderer().datafile)
         ordered_buckets = self.order_buckets(purchase_data, deduped_data)
 
         with self.output().open('w') as out_file:

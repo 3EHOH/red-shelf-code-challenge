@@ -2,16 +2,16 @@ import luigi
 import os
 from config import PathConfig
 import json
-from steps.sortpurchasedata import SortPurchaseData
-from steps.readfile import ReadFile
+from steps.sortpurchasedata import PurchaseDataBucketer
+from steps.filereader import FileReader
 
-STEP = 'dedupepurchaselists'
+STEP = 'purchaselistsdeduper'
 
 # This class is actually redundant at this point, because we use a generator to ensure that any duplicate buckets aren't
 # inserted into if a first one is found. But, one can imagine needing this if additional steps or functionality were added,
 # so it's anticipatory robustness diligence.
 
-class DedupePurchaseLists(luigi.Task):
+class PurchaseListsDeduper(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
     @staticmethod
@@ -29,14 +29,14 @@ class DedupePurchaseLists(luigi.Task):
 
     @staticmethod
     def requires():
-        return [SortPurchaseData()]
+        return [PurchaseDataBucketer()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
 
-        output_buckets = ReadFile.read_file(SortPurchaseData().datafile)
+        output_buckets = FileReader.read_file(PurchaseDataBucketer().datafile)
         deduped_data = self.dedupe_purchase_lists(output_buckets)
 
         with self.output().open('w') as out_file:

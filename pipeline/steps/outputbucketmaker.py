@@ -2,24 +2,24 @@ import luigi
 import os
 from config import PathConfig
 import json
-from steps.readbucketdata import ReadBucketData
+from steps.bucketdatareader import BucketDataReader
 
-STEP = 'createoutputbuckets'
+STEP = 'outputbucketmaker'
 
 
-class CreateOutputBuckets(luigi.Task):
+class OutputBucketMaker(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
 
     @staticmethod
     def requires():
-        return [ReadBucketData()]
+        return [BucketDataReader()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
     def run(self):
-        bucket_data_path = os.path.join(PathConfig().target_path, ReadBucketData().datafile)
+        bucket_data_path = os.path.join(PathConfig().target_path, BucketDataReader().datafile)
         output_buckets = []
 
         with open(bucket_data_path, 'r') as f:
