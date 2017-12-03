@@ -20,12 +20,13 @@ class SortPurchaseData(luigi.Task):
             record_values = ','.join(record.values())
             record_publisher_lc = record['publisher'].lower()
             record_duration_lc = record['duration'].lower()
+            record_price = record['price']
 
             # match all fields
 
             if next((bucket for bucket in bucket_data
                      if  bucket['publisher'].lower() == record_publisher_lc
-                     and bucket['price']             == record['price']
+                     and bucket['price']             == record_price
                      and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'], record['duration'])
@@ -54,7 +55,7 @@ class SortPurchaseData(luigi.Task):
 
             elif next((bucket for bucket in bucket_data
                        if  bucket['publisher'].lower() == record_publisher_lc
-                       and bucket['price']             == record['price']
+                       and bucket['price']             == record_price
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'], record['price'])
@@ -68,8 +69,8 @@ class SortPurchaseData(luigi.Task):
 
             elif next((bucket for bucket in bucket_data
                        if  bucket['publisher'].lower() == WILDCARD
-                       and record['price']             == bucket['price']
-                       and record_duration_lc          == bucket['duration'].lower()), None) is not None:
+                       and bucket['price']             == record_price
+                       and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(None, record['price'], record['duration'])
                 matched_bucket = next(
@@ -82,9 +83,9 @@ class SortPurchaseData(luigi.Task):
             # match publisher
 
             elif next((bucket for bucket in bucket_data
-                       if bucket['publisher'].lower() == record_publisher_lc
-                       and record['price']            == WILDCARD
-                       and record_duration_lc         == WILDCARD), None) is not None:
+                       if  bucket['publisher'].lower() == record_publisher_lc
+                       and bucket['price']             == WILDCARD
+                       and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'])
 
@@ -99,9 +100,9 @@ class SortPurchaseData(luigi.Task):
             # match duration
 
             elif next((bucket for bucket in bucket_data
-                       if bucket['publisher'].lower() == WILDCARD
-                       and record['price']            == WILDCARD
-                       and record_duration_lc         == bucket['duration'].lower()), None) is not None:
+                       if  bucket['publisher'].lower() == WILDCARD
+                       and bucket['price']             == WILDCARD
+                       and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(None, None, record['duration'])
 
@@ -114,9 +115,9 @@ class SortPurchaseData(luigi.Task):
             # match price
 
             elif next((bucket for bucket in bucket_data
-                       if bucket['publisher'].lower() == WILDCARD
-                       and record['price']            == bucket['price']
-                       and record_duration_lc         == WILDCARD), None) is not None:
+                       if  bucket['publisher'].lower() == WILDCARD
+                       and bucket['price']             == record_price
+                       and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
                 bucket_name_match = self.mock_bucket_name(None, record['price'])
 
