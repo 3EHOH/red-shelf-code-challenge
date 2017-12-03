@@ -19,6 +19,7 @@ class OrderPurchaseBuckets(luigi.Task):
         for i, original_list_item in enumerate(bucket_data):
             for j, output_list_item in enumerate(output_buckets):
                 if output_list_item['bucket'] == original_list_item:
+                    print()
                     ordered_set.add(output_list_item)
 
         return ordered_set

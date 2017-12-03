@@ -39,7 +39,7 @@ class PipelineTask(luigi.WrapperTask):
 
         sort_data = [
             OrderPurchaseLists(),
-            OrderPurchaseBuckets()
+            # OrderPurchaseBuckets()
         ]
 
 
