@@ -21,7 +21,7 @@ PURCHASE_BUCKETS="$1"
 PURCHASE_DATA="$2"
 
 sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
-       -e 's/.*purchase_data.*/'purchase_buckets=$PURCHASE_DATA'/'\
+       -e 's/.*purchase_data.*/'purchase_data=$PURCHASE_DATA'/'\
     /home/ec2-user/prom-rebuild/pipeline/luigi.cfg
 
 
