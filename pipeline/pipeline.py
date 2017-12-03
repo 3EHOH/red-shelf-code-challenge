@@ -7,7 +7,7 @@ from steps.purchasedatareader import PurchaseDataReader
 from steps.bucketdatareader import BucketDataReader
 from steps.outputbucketmaker import OutputBucketMaker
 from steps.purchasedatabucketer import PurchaseDataBucketer
-from steps.dedupepurchaselists import DedupePurchaseLists
+from steps.purchaselistsdeduper import PurchaseListsDeduper
 from steps.orderpurchasebuckets import OrderPurchaseBuckets
 from steps.purchaselistsorderer import PurchaseListsOrderer
 
@@ -34,7 +34,7 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         dedupe_purchase_lists = [
-            DedupePurchaseLists()
+            PurchaseListsDeduper()
         ]
 
         sort_data = [
