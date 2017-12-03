@@ -5,6 +5,9 @@
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
+echo PARENT PATH
+echo $parent_path
+
 if [ -z "$1" ]
   then
     echo "No purchase buckets file supplied"
@@ -24,7 +27,7 @@ cd ..
 
 sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
        -e 's/.*purchase_data.*/'purchase_data=$PURCHASE_DATA'/'\
-    luigi.cfg
+    realpath/luigi.cfg
 
 
 python -m luigi --local-scheduler --workers 1 --module pipeline PipelineTask
