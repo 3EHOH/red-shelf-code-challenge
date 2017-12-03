@@ -90,8 +90,6 @@ class SortPurchaseData(luigi.Task):
 
                 bucket_name_match = self.mock_bucket_name(record['publisher'])
 
-                print("BUCKET NAME MATCH ", bucket_name_match)
-
                 matched_bucket = next(
                     (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
                     None)
@@ -177,20 +175,11 @@ class SortPurchaseData(luigi.Task):
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
 
-    @staticmethod
-    def read_files(pathname):
-        path_to_file = os.path.join(PathConfig().target_path, pathname)
-
-        with open(path_to_file, 'r') as f:
-            file_output = json.load(f)
-
-        return file_output
-
     def run(self):
 
-        output_buckets = ReadFile.readfile("createoutputbuckets") #self.read_files("createoutputbuckets")
-        purchase_data = ReadFile.readfile("readpurchasedata") #self.read_files("readpurchasedata")
-        bucket_data = ReadFile.readfile("readbucketdata") #self.read_files("readbucketdata")
+        output_buckets = ReadFile.read_file("createoutputbuckets")
+        purchase_data = ReadFile.read_file("readpurchasedata")
+        bucket_data = ReadFile.read_file("readbucketdata")
 
         self.sort_data(self, purchase_data, bucket_data, output_buckets)
 
