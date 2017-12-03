@@ -20,9 +20,9 @@ fi
 PURCHASE_BUCKETS="$1"
 PURCHASE_DATA="$2"
 
-sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=../data/$PURCHASE_BUCKETS'/'\
-       -e 's/.*purchase_data.*/'purchase_data=../data/$PURCHASE_DATA'/'\
-    ../luigi.cfg
+sed -i -e 's/.*purchase_buckets.*/'purchase_buckets=$PURCHASE_BUCKETS'/'\
+       -e 's/.*purchase_data.*/'purchase_data=$PURCHASE_DATA'/'\
+    /../luigi.cfg
 
 cd ..
 
