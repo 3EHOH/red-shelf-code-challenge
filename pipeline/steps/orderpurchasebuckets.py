@@ -28,7 +28,7 @@ class OrderPurchaseBuckets(luigi.Task):
         purchase_data = []
 
         with open(BucketConfig().purchase_buckets) as f:
-            content = f.readlines()
+            content = f.read().splitlines()
             for row in content:
                 purchase_data.append(row)
 
