@@ -14,7 +14,7 @@ class OrderPurchaseBuckets(luigi.Task):
 
     @staticmethod
     def order_buckets(bucket_data, output_buckets):
-        return output_buckets.sort(key=lambda x: bucket_data.index(x['bucket']))
+        return sorted(output_buckets, key=lambda item: bucket_data.index(item['bucket']))
 
     @staticmethod
     def requires():
