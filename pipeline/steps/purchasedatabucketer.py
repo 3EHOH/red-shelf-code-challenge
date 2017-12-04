@@ -38,7 +38,7 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(record_publisher, record_price, record_duration)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match),
                     None)
 
                 if matched_bucket is not None:
@@ -53,7 +53,7 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(record_publisher, record_price)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match),
                     None)
 
                 if matched_bucket is not None:
@@ -68,7 +68,7 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(record_publisher, record_price)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match),
                     None)
 
                 if matched_bucket is not None:
@@ -83,7 +83,7 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(None, record_price, record_duration)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match),
                     None)
 
                 if matched_bucket is not None:
@@ -98,7 +98,7 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(record_publisher)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match),
                     None)
 
                 if matched_bucket is not None:
@@ -113,7 +113,7 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(None, None, record_duration)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match),
                     None)
 
                 if matched_bucket is not None:
@@ -129,7 +129,7 @@ class PurchaseDataBucketer(luigi.Task):
                 bucket_name_match = self.concat_bucket_name(None, record_price)
 
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
+                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match),
                     None)
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
@@ -138,7 +138,7 @@ class PurchaseDataBucketer(luigi.Task):
 
             else:
                 bucket_name_match = self.concat_bucket_name()
-                bucket = next(bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match)
+                bucket = next(bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match)
 
                 bucket['purchases'].append(record_values)
 
@@ -177,7 +177,7 @@ class PurchaseDataBucketer(luigi.Task):
         else:
             bucket_name = bucket_name + duration
 
-        return bucket_name
+        return bucket_name.lower()
 
     @staticmethod
     def requires():

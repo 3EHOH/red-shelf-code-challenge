@@ -36,7 +36,7 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         dedupe_purchase_lists = [
-            # PurchaseListsDeduper()
+            PurchaseListsDeduper()
         ]
 
         sort_data = [
