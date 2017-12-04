@@ -6,10 +6,25 @@ from steps.bucketdatareader import BucketDataReader
 
 STEP = 'outputbucketmaker'
 
+# Create the output bucket dictionaries based on the bucket csv input data.
+
 
 class OutputBucketMaker(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
+
+    @staticmethod
+    def make_output_buckets(data_path):
+        output_buckets = []
+
+        with open(data_path, 'r') as f:
+            bucket_data = json.load(f)
+
+        for bucket in bucket_data:
+            bucket_name = ','.join(bucket.values())
+            output_buckets.append({"bucket": bucket_name, "purchases": []})
+
+        return output_buckets
 
     @staticmethod
     def requires():
@@ -20,14 +35,7 @@ class OutputBucketMaker(luigi.Task):
 
     def run(self):
         bucket_data_path = os.path.join(PathConfig().target_path, BucketDataReader().datafile)
-        output_buckets = []
-
-        with open(bucket_data_path, 'r') as f:
-            bucket_data = json.load(f)
-
-        for bucket in bucket_data:
-            bucket_name = ','.join(bucket.values())
-            output_buckets.append({"bucket": bucket_name, "purchases": []})
+        output_buckets = self.make_output_buckets(bucket_data_path)
 
         with self.output().open('w') as out_file:
             out_file.write(json.dumps(output_buckets))

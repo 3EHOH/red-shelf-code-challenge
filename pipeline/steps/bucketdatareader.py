@@ -4,6 +4,7 @@ from steps.csvkeyer import CsvKeyer
 
 STEP = 'bucketdatareader'
 
+# Pair the bucket data CSV file with its keys.
 
 class BucketDataReader(CsvKeyer):
 

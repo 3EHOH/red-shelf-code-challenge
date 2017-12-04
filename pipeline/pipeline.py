@@ -8,8 +8,10 @@ from steps.bucketdatareader import BucketDataReader
 from steps.outputbucketmaker import OutputBucketMaker
 from steps.purchasedatabucketer import PurchaseDataBucketer
 from steps.purchaselistsdeduper import PurchaseListsDeduper
-from steps.orderpurchasebuckets import OrderPurchaseBuckets
 from steps.purchaselistsorderer import PurchaseListsOrderer
+from steps.finalloader import FinalLoader
+
+#  The main pipeline class where we aggregate all the steps to run
 
 
 class PipelineTask(luigi.WrapperTask):
@@ -38,18 +40,22 @@ class PipelineTask(luigi.WrapperTask):
         ]
 
         sort_data = [
-            PurchaseListsOrderer(),
-            # OrderPurchaseBuckets()
+            PurchaseListsOrderer()
+        ]
+
+        final_load = [
+            FinalLoader()
         ]
 
 
-        pipeline = setup_tasks + read_files + create_output_buckets + insert_purchase_data + dedupe_purchase_lists + sort_data
+        pipeline = setup_tasks + read_files + create_output_buckets + insert_purchase_data + \
+                   dedupe_purchase_lists + sort_data + final_load
 
         return pipeline
 
     @staticmethod
     def output():
-        return luigi.LocalTarget(os.path.join(PathConfig().target_path,"dummy"))
+        return luigi.LocalTarget(os.path.join(PathConfig().target_path, "dummy"))
 
 
 if __name__ == "__main__":

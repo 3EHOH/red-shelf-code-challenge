@@ -6,9 +6,17 @@ from pathlib import Path
 STEP = 'preflightcheck'
 
 
+# Check whether both of the CSV files can be found.
+
+
 class PreflightCheck(luigi.Task):
 
     datafile = luigi.Parameter(default=STEP)
+
+    @staticmethod
+    def file_exists_check(file_name):
+        if Path(file_name).is_file():
+            return True
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
@@ -26,11 +34,6 @@ class PreflightCheck(luigi.Task):
             raise ValueError("Error: Unable to find purchase buckets file")
         else:
             self.output().open('w').close()
-
-    @staticmethod
-    def file_exists_check(file_name):
-        if Path(file_name).is_file():
-            return True
 
 
 if __name__ == "__main__":

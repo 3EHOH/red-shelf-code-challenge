@@ -5,6 +5,9 @@ from steps.csvkeyer import CsvKeyer
 STEP = 'purchasedatareader'
 
 
+# Pair the purchase data CSV file with its keys.
+
+
 class PurchaseDataReader(CsvKeyer):
 
     datafile = luigi.Parameter(default=STEP)

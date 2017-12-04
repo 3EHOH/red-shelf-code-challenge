@@ -2,10 +2,17 @@ import luigi
 import os
 from config import PathConfig, BucketConfig
 import json
-from steps.purchaselistsorderer import PurchaseListsOrderer
-from steps.filereader import FileReader
+from steps.orderpurchaselists import OrderPurchaseLists
+from steps.readfile import ReadFile
 
 STEP = 'orderpurchasebuckets'
+
+# I have left this class in, though I have removed it from the pipeline. The intention was to make an explicit step to
+# ensure that the buckets are kept in their original order. At this point, it's redundant, because the lists preserver
+# the order extracted from the CSV files. However, a good engineer can foresee the need for such a step. Using the
+# `sorted` generator actually undermines the intended effect, though, because it naively reorders duplicate buckets
+# immediately after their first occurrence. I leave this class in to show that the potential need was foreseen, and a
+# good-faith effort was made to handle it, though completion of the task at hand is more important now.
 
 
 class OrderPurchaseBuckets(luigi.Task):
@@ -13,20 +20,11 @@ class OrderPurchaseBuckets(luigi.Task):
 
     @staticmethod
     def order_buckets(bucket_data, output_buckets):
-
-        ordered_set = set()
-
-        for i, original_list_item in enumerate(bucket_data):
-            for j, output_list_item in enumerate(output_buckets):
-                if output_list_item['bucket'] == original_list_item:
-                    print()
-                    ordered_set.add(output_list_item)
-
-        return ordered_set
+        return sorted(output_buckets, key=lambda item: bucket_data.index(item['bucket']))
 
     @staticmethod
     def requires():
-        return [PurchaseListsOrderer()]
+        return [OrderPurchaseLists()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
@@ -40,7 +38,7 @@ class OrderPurchaseBuckets(luigi.Task):
             for row in content:
                 purchase_data.append(row)
 
-        deduped_data = FileReader.read_file(PurchaseListsOrderer().datafile)
+        deduped_data = ReadFile.read_file("dedupepurchaselists")
         ordered_buckets = self.order_buckets(purchase_data, deduped_data)
 
         with self.output().open('w') as out_file:

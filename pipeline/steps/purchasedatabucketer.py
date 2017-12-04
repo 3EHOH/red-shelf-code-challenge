@@ -10,10 +10,14 @@ from steps.filereader import FileReader
 STEP = 'purchasedatasorter'
 WILDCARD = '*'
 
+# The main transformation step in our ETL pipeline where we put purchase data into buckets based on specificity of
+# publisher, price, and duration.
+
 
 class PurchaseDataBucketer(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
 
+    @staticmethod
     def sort_data(self, purchase_data, bucket_data, output_buckets):
 
         for record in purchase_data:
@@ -182,7 +186,7 @@ class PurchaseDataBucketer(luigi.Task):
         purchase_data = FileReader.read_file(PurchaseDataReader().datafile)
         bucket_data = FileReader.read_file(BucketDataReader().datafile)
 
-        self.sort_data(purchase_data, bucket_data, output_buckets)
+        self.sort_data(self, purchase_data, bucket_data, output_buckets)
 
         with self.output().open('w') as out_file:
             out_file.write(json.dumps(output_buckets))

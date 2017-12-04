@@ -2,6 +2,7 @@ import json
 import os
 from config import PathConfig
 
+# Simple file reader class.
 
 class FileReader:
 

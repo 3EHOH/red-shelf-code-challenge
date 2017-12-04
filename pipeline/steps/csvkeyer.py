@@ -5,8 +5,8 @@ import csv
 import json
 from steps.preflightcheck import PreflightCheck
 
-# this class itself isn't actually part of the pipeline
-# but PurchaseDataReader and BucketDataReader are subclasses of it
+# This class itself isn't actually part of the pipeline
+# but PurchaseDataReader and BucketDataReader are subclasses of it.
 
 
 class CsvKeyer(luigi.Task):
