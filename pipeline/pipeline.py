@@ -47,7 +47,6 @@ class PipelineTask(luigi.WrapperTask):
             FinalLoader()
         ]
 
-
         pipeline = setup_tasks + read_files + create_output_buckets + insert_purchase_data + \
                    dedupe_purchase_lists + sort_data + final_load
 

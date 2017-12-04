@@ -170,7 +170,9 @@ Thank you for your interest and good luck!
 **Assumptions**
 
 - The user will specify the `purchase_buckets` file as the first command line argument, and the `purchase_data` file as
-the second command line argument. The user needs to specify the relative path to those files.
+the second command line argument.
+- The original provided `purchase_data` and `purchase_buckets` are located in the `/data` directory, and a user can specify that
+ relative path to those files, or provide another relative path to other files.
 
 **Design**
 
@@ -190,4 +192,5 @@ in the `/target/<timestamp>/` directory of the running program.
 **Other Notes**
 
 - Each time the pipeline runs, a new subdirectory in the `/target` directory is created based on the current timestamp,
-and the output of each step is entered into that directory.
+and the output of each step is entered into that directory. The `/target` directory is the default step-output location
+for Luigi applications.

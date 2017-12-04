@@ -29,7 +29,7 @@ class PurchaseDataBucketer(luigi.Task):
             record_duration_lc = record_duration
             record_price = record['price']
 
-            # match all fields
+            # match publisher, price, and duration
 
             if next((bucket for bucket in bucket_data
                      if  bucket['publisher'].lower() == record_publisher_lc
@@ -37,10 +37,10 @@ class PurchaseDataBucketer(luigi.Task):
                      and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
                 bucket_name_match = self.concat_bucket_name(record_publisher, record_price, record_duration)
-
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
                     None)
+
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
@@ -53,8 +53,9 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(record_publisher, record_price)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
                     None)
+
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
@@ -67,8 +68,9 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(record_publisher, record_price)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
                     None)
+
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
@@ -81,7 +83,7 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket_name_match = self.concat_bucket_name(None, record_price, record_duration)
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
                     None)
 
                 if matched_bucket is not None:
@@ -95,10 +97,10 @@ class PurchaseDataBucketer(luigi.Task):
                        and bucket['duration'].lower()  == WILDCARD), None) is not None:
 
                 bucket_name_match = self.concat_bucket_name(record_publisher)
-
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
                     None)
+
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
@@ -110,10 +112,10 @@ class PurchaseDataBucketer(luigi.Task):
                        and bucket['duration'].lower()  == record_duration_lc), None) is not None:
 
                 bucket_name_match = self.concat_bucket_name(None, None, record_duration)
-
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
                     None)
+
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
 
@@ -127,7 +129,7 @@ class PurchaseDataBucketer(luigi.Task):
                 bucket_name_match = self.concat_bucket_name(None, record_price)
 
                 matched_bucket = next(
-                    (bucket for bucket in output_buckets if bucket['bucket'].lower() == bucket_name_match.lower()),
+                    (bucket for bucket in output_buckets if bucket['bucket'] == bucket_name_match),
                     None)
                 if matched_bucket is not None:
                     matched_bucket['purchases'].append(record_values)
@@ -140,14 +142,18 @@ class PurchaseDataBucketer(luigi.Task):
 
                 bucket['purchases'].append(record_values)
 
-    @staticmethod
-    def find_and_assign(compare, output_buckets, record_values, unique_buckets_and_purchases):
-        for i, dic in enumerate(output_buckets):
-            if dic['bucket'].lower() == compare and record_values not in dic['purchases'] and not \
-                    any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in
-                        unique_buckets_and_purchases):
-                dic['purchases'].append(record_values)
-                unique_buckets_and_purchases.append({"bucket_name": compare, "purchase": record_values})
+        return output_buckets
+
+    # @staticmethod
+    # def find_and_assign(compare, output_buckets, record_values, unique_buckets_and_purchases):
+    #
+    #     for i, dic in enumerate(output_buckets):
+    #         if dic['bucket'].lower() == compare and record_values not in dic['purchases'] and not \
+    #                 any(d['bucket_name'].lower() == compare and d['purchase'] == record_values for d in
+    #                     unique_buckets_and_purchases):
+    #
+    #             dic['purchases'].append(record_values)
+    #             unique_buckets_and_purchases.append({"bucket_name": compare, "purchase": record_values})
 
     @staticmethod
     def concat_bucket_name(publisher=None, price=None, duration=None):
@@ -186,10 +192,10 @@ class PurchaseDataBucketer(luigi.Task):
         purchase_data = FileReader.read_file(PurchaseDataReader().datafile)
         bucket_data = FileReader.read_file(BucketDataReader().datafile)
 
-        self.sort_data(self, purchase_data, bucket_data, output_buckets)
+        populated_buckets = self.sort_data(self, purchase_data, bucket_data, output_buckets)
 
         with self.output().open('w') as out_file:
-            out_file.write(json.dumps(output_buckets))
+            out_file.write(json.dumps(populated_buckets))
 
 
 if __name__ == "__main__":

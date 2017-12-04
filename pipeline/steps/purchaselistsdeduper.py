@@ -7,9 +7,10 @@ from steps.filereader import FileReader
 
 STEP = 'purchaselistsdeduper'
 
-# This class is actually redundant at this point, because we use a generator to ensure that any duplicate buckets aren't
-# inserted into if a first one is found. But, one can imagine needing this if additional steps or functionality were added,
-# so it's anticipatory robustness diligence.
+# This class empties the purchase data from duplicate buckets, as per the README instruction that only the first occurrence
+# of a bucket should have the data. This is actually redundant at this point, because we use a generator to ensure that
+# duplicate buckets aren't inserted into if a first one is found. But, a good engineer can imagine needing this if
+# additional steps or functionality were added, so it's anticipatory robustness diligence.
 
 class PurchaseListsDeduper(luigi.Task):
     datafile = luigi.Parameter(default=STEP)
