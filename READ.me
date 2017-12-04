@@ -169,7 +169,7 @@ Thank you for your interest and good luck!
 
 **Assumptions**
 
-- A user has Python 3, and Luigi installed on their machine
+- A user has Python 3, and Luigi installed on their machine, and Luigi is pointed to Python 3, *not* Python 2.
 - The user will specify the `purchase_buckets` file as the first command line argument, and the `purchase_data` file as
 the second command line argument.
 - The original provided `purchase_data` and `purchase_buckets` are located in the `/data` directory, and a user can specify that
@@ -177,7 +177,8 @@ the second command line argument.
 
 **Design**
 
-- This ETL program makes use of the Luigi data pipeline library, so a user will need Luigi installed on their machine.
+- This ETL program follows the Luigi data pipeline pattern whereby a pipeline of ETL steps output to a `/target` directory
+and each subsequent step is dependent on the completion of a previous one.
 - The program is launched from a script in the `/automation` directory, and takes two command-line arguments for the files
 to be included. The user needs to specify the relative path to the files. Example:
  `./launchpipeline.sh data/purchase_buckets.csv data/purchase_data.csv`
@@ -195,3 +196,6 @@ in the `/target/<timestamp>/` directory of the running program.
 - Each time the pipeline runs, a new subdirectory in the `/target` directory is created based on the current timestamp,
 and the output of each step is entered into that directory. The `/target` directory is the default step-output location
 for Luigi applications.
+- If a user attempts to launch the program and it fails because it cannot locate `steps.preflightcheck`, it is likely
+that they're running Python 2 instead of 3, or at least that Luigi is associated with 2 and not 3. Make sure Python 3 is
+being used.
