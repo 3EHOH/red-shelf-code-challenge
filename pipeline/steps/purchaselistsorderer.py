@@ -3,6 +3,7 @@ import os
 from config import PathConfig, PurchaseConfig
 import json
 from steps.purchaselistsdeduper import PurchaseListsDeduper
+from steps.purchasedatabucketer import PurchaseDataBucketer
 from steps.filereader import FileReader
 
 STEP = 'purchaselistsorderer'
@@ -24,7 +25,7 @@ class PurchaseListsOrderer(luigi.Task):
 
     @staticmethod
     def requires():
-        return [PurchaseListsDeduper()]
+        return [PurchaseDataBucketer()]
 
     def output(self):
         return luigi.LocalTarget(os.path.join(PathConfig().target_path, self.datafile))
